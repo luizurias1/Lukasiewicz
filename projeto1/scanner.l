@@ -16,7 +16,7 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 [ \t]               ; //ignores spaces
 
 "int" 		          {return T_TYPE_INT;}
-{id}	              {yyval.id = new char[yylen+1]; strcpy(yyval.id, yytext); return T_ID;}
+{id}	              {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_ID;}
 {digs}              {yylval.value = std::atoi(yytext); return T_INT;}
 "+"                 {return T_PLUS;} /*special character with " "*/
 "-"                 {return T_MINUS;} /*special character with " "*/
