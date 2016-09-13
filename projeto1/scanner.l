@@ -26,6 +26,7 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 "("                 {return T_OPEN_PAR;} /*special character with " "*/
 ")"                 {return T_CLOSING_PAR;} /*special character with " "*/
 \n                  {return T_NL;}
+","                 {return T_COMMA;}
 .                   {yyerror("Unknown token! %c\n", *yytext);} /*complains about every unknown character*/
 
 %%
