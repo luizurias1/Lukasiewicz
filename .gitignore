@@ -1,4 +1,4 @@
 projeto1/lukasiewicz
-projeto1/parser.cpp
-projeto1/parser.h
-projeto1/scanner.cpp
+projeto1/include/Parser.h
+projeto1/src/Parser.cpp
+projeto1/src/Scanner.cpp
