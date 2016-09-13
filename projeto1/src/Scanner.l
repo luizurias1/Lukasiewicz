@@ -13,20 +13,29 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 
 %%
 
-[ \t]               ; //ignores spaces
+// Spaces and tabs are ignored
+[ \t]               ;
 
-"int" 		          {return T_TYPE_INT;}
-{id}	              {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_ID;}
+// Types
+"int" 		        {return T_TYPE_INT;}
+
+// Identifiers and numbers
+{id}	            {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_ID;}
 {digs}              {yylval.value = std::atoi(yytext); return T_INT;}
+
+// Binary and unary operators
 "+"                 {return T_PLUS;} /*special character with " "*/
 "-"                 {return T_MINUS;} /*special character with " "*/
 \*                  {return T_TIMES;} /* special character with \ */
-"="		              {return T_ATT;}
 "/"                 {return T_DIVIDE;} /*special character with " "*/
+
+// Others
+"="                 {return T_ATT;}
+","                 {return T_COMMA;}
 "("                 {return T_OPEN_PAR;} /*special character with " "*/
 ")"                 {return T_CLOSING_PAR;} /*special character with " "*/
 \n                  {return T_NL;}
-","                 {return T_COMMA;}
+
 .                   {yyerror("Unknown token! %c\n", *yytext);} /*complains about every unknown character*/
 
 %%
