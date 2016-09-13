@@ -9,19 +9,19 @@ void yyerror(const char* s, ...);
 %option noyywrap nodefault yylineno
 
 digs [0-9]+
-letters [a-z|A-Z|_]+[a-z|A-Z|_|0-9]*
+id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 
 %%
 
 [ \t]               ; //ignores spaces
 
-{letters}	    {yylval.text = yytext; return T_STRING;}	
+"int" 		          {return T_TYPE_INT;}
+{id}	              {yyval.id = new char[yylen+1]; strcpy(yyval.id, yytext); return T_ID;}
 {digs}              {yylval.value = std::atoi(yytext); return T_INT;}
 "+"                 {return T_PLUS;} /*special character with " "*/
 "-"                 {return T_MINUS;} /*special character with " "*/
 \*                  {return T_TIMES;} /* special character with \ */
-"="		    {return T_ATT;}
-"int" 		    {return T_INT2;}
+"="		              {return T_ATT;}
 "/"                 {return T_DIVIDE;} /*special character with " "*/
 "("                 {return T_OPEN_PAR;} /*special character with " "*/
 ")"                 {return T_CLOSING_PAR;} /*special character with " "*/

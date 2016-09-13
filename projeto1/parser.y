@@ -12,12 +12,14 @@ extern void yyerror(const char* s, ...);
  */
 %union {
     int value;
+    char* id;
 }
 
 /* token defines our terminal symbols (tokens).
  */
 %token <value> T_INT
-%token T_PLUS T_TIMES T_MINUS T_DIVIDE T_OPEN_PAR T_CLOSING_PAR T_POW T_NL
+%token <id> T_ID
+%token T_PLUS T_TIMES T_MINUS T_DIVIDE T_OPEN_PAR T_CLOSING_PAR T_NL T_ATT T T_TYPE_INT
 
 /* type defines the type of our nonterminal symbols.
  * Types should match the names used in the union.
@@ -29,12 +31,13 @@ extern void yyerror(const char* s, ...);
  * The latest it is listed, the highest the precedence
  * left, right, nonassoc
  */
+
 %left T_PLUS T_MINUS
 %left T_TIMES T_DIVIDE
 %left T_POW
 %nonassoc U_MINUS
 
-/* Starting rule 
+/* Starting rule
  */
 %start program
 
@@ -44,17 +47,17 @@ program: /*use ctrl+d to stop*/
     lines /*$$ = $1 when nothing is said*/
     ;
 
-lines: 
+lines:
     line /*$$ = $1 when nothing is said*/
     | lines line
     ;
 
-line: 
+line:
     T_NL { $$ = 0 /*NULL*/; } /*nothing here to be used */
     | expr T_NL { std::cout << "Res: " << $1 << std::endl; }
     ;
 
-expr: 
+expr:
     T_INT { $$ = $1; } /*Could write nothing here since we are just copying*/
     | T_MINUS expr %prec U_MINUS { $$ = -$2; std::cout << " -" << $2 << std::endl; }
     | expr T_PLUS expr { $$ = $1 + $3; std::cout << $1 << " + " << $3 << std::endl; }
