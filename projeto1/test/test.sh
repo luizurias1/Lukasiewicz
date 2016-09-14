@@ -1,6 +1,8 @@
 #!/bin/sh -e
 
 # Executes all the tests
-echo "Coming soon!"
+echo ""
+echo "   Coming soon!"
+echo ""
 
 exit 0
