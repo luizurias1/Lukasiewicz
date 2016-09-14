@@ -50,8 +50,14 @@ class SymbolTable {
         /*checkId returns true if the variable has been defined and false if it does not exist*/
         bool checkId(std::string id);
         void addSymbol(std::string id, Symbol newSymbol);
+        
+        // Nova variável
         TreeNode* newVariable(std::string id, TreeNode* next);
+    
+        // Marcar variável como inicializada
         TreeNode* assignVariable(std::string id);
+    
+        // Usar variável
         TreeNode* useVariable(std::string id);
     
     private:

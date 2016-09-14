@@ -19,7 +19,7 @@ SCANNER_CPP = tmp/Scanner.cpp
 # Colors
 GREEN=\033[0;32m
 LIGHT_GREEN=\033[1;32m
-WHITE=\033[1;37m
+WHITE=\033[0;37m
 
 $(EXECUTABLE): tmp parser scanner $(SRC_FILES) $(PARSER_CPP) $(SCANNER_CPP)
 	@echo "${GREEN}Creating executable...${WHITE}"

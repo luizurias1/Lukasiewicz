@@ -1,22 +1,31 @@
 #include "TreeNode.h"
 
-TreeNode::TreeNode(TreeNode* left, TreeNode* right) {
-    this->left = left;
-    this->right = right;
+TreeNode::TreeNode() {
 }
 
 TreeNode::~TreeNode() {
-    if(left)
-        delete left;
-    
-    if(right)
-        delete right;
 }
 
-BinaryOperation::BinaryOperation() : TreeNode(0, 0) {
-    
+BinaryOperation::BinaryOperation(TreeNode* left, Type operation, TreeNode* right) : TreeNode() {
+    this->left = left;
+    this->operation = operation;
+    this->right = right;
 }
 
 BinaryOperation::~BinaryOperation() {
-    
+}
+
+Integer::Integer(int value) : TreeNode() {
+    this->value = value;    
+}
+
+Integer::~Integer() {
+}
+
+Variable::Variable(std::string id, TreeNode* next) : TreeNode() {
+    this->id = id;
+    this->next = next;
+}
+
+Variable::~Variable() {
 }

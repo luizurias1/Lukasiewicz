@@ -1,6 +1,8 @@
 #ifndef TREENODE_H_
 #define TREENODE_H_
 
+#include <string>
+
 class SyntaxTree;
 
 /**
@@ -8,15 +10,9 @@ class SyntaxTree;
  */
 class TreeNode {
     
-    friend class SyntaxTree;
-    
     public:    
-        TreeNode(TreeNode* left, TreeNode* right);
+        TreeNode();
         virtual ~TreeNode();
-    
-    private:
-        TreeNode* left;
-        TreeNode* right;
     
 };
 
@@ -31,12 +27,38 @@ class BinaryOperation : public TreeNode {
             ASSIGN
         };
     
-        BinaryOperation();
+        BinaryOperation(TreeNode* left, Type operation, TreeNode* right);
         virtual ~BinaryOperation();
     
     private:
         Type operation;
+        TreeNode* left;
+        TreeNode* right;
     
 };
+
+class Integer : public TreeNode {
+  
+    public:
+        Integer(int value);
+        virtual ~Integer();
+    
+    private:
+        int value;
+    
+};
+
+class Variable : public TreeNode {
+    
+    public:
+        Variable(std::string id, TreeNode* next);
+        virtual ~Variable();
+    
+    private:
+        std::string id;
+        TreeNode* next;
+    
+};
+
 
 #endif

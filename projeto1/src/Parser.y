@@ -37,8 +37,8 @@ extern void yyerror(const char* s, ...);
  * Types should match the names used in the union.
  * Example: %type<node> expr
  */
-%type <syntaxTree> lines
-%type <integer> program line expr declar
+%type <syntaxTree> lines program
+%type <node> line expr declar
 
 /* Operator precedence for mathematical operators
  * The latest it is listed, the highest the precedence
@@ -46,7 +46,7 @@ extern void yyerror(const char* s, ...);
  */
 %left T_PLUS T_MINUS
 %left T_TIMES T_DIVIDE
-%nonassoc U_MINUS
+%nonassoc U_MINUS error
 
 /* Starting rule
  */
@@ -54,37 +54,38 @@ extern void yyerror(const char* s, ...);
 
 %%
 
-program: /*use ctrl+d to stop*/
-    lines /*$$ = $1 when nothing is said*/
+program:
+    lines { SYNTAX_TREE = $1; }
     ;
 
 lines:
-    line T_NL { $$ = 0 /*NULL*/; } /*$$ = $1 when nothing is said*/
-    | T_NL lines {$$ = 0;}
-    | line T_NL lines
+    line { $$ = new SyntaxTree(); if($1 != NULL) $$->pushBackLine($1); }
+    | line lines { if($1 != NULL) $2->pushBackLine($1); }
+    | lines error T_NL { yyerrok; }
     ;
 
 line:
-    T_TYPE_INT declar {$$ = 0;}
-    | T_ID T_ATT expr {$$ = 0;}
+    T_NL { $$ = NULL; }
+    | T_TYPE_INT declar { $$ = 0; }
+    | T_ID T_ATT expr { $$ = 0; }
     ;
 
 expr:
-    T_INT { $$ = $1; }
-    | T_ID
-    | T_MINUS expr %prec U_MINUS { $$ = -$2; std::cout << " -" << $2 << std::endl; }
-    | expr T_PLUS expr { $$ = $1 + $3; std::cout << $1 << " + " << $3 << std::endl; }
-    | expr T_MINUS expr { $$ = $1 - $3; std::cout << $1 << " - " << $3 << std::endl; }
-    | expr T_TIMES expr { $$ = $1 * $3; std::cout << $1 << " * " << $3 << std::endl; }
-    | expr T_DIVIDE expr { $$ = $1 / $3; std::cout << $1 << " / " << $3 << std::endl; }
-    | T_OPEN_PAR expr T_CLOSING_PAR { $$ = $2; std::cout << "( " << $2 << " )" << std::endl; }
+    T_INT { $$ = new Integer($1); }
+    | T_ID { $$ = new Variable($1, NULL); }
+    | T_MINUS expr %prec U_MINUS { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3); }
+    | expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3); }
+    | expr T_MINUS expr { $$ = new BinaryOperation($1, BinaryOperation::MINUS, $3); }
+    | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3); }
+    | expr T_DIVIDE expr { $$ = new BinaryOperation($1, BinaryOperation::DIVIDE, $3); }
+    | T_OPEN_PAR expr T_CLOSING_PAR { $$ = $2; }
     ;
 
 declar:
-    T_ID T_COMMA declar {$$ = 0;}
-    | T_ID {$$ = 0;}
-    | T_ID T_ATT expr T_COMMA declar {$$ = 0;}
-    | T_ID T_ATT expr {$$ = 0;}
+    T_ID T_COMMA declar
+    | T_ID { $$ = new Variable($1, NULL); }
+    | T_ID T_ATT expr T_COMMA declar
+    | T_ID T_ATT expr { $$ = new BinaryOperation($1, BinaryOperation::ASSIGN, $3); }
     ;
 
 %%
