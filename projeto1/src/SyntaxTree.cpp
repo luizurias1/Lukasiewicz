@@ -1,14 +1,11 @@
 #include "SyntaxTree.h"
 
-SyntaxTree::SyntaxTree(TreeNode* root) {
-    this->root = root;    
+SyntaxTree::SyntaxTree() {   
 }
 
 SyntaxTree::~SyntaxTree() {
-    if(root)
-        delete root;
 }
 
-std::string SyntaxTree::printInOrder() {
+std::string SyntaxTree::print() {
     return "Syntax Tree";
 }

@@ -1,23 +1,35 @@
 %{
+#include "SymbolTable.h"
+#include "SyntaxTree.h"
+#include "TreeNode.h"
 #include <iostream>
 
+SymbolTable SYMBOL_TABLE;
+SyntaxTree* SYNTAX_TREE;
 extern int yylex();
 extern void yyerror(const char* s, ...);
 %}
 
 %define parse.trace
 
+%code requires {
+    class TreeNode;
+    class SyntaxTree;
+}
+
 /* yylval == %union
  * union informs the different ways we can store data
  */
 %union {
-    int value;
-    char* id;
+    TreeNode* node;
+    SyntaxTree* syntaxTree;
+    int integer;
+    char *id;
 }
 
 /* token defines our terminal symbols (tokens).
  */
-%token <value> T_INT
+%token <integer> T_INT
 %token <id> T_ID
 %token T_PLUS T_TIMES T_MINUS T_DIVIDE T_OPEN_PAR T_CLOSING_PAR T_NL T_ATT T T_TYPE_INT T_COMMA
 
@@ -25,13 +37,13 @@ extern void yyerror(const char* s, ...);
  * Types should match the names used in the union.
  * Example: %type<node> expr
  */
-%type <value> program lines line expr declar
+%type <syntaxTree> lines
+%type <integer> program line expr declar
 
 /* Operator precedence for mathematical operators
  * The latest it is listed, the highest the precedence
  * left, right, nonassoc
  */
-
 %left T_PLUS T_MINUS
 %left T_TIMES T_DIVIDE
 %nonassoc U_MINUS

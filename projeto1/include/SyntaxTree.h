@@ -3,6 +3,7 @@
 
 #include "TreeNode.h"
 #include <string>
+#include <vector>
 
 /**
  * Árvore sintática abstrata.
@@ -10,12 +11,12 @@
 class SyntaxTree {
     
     public:        
-        SyntaxTree(TreeNode* root);
+        SyntaxTree();
         virtual ~SyntaxTree();
-        std::string printInOrder();
+        std::string print();
     
     private:
-        TreeNode* root;
+        std::vector<TreeNode*> lines;
     
 };
 
