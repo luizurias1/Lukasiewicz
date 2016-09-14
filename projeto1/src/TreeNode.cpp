@@ -12,3 +12,11 @@ TreeNode::~TreeNode() {
     if(right)
         delete right;
 }
+
+BinaryOperation::BinaryOperation() : TreeNode(0, 0) {
+    
+}
+
+BinaryOperation::~BinaryOperation() {
+    
+}

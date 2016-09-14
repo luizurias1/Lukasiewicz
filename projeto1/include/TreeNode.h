@@ -10,13 +10,32 @@ class TreeNode {
     
     friend class SyntaxTree;
     
-    public:
+    public:    
         TreeNode(TreeNode* left, TreeNode* right);
         virtual ~TreeNode();
     
     private:
         TreeNode* left;
         TreeNode* right;
+    
+};
+
+class BinaryOperation : public TreeNode {
+    
+    public:
+        enum Type {
+            PLUS,
+            MINUS,
+            TIMES,
+            DIVIDE,
+            ASSIGN
+        };
+    
+        BinaryOperation();
+        virtual ~BinaryOperation();
+    
+    private:
+        Type operation;
     
 };
 
