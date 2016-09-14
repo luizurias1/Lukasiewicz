@@ -10,6 +10,14 @@
 class SyntaxTree {
     
     public:
+        enum BinaryOperation {
+            PLUS,
+            MINUS,
+            TIMES,
+            DIVIDE,
+            ASSIGN
+        };
+        
         SyntaxTree(TreeNode* root);
         virtual ~SyntaxTree();
         std::string printInOrder();
