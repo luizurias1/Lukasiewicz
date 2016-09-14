@@ -3,12 +3,15 @@
 
 class SyntaxTree;
 
+/**
+ * Nodo da árvore sintática.
+ */
 class TreeNode {
     
     friend class SyntaxTree;
     
     public:
-        TreeNode();
+        TreeNode(TreeNode* left, TreeNode* right);
         virtual ~TreeNode();
     
     private:
