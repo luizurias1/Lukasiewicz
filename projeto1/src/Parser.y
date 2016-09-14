@@ -1,6 +1,6 @@
 %{
 #include <iostream>
-#include <math.h>
+
 extern int yylex();
 extern void yyerror(const char* s, ...);
 %}
