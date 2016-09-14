@@ -37,7 +37,7 @@ all: clean $(EXECUTABLE) test
     
 test: $(EXECUTABLE)
 	@echo 'Executing tests...'
-	bash ./$(TEST_EXECUTABLE)
+	@bash ./$(TEST_EXECUTABLE)
 	@echo 'Executing tests... Done!'
 	@echo ''
 
