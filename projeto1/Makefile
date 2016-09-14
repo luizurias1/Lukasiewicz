@@ -55,4 +55,7 @@ clean:
 	@echo ''
 
 tmp:
+	@echo "${GREEN}Creating tmp directory...${WHITE}"
 	@mkdir tmp
+	@echo "${GREEN}Creating tmp directory... ${LIGHT_GREEN}Done!${WHITE}"
+	@echo ''
