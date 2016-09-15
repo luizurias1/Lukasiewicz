@@ -60,20 +60,21 @@ program:
 
 lines:
     line { $$ = new SyntaxTree(); if($1 != NULL) $$->pushBackLine($1); }
-    | line lines { if($1 != NULL) $2->pushBackLine($1); }
+    | line lines { $$ = $2; if($1 != NULL) $2->pushBackLine($1); }
     | lines error T_NL { yyerrok; }
     ;
 
 line:
     T_NL { $$ = NULL; }
-    | T_TYPE_INT declar { $$ = 0; }
-    | T_ID T_ATT expr { $$ = 0; }
+    | T_TYPE_INT declar { $$ = $2; }
+    | T_ID T_ATT expr { $$ = new BinaryOperation(new Variable($1, NULL),
+                                                    BinaryOperation::ASSIGN, $3); }
     ;
 
 expr:
     T_INT { $$ = new Integer($1); }
     | T_ID { $$ = new Variable($1, NULL); }
-    | T_MINUS expr %prec U_MINUS { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3); }
+    | T_MINUS expr %prec U_MINUS { $$ = new BinaryOperation(new Integer(0), BinaryOperation::MINUS, $2); }
     | expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3); }
     | expr T_MINUS expr { $$ = new BinaryOperation($1, BinaryOperation::MINUS, $3); }
     | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3); }
@@ -85,7 +86,8 @@ declar:
     T_ID T_COMMA declar
     | T_ID { $$ = new Variable($1, NULL); }
     | T_ID T_ATT expr T_COMMA declar
-    | T_ID T_ATT expr { $$ = new BinaryOperation($1, BinaryOperation::ASSIGN, $3); }
+    | T_ID T_ATT expr { $$ = new BinaryOperation(new Variable($1, NULL),
+                                                    BinaryOperation::ASSIGN, $3); }
     ;
 
 %%

@@ -1,6 +1,7 @@
 #ifndef TREENODE_H_
 #define TREENODE_H_
 
+#include <iostream>
 #include <string>
 
 class SyntaxTree;
@@ -13,6 +14,7 @@ class TreeNode {
     public:    
         TreeNode();
         virtual ~TreeNode();
+        virtual void printTree() = 0;
     
 };
 
@@ -29,6 +31,8 @@ class BinaryOperation : public TreeNode {
     
         BinaryOperation(TreeNode* left, Type operation, TreeNode* right);
         virtual ~BinaryOperation();
+        void printTree();
+        std::string operationToString(Type operation);
     
     private:
         Type operation;
@@ -42,6 +46,7 @@ class Integer : public TreeNode {
     public:
         Integer(int value);
         virtual ~Integer();
+        void printTree();
     
     private:
         int value;
@@ -53,6 +58,7 @@ class Variable : public TreeNode {
     public:
         Variable(std::string id, TreeNode* next);
         virtual ~Variable();
+        void printTree();
     
     private:
         std::string id;

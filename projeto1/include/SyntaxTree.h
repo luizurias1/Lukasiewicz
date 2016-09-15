@@ -2,6 +2,7 @@
 #define SYNTAXTREE_H_
 
 #include "TreeNode.h"
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -13,7 +14,7 @@ class SyntaxTree {
     public:        
         SyntaxTree();
         virtual ~SyntaxTree();
-        std::string print();
+        void print();
         void pushBackLine(TreeNode* line);
     
     private:

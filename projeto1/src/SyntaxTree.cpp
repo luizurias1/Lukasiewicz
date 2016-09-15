@@ -6,8 +6,11 @@ SyntaxTree::SyntaxTree() {
 SyntaxTree::~SyntaxTree() {
 }
 
-std::string SyntaxTree::print() {
-    return "Syntax Tree";
+void SyntaxTree::print() {
+    for (TreeNode* line: lines) {
+        line->printTree();
+        std::cout << std::endl;
+    }
 }
 
 void SyntaxTree::pushBackLine(TreeNode* line) {
