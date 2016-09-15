@@ -83,9 +83,10 @@ expr:
     ;
 
 declar:
-    T_ID T_COMMA declar
+    T_ID T_COMMA declar { $$ = new Variable($1, $3); }
     | T_ID { $$ = new Variable($1, NULL); }
-    | T_ID T_ATT expr T_COMMA declar
+    | T_ID T_ATT expr T_COMMA declar { $$ = new BinaryOperation(new Variable($1, $5),
+                                                    BinaryOperation::ASSIGN, $3); }
     | T_ID T_ATT expr { $$ = new BinaryOperation(new Variable($1, NULL),
                                                     BinaryOperation::ASSIGN, $3); }
     ;
