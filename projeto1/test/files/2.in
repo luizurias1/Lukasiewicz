@@ -1,0 +1,4 @@
+int a = 0
+int b, c = 3
+
+int a = 2

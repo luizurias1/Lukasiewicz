@@ -62,7 +62,7 @@ program:
 lines:
     line { $$ = new SyntaxTree(); if($1 != NULL) $$->insertLine($1); }
     | line lines { $$ = $2; if($1 != NULL) $2->insertLine($1); }
-    | lines error T_NL { yyerrok; }
+    | error { yyerrok; }
     ;
 
 line:

@@ -31,13 +31,13 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 ")"                 {return T_CLOSING_PAR;} /* Closing parenthesis */
 \n                  {return T_NL;} /* New line */
 
-.                   {yyerror("Unknown token! %c\n", *yytext);} /* Every other character produces a lexical error */
+.                   {yyerror("unknown symbol %c\n", *yytext);} /* Every other character produces a lexical error */
 
 %%
 
 void yyerror(const char *s, ...) {
     va_list ap;
     va_start(ap, s);
-    std::fprintf(stderr, "Line %d: error: ", yylineno);
+    std::fprintf(stderr, "[Line %d] ", yylineno);
     std::vfprintf(stderr, s, ap);
 }

@@ -29,7 +29,7 @@ void SymbolTable::addSymbol(std::string id, Symbol newSymbol) {
 
 TreeNode* SymbolTable::newVariable(std::string id, TreeNode* next) {
     if(checkId(id))
-        yyerror("Variable redefinition! %s\n", id.c_str());
+        yyerror("semantic error: re-declaration of variable %s\n", id.c_str());
     else
        addSymbol(id, Symbol(Symbol::INTEGER, Symbol::VARIABLE, 0, false)); // Adds variable to symbol table
     
@@ -38,7 +38,7 @@ TreeNode* SymbolTable::newVariable(std::string id, TreeNode* next) {
 
 TreeNode* SymbolTable::assignVariable(std::string id, TreeNode* next) {
     if(!checkId(id))
-        yyerror("Variable not defined yet! %s\n", id.c_str());
+        yyerror("semantic error: undeclared variable %s\n", id.c_str());
     entryList[id].initialized = true;
     
     return new Variable(id, next); //Creates variable node anyway
@@ -46,17 +46,17 @@ TreeNode* SymbolTable::assignVariable(std::string id, TreeNode* next) {
 
 TreeNode* SymbolTable::newAssignedVariable(std::string id, TreeNode* next) {
     if(checkId(id))
-        yyerror("Variable redefinition! %s\n", id.c_str());
+        yyerror("semantic error: re-declaration of variable %s\n", id.c_str());
     else
        addSymbol(id, Symbol(Symbol::INTEGER, Symbol::VARIABLE, 0, false)); // Adds variable to symbol table
     entryList[id].initialized = true;
     
-    return newVariable(id, next);
+    return new Variable(id, next);
 }
 
 TreeNode* SymbolTable::useVariable(std::string id) {
     if(!checkId(id))
-        yyerror("Variable not defined yet! %s\n", id.c_str());
+        yyerror("semantic error: undeclared variable %s\n", id.c_str());
     if(!entryList[id].initialized)
         yyerror("Variable not initialized yet! %s\n", id.c_str());
     

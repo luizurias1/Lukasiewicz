@@ -1,0 +1,3 @@
+int var: a = 9
+int var: b
+= a 10
