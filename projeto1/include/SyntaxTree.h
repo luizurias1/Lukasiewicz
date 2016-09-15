@@ -15,7 +15,7 @@ class SyntaxTree {
         SyntaxTree();
         virtual ~SyntaxTree();
         void print();
-        void pushBackLine(TreeNode* line);
+        void insertLine(TreeNode* line);
     
     private:
         std::vector<TreeNode*> lines;

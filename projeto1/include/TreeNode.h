@@ -41,6 +41,24 @@ class BinaryOperation : public TreeNode {
     
 };
 
+class UnaryOperation : public TreeNode {
+    
+    public:
+        enum Type {
+            MINUS
+        };
+    
+        UnaryOperation(Type operation, TreeNode* right);
+        virtual ~UnaryOperation();
+        void printTree();
+        std::string operationToString(Type operation);
+    
+    private:
+        Type operation;
+        TreeNode* right;
+    
+};
+
 class Integer : public TreeNode {
   
     public:

@@ -55,8 +55,10 @@ class SymbolTable {
         TreeNode* newVariable(std::string id, TreeNode* next);
     
         // Marcar variável como inicializada
-        TreeNode* assignVariable(std::string id);
+        TreeNode* assignVariable(std::string id, TreeNode* next);
     
+        TreeNode* newAssignedVariable(std::string id, TreeNode* next);
+        
         // Usar variável
         TreeNode* useVariable(std::string id);
     

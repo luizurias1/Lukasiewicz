@@ -13,6 +13,6 @@ void SyntaxTree::print() {
     }
 }
 
-void SyntaxTree::pushBackLine(TreeNode* line) {
-    this->lines.push_back(line);
+void SyntaxTree::insertLine(TreeNode* line) {
+    this->lines.insert(lines.begin(), line);
 }

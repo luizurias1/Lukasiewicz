@@ -33,15 +33,25 @@ TreeNode* SymbolTable::newVariable(std::string id, TreeNode* next) {
     else
        addSymbol(id, Symbol(Symbol::INTEGER, Symbol::VARIABLE, 0, false)); // Adds variable to symbol table
     
-    return 0;//new AST::Variable(id, next); //Creates variable node anyway
+    return new Variable(id, next); //Creates variable node anyway
 }
 
-TreeNode* SymbolTable::assignVariable(std::string id) {
+TreeNode* SymbolTable::assignVariable(std::string id, TreeNode* next) {
     if(!checkId(id))
         yyerror("Variable not defined yet! %s\n", id.c_str());
     entryList[id].initialized = true;
     
-    return 0;//new AST::Variable(id, NULL); //Creates variable node anyway
+    return new Variable(id, next); //Creates variable node anyway
+}
+
+TreeNode* SymbolTable::newAssignedVariable(std::string id, TreeNode* next) {
+    if(checkId(id))
+        yyerror("Variable redefinition! %s\n", id.c_str());
+    else
+       addSymbol(id, Symbol(Symbol::INTEGER, Symbol::VARIABLE, 0, false)); // Adds variable to symbol table
+    entryList[id].initialized = true;
+    
+    return newVariable(id, next);
 }
 
 TreeNode* SymbolTable::useVariable(std::string id) {
@@ -50,5 +60,5 @@ TreeNode* SymbolTable::useVariable(std::string id) {
     if(!entryList[id].initialized)
         yyerror("Variable not initialized yet! %s\n", id.c_str());
     
-    return 0;//new AST::Variable(id, NULL); //Creates variable node anyway
+    return new Variable(id, NULL); //Creates variable node anyway
 }

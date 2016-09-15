@@ -45,7 +45,8 @@ extern void yyerror(const char* s, ...);
  * left, right, nonassoc
  */
 %left T_PLUS T_MINUS
-%left T_TIMES T_DIVIDE
+%left T_TIMES
+%left T_DIVIDE
 %nonassoc U_MINUS error
 
 /* Starting rule
@@ -59,22 +60,22 @@ program:
     ;
 
 lines:
-    line { $$ = new SyntaxTree(); if($1 != NULL) $$->pushBackLine($1); }
-    | line lines { $$ = $2; if($1 != NULL) $2->pushBackLine($1); }
+    line { $$ = new SyntaxTree(); if($1 != NULL) $$->insertLine($1); }
+    | line lines { $$ = $2; if($1 != NULL) $2->insertLine($1); }
     | lines error T_NL { yyerrok; }
     ;
 
 line:
     T_NL { $$ = NULL; }
     | T_TYPE_INT declar { $$ = $2; }
-    | T_ID T_ATT expr { $$ = new BinaryOperation(new Variable($1, NULL),
+    | T_ID T_ATT expr { $$ = new BinaryOperation(SYMBOL_TABLE.assignVariable($1, NULL),
                                                     BinaryOperation::ASSIGN, $3); }
     ;
 
 expr:
     T_INT { $$ = new Integer($1); }
-    | T_ID { $$ = new Variable($1, NULL); }
-    | T_MINUS expr %prec U_MINUS { $$ = new BinaryOperation(new Integer(0), BinaryOperation::MINUS, $2); }
+    | T_ID { $$ = SYMBOL_TABLE.useVariable($1); }
+    | T_MINUS expr %prec U_MINUS { $$ = new UnaryOperation(UnaryOperation::MINUS, $2); }
     | expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3); }
     | expr T_MINUS expr { $$ = new BinaryOperation($1, BinaryOperation::MINUS, $3); }
     | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3); }
@@ -83,11 +84,11 @@ expr:
     ;
 
 declar:
-    T_ID T_COMMA declar { $$ = new Variable($1, $3); }
-    | T_ID { $$ = new Variable($1, NULL); }
-    | T_ID T_ATT expr T_COMMA declar { $$ = new BinaryOperation(new Variable($1, $5),
+    T_ID T_COMMA declar { $$ = SYMBOL_TABLE.newVariable($1, $3); }
+    | T_ID { $$ = SYMBOL_TABLE.newVariable($1, NULL); }
+    | T_ID T_ATT expr T_COMMA declar { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1, $5),
                                                     BinaryOperation::ASSIGN, $3); }
-    | T_ID T_ATT expr { $$ = new BinaryOperation(new Variable($1, NULL),
+    | T_ID T_ATT expr { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1, NULL),
                                                     BinaryOperation::ASSIGN, $3); }
     ;
 
