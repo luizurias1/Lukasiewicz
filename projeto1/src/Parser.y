@@ -62,11 +62,11 @@ program:
 lines:
     line { $$ = new SyntaxTree(); if($1 != NULL) $$->insertLine($1); }
     | line lines { $$ = $2; if($1 != NULL) $2->insertLine($1); }
-    | error { yyerrok; }
     ;
 
 line:
     T_NL { $$ = NULL; }
+    | error T_NL { yyerrok; $$ = NULL; }
     | T_TYPE_INT declar { $$ = $2; }
     | T_ID T_ATT expr { $$ = new BinaryOperation(SYMBOL_TABLE.assignVariable($1, NULL),
                                                     BinaryOperation::ASSIGN, $3); }
