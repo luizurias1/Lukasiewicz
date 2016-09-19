@@ -45,8 +45,8 @@ extern void yyerror(const char* s, ...);
  * left, right, nonassoc
  */
 %left T_PLUS T_MINUS
-%left T_TIMES
 %left T_DIVIDE
+%left T_TIMES
 %nonassoc U_MINUS error
 
 /* Starting rule
@@ -67,7 +67,7 @@ lines:
 line:
     T_NL { $$ = NULL; }
     | error T_NL { yyerrok; $$ = NULL; }
-    | T_TYPE_INT declar { $$ = $2; }
+    | T_TYPE_INT declar { $$ = new VariableDeclaration(VariableDeclaration::INTEGER, $2); }
     | T_ID T_ATT expr { $$ = new BinaryOperation(SYMBOL_TABLE.assignVariable($1, NULL),
                                                     BinaryOperation::ASSIGN, $3); }
     ;
@@ -84,10 +84,14 @@ expr:
     ;
 
 declar:
-    T_ID T_COMMA declar { $$ = SYMBOL_TABLE.newVariable($1, $3); }
+    T_ID T_COMMA declar { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1, NULL),
+                                                    BinaryOperation::COMMA, $3);}
     | T_ID { $$ = SYMBOL_TABLE.newVariable($1, NULL); }
-    | T_ID T_ATT expr T_COMMA declar { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1, $5),
-                                                    BinaryOperation::ASSIGN, $3); }
+    | T_ID T_ATT expr T_COMMA declar { $$ = new BinaryOperation(
+                                                new BinaryOperation(
+                                                    SYMBOL_TABLE.newAssignedVariable($1, NULL),
+                                                    BinaryOperation::ASSIGN, $3), 
+                                                BinaryOperation::COMMA, $5); }
     | T_ID T_ATT expr { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1, NULL),
                                                     BinaryOperation::ASSIGN, $3); }
     ;

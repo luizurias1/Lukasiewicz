@@ -8,7 +8,7 @@ SyntaxTree::~SyntaxTree() {
 
 void SyntaxTree::print() {
     for (TreeNode* line: lines) {
-        line->printTree();
+        line->printPreOrder();
         std::cout << std::endl;
     }
 }

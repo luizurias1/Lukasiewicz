@@ -14,7 +14,8 @@ class TreeNode {
     public:    
         TreeNode();
         virtual ~TreeNode();
-        virtual void printTree() = 0;
+        virtual void printInOrder() = 0;
+        virtual void printPreOrder() = 0;
     
 };
 
@@ -26,12 +27,14 @@ class BinaryOperation : public TreeNode {
             MINUS,
             TIMES,
             DIVIDE,
-            ASSIGN
+            ASSIGN,
+            COMMA
         };
     
         BinaryOperation(TreeNode* left, Type operation, TreeNode* right);
         virtual ~BinaryOperation();
-        void printTree();
+        void printInOrder();
+        void printPreOrder();
         std::string operationToString(Type operation);
     
     private:
@@ -50,7 +53,8 @@ class UnaryOperation : public TreeNode {
     
         UnaryOperation(Type operation, TreeNode* right);
         virtual ~UnaryOperation();
-        void printTree();
+        void printInOrder();
+        void printPreOrder();
         std::string operationToString(Type operation);
     
     private:
@@ -64,7 +68,8 @@ class Integer : public TreeNode {
     public:
         Integer(int value);
         virtual ~Integer();
-        void printTree();
+        void printInOrder();
+        void printPreOrder();
     
     private:
         int value;
@@ -76,10 +81,30 @@ class Variable : public TreeNode {
     public:
         Variable(std::string id, TreeNode* next);
         virtual ~Variable();
-        void printTree();
+        void printInOrder();
+        void printPreOrder();
     
     private:
         std::string id;
+        TreeNode* next;
+    
+};
+
+class VariableDeclaration : public TreeNode {
+    
+    public:
+        enum Type {
+            INTEGER
+        };
+    
+        VariableDeclaration(Type type, TreeNode* next);
+        virtual ~VariableDeclaration();
+        void printInOrder();
+        void printPreOrder();
+        std::string typeToString(Type type);
+    
+    private:
+        Type type;
         TreeNode* next;
     
 };
