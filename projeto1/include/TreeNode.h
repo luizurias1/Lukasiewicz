@@ -1,7 +1,6 @@
 #ifndef TREENODE_H_
 #define TREENODE_H_
 
-#include <iostream>
 #include <string>
 
 class SyntaxTree;
@@ -14,8 +13,8 @@ class TreeNode {
     public:    
         TreeNode();
         virtual ~TreeNode();
-        virtual void printInOrder() = 0;
-        virtual void printPreOrder() = 0;
+        virtual std::string printInOrder() = 0;
+        virtual std::string printPreOrder() = 0;
     
 };
 
@@ -33,8 +32,8 @@ class BinaryOperation : public TreeNode {
     
         BinaryOperation(TreeNode* left, Type operation, TreeNode* right);
         virtual ~BinaryOperation();
-        void printInOrder();
-        void printPreOrder();
+        std::string printInOrder();
+        std::string printPreOrder();
         std::string operationToString(Type operation);
     
     private:
@@ -53,8 +52,8 @@ class UnaryOperation : public TreeNode {
     
         UnaryOperation(Type operation, TreeNode* right);
         virtual ~UnaryOperation();
-        void printInOrder();
-        void printPreOrder();
+        std::string printInOrder();
+        std::string printPreOrder();
         std::string operationToString(Type operation);
     
     private:
@@ -68,8 +67,8 @@ class Integer : public TreeNode {
     public:
         Integer(int value);
         virtual ~Integer();
-        void printInOrder();
-        void printPreOrder();
+        std::string printInOrder();
+        std::string printPreOrder();
     
     private:
         int value;
@@ -79,14 +78,13 @@ class Integer : public TreeNode {
 class Variable : public TreeNode {
     
     public:
-        Variable(std::string id, TreeNode* next);
+        Variable(std::string id);
         virtual ~Variable();
-        void printInOrder();
-        void printPreOrder();
+        std::string printInOrder();
+        std::string printPreOrder();
     
     private:
         std::string id;
-        TreeNode* next;
     
 };
 
@@ -99,8 +97,8 @@ class VariableDeclaration : public TreeNode {
     
         VariableDeclaration(Type type, TreeNode* next);
         virtual ~VariableDeclaration();
-        void printInOrder();
-        void printPreOrder();
+        std::string printInOrder();
+        std::string printPreOrder();
         std::string typeToString(Type type);
     
     private:

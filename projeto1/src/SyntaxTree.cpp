@@ -8,8 +8,12 @@ SyntaxTree::~SyntaxTree() {
 
 void SyntaxTree::print() {
     for (TreeNode* line: lines) {
-        line->printPreOrder();
-        std::cout << std::endl;
+        std::string toPrint = line->printPreOrder();
+        
+        if(toPrint.back() == ' ')
+            toPrint.back() = '\0';
+        
+        std::cout << toPrint << std::endl;
     }
 }
 

@@ -15,19 +15,20 @@ BinaryOperation::BinaryOperation(TreeNode* left, Type operation, TreeNode* right
 BinaryOperation::~BinaryOperation() {
 }
 
-void BinaryOperation::printInOrder() {
-    left->printInOrder();
+std::string BinaryOperation::printInOrder() {
+    std::string output = left->printInOrder();
     if(operation != COMMA)
-        std::cout << " ";
+        output += " ";
     
-    std::cout << operationToString(operation) << " ";
-    right->printInOrder();
+    output += operationToString(operation) + " ";
+    return output + right->printInOrder();
 }
 
-void BinaryOperation::printPreOrder() {
-    std::cout << operationToString(operation) << " ";
-    left->printPreOrder();
-    right->printPreOrder();
+std::string BinaryOperation::printPreOrder() {
+    std::string output = "";
+    output += operationToString(operation) + " ";
+    output += left->printPreOrder();
+    return output + right->printPreOrder();
 }
 
 std::string BinaryOperation::operationToString(Type operation) {
@@ -57,14 +58,16 @@ UnaryOperation::UnaryOperation(Type operation, TreeNode* right) : TreeNode() {
 UnaryOperation::~UnaryOperation() {
 }
 
-void UnaryOperation::printInOrder() {
-    std::cout << operationToString(operation) << "u ";
-    right->printInOrder();
+std::string UnaryOperation::printInOrder() {
+    std::string output = "";
+    output += operationToString(operation) + "u ";
+    return output + right->printInOrder();
 }
 
-void UnaryOperation::printPreOrder() {
-    std::cout << operationToString(operation) << "u ";
-    right->printPreOrder();
+std::string UnaryOperation::printPreOrder() {
+    std::string output = "";
+    output += operationToString(operation) + "u ";
+    return output + right->printPreOrder();
 }
 
 std::string UnaryOperation::operationToString(Type operation) {
@@ -83,36 +86,27 @@ Integer::Integer(int value) : TreeNode() {
 Integer::~Integer() {
 }
 
-void Integer::printPreOrder() {
-    std::cout << value << " ";
+std::string Integer::printPreOrder() {
+    return std::to_string(value) + " ";
 }
 
-void Integer::printInOrder() {
-    std::cout << value;
+std::string Integer::printInOrder() {
+    return std::to_string(value);
 }
 
-Variable::Variable(std::string id, TreeNode* next) : TreeNode() {
+Variable::Variable(std::string id) : TreeNode() {
     this->id = id;
-    this->next = next;
 }
 
 Variable::~Variable() {
 }
 
-void Variable::printInOrder() {
-    std::cout << id << " ";
-    if (next != NULL) {
-        next->printInOrder();
-        std::cout << ", ";
-    }
+std::string Variable::printInOrder() {
+    return id;
 }
 
-void Variable::printPreOrder() {
-    std::cout << id << " ";
-    if (next != NULL) {
-        next->printPreOrder();
-        std::cout << ", ";
-    }
+std::string Variable::printPreOrder() {
+    return id + " ";
 }
 
 VariableDeclaration::VariableDeclaration(Type type, TreeNode* next) : TreeNode() {
@@ -123,18 +117,20 @@ VariableDeclaration::VariableDeclaration(Type type, TreeNode* next) : TreeNode()
 VariableDeclaration::~VariableDeclaration() {
 }
 
-void VariableDeclaration::printInOrder() {
-    std::cout << typeToString(this->type) << " var: ";
+std::string VariableDeclaration::printInOrder() {
+    std::string output = typeToString(this->type) + " var: ";
     if (next != NULL) {
-        next->printInOrder();
+        output += next->printInOrder();
     }
+    return output;
 }
 
-void VariableDeclaration::printPreOrder() {
-    std::cout << typeToString(this->type) << " var: ";
+std::string VariableDeclaration::printPreOrder() {
+    std::string output = typeToString(this->type) + " var: ";
     if (next != NULL) {
-        next->printInOrder();
+        output += next->printInOrder();
     }
+    return output;
 }
 
 std::string VariableDeclaration::typeToString(Type type) {

@@ -52,12 +52,12 @@ class SymbolTable {
         void addSymbol(std::string id, Symbol newSymbol);
         
         // Nova variável
-        TreeNode* newVariable(std::string id, TreeNode* next);
+        TreeNode* newVariable(std::string id);
     
         // Marcar variável como inicializada
-        TreeNode* assignVariable(std::string id, TreeNode* next);
+        TreeNode* assignVariable(std::string id);
     
-        TreeNode* newAssignedVariable(std::string id, TreeNode* next);
+        TreeNode* newAssignedVariable(std::string id);
         
         // Usar variável
         TreeNode* useVariable(std::string id);
