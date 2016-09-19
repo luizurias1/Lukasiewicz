@@ -87,13 +87,13 @@ declar:
     T_ID T_COMMA declar { $$ = new BinaryOperation(SYMBOL_TABLE.newVariable($1),
                                                     BinaryOperation::COMMA, $3);}
     | T_ID { $$ = SYMBOL_TABLE.newVariable($1); }
-    | T_ID T_ATT expr T_COMMA declar { $$ = new BinaryOperation(
+    | T_ID T_ATT T_INT T_COMMA declar { $$ = new BinaryOperation(
                                                 new BinaryOperation(
                                                     SYMBOL_TABLE.newAssignedVariable($1),
-                                                    BinaryOperation::ASSIGN, $3), 
+                                                    BinaryOperation::ASSIGN, new Integer($3)), 
                                                 BinaryOperation::COMMA, $5); }
-    | T_ID T_ATT expr { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1),
-                                                    BinaryOperation::ASSIGN, $3); }
+    | T_ID T_ATT T_INT { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1),
+                                                    BinaryOperation::ASSIGN, new Integer($3)); }
     ;
 
 %%
