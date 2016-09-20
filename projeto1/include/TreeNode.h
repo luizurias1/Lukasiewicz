@@ -32,7 +32,9 @@ class BinaryOperation : public TreeNode {
             GREATER,
             GREATER_EQUAL,
             LOWER,
-            LOWER_EQUAL
+            LOWER_EQUAL,
+            AND,
+            OR
         };
 
         BinaryOperation(TreeNode* left, Type operation, TreeNode* right);

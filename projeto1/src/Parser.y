@@ -25,7 +25,7 @@ extern void yyerror(const char* s, ...);
     SyntaxTree* syntaxTree;
     int integer;
     char *id;
-    char  *real;
+    float  real;
 }
 
 /* token defines our terminal symbols (tokens).
@@ -73,17 +73,17 @@ line:
     T_NL { $$ = NULL; }
     | error T_NL { yyerrok; $$ = NULL; }
     | T_TYPE_INT declar { $$ = new VariableDeclaration(VariableDeclaration::INTEGER, $2);}
-    | T_TYPE_FLOAT declar
-    | T_TYPE_BOOL declar
+    | T_TYPE_FLOAT declar { $$ = new VariableDeclaration(VariableDeclaration::FLOAT, $2);}
+    | T_TYPE_BOOL declar { $$ = new VariableDeclaration(VariableDeclaration::BOOLEAN, $2);}
     | T_ID T_ATT expr { $$ = new BinaryOperation(SYMBOL_TABLE.assignVariable($1),
                                                     BinaryOperation::ASSIGN, $3); }
     ;
 
 expr:
     T_INT { $$ = new Integer($1); }
-    | T_FLOAT
-    | T_TRUE
-    | T_FALSE
+    | T_FLOAT { $$ = new Float($1); }
+    | T_TRUE { $$ = new Boolean(true); }
+    | T_FALSE { $$ = new Boolean(false); }
     | T_ID { $$ = SYMBOL_TABLE.useVariable($1); }
     | T_MINUS expr %prec U_MINUS { $$ = new UnaryOperation(UnaryOperation::MINUS, $2); }
     | expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3); }
@@ -91,17 +91,17 @@ expr:
     | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3); }
     | expr T_DIVIDE expr { $$ = new BinaryOperation($1, BinaryOperation::DIVIDE, $3); }
     | T_OPEN_PAR expr T_CLOSING_PAR { $$ = $2; }
-    | T_NOT expr
-    | expr op_relation expr
+    | T_NOT expr { $$ = new UnaryOperation(UnaryOperation::NOT, $2); }
+    | op_relation
     ;
 
 op_relation:
-    T_GREATER
-    | T_OR
-    | T_LOWER
-    | T_GREATER_EQUAL
-    | T_LOWER_EQUAL
-    | T_AND
+    expr T_GREATER expr { $$ = new BinaryOperation($1, BinaryOperation::GREATER, $3); }
+    | expr T_OR expr { $$ = new BinaryOperation($1, BinaryOperation::OR, $3); }
+    | expr T_LOWER expr { $$ = new BinaryOperation($1, BinaryOperation::LOWER, $3); }
+    | expr T_GREATER_EQUAL expr { $$ = new BinaryOperation($1, BinaryOperation::GREATER_EQUAL, $3); }
+    | expr T_LOWER_EQUAL expr { $$ = new BinaryOperation($1, BinaryOperation::LOWER_EQUAL, $3); }
+    | expr T_AND expr { $$ = new BinaryOperation($1, BinaryOperation::AND, $3); }
     ;
 
 declar:
@@ -119,8 +119,8 @@ declar:
 
 type:
     T_INT {$$ = new Integer($1);}
-    |T_FLOAT
-    |T_TRUE
-    |T_FALSE
+    |T_FLOAT {$$ = new Float($1);}
+    |T_TRUE {$$ = new Boolean(true);}
+    |T_FALSE {$$ = new Boolean(flase);}
 
 %%

@@ -55,6 +55,10 @@ std::string BinaryOperation::operationToString(Type operation) {
             return "<";
         case LOWER_EQUAL:
             return "<=";
+        case AND:
+            return "&";
+        case OR:
+            return "|";
         default:
             return "unknown";
     }
