@@ -25,20 +25,25 @@ extern void yyerror(const char* s, ...);
     SyntaxTree* syntaxTree;
     int integer;
     char *id;
+    char  *real;
 }
 
 /* token defines our terminal symbols (tokens).
  */
 %token <integer> T_INT
 %token <id> T_ID
-%token T_PLUS T_TIMES T_MINUS T_DIVIDE T_OPEN_PAR T_CLOSING_PAR T_NL T_ATT T T_TYPE_INT T_COMMA
+%token <real> T_FLOAT
+%token T_PLUS T_TIMES T_MINUS T_DIVIDE T_OPEN_PAR T_CLOSING_PAR T_NL
+%token T_ATT T T_TYPE_INT T_COMMA T_TYPE_FLOAT T_TYPE_BOOL T_TRUE T_FALSE
+%token T_EQUAL T_NOT_EQUAL T_GREATER T_LOWER T_GREATER_EQUAL T_LOWER_EQUAL
+%token T_AND T_OR T_NOT
 
 /* type defines the type of our nonterminal symbols.
  * Types should match the names used in the union.
  * Example: %type<node> expr
  */
 %type <syntaxTree> lines program
-%type <node> line expr declar
+%type <node> line expr declar type op_relation
 
 /* Operator precedence for mathematical operators
  * The latest it is listed, the highest the precedence
@@ -56,7 +61,7 @@ extern void yyerror(const char* s, ...);
 %%
 
 program:
-    lines { SYNTAX_TREE = $1; }
+    lines { SYNTAX_TREE = $1; std::cout <<"one"<< std::endl;}
     ;
 
 lines:
@@ -67,13 +72,18 @@ lines:
 line:
     T_NL { $$ = NULL; }
     | error T_NL { yyerrok; $$ = NULL; }
-    | T_TYPE_INT declar { $$ = new VariableDeclaration(VariableDeclaration::INTEGER, $2); }
+    | T_TYPE_INT declar { $$ = new VariableDeclaration(VariableDeclaration::INTEGER, $2);}
+    | T_TYPE_FLOAT declar
+    | T_TYPE_BOOL declar
     | T_ID T_ATT expr { $$ = new BinaryOperation(SYMBOL_TABLE.assignVariable($1),
                                                     BinaryOperation::ASSIGN, $3); }
     ;
 
 expr:
     T_INT { $$ = new Integer($1); }
+    | T_FLOAT
+    | T_TRUE
+    | T_FALSE
     | T_ID { $$ = SYMBOL_TABLE.useVariable($1); }
     | T_MINUS expr %prec U_MINUS { $$ = new UnaryOperation(UnaryOperation::MINUS, $2); }
     | expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3); }
@@ -81,19 +91,36 @@ expr:
     | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3); }
     | expr T_DIVIDE expr { $$ = new BinaryOperation($1, BinaryOperation::DIVIDE, $3); }
     | T_OPEN_PAR expr T_CLOSING_PAR { $$ = $2; }
+    | T_NOT expr
+    | expr op_relation expr
+    ;
+
+op_relation:
+    T_GREATER
+    | T_OR
+    | T_LOWER
+    | T_GREATER_EQUAL
+    | T_LOWER_EQUAL
+    | T_AND
     ;
 
 declar:
     T_ID T_COMMA declar { $$ = new BinaryOperation(SYMBOL_TABLE.newVariable($1),
                                                     BinaryOperation::COMMA, $3);}
-    | T_ID { $$ = SYMBOL_TABLE.newVariable($1); }
-    | T_ID T_ATT T_INT T_COMMA declar { $$ = new BinaryOperation(
-                                                new BinaryOperation(
+    | T_ID { $$ = SYMBOL_TABLE.newVariable($1);}
+    | T_ID T_ATT type T_COMMA declar { $$ = new BinaryOperation(
+                                                  new BinaryOperation(
                                                     SYMBOL_TABLE.newAssignedVariable($1),
-                                                    BinaryOperation::ASSIGN, new Integer($3)), 
-                                                BinaryOperation::COMMA, $5); }
-    | T_ID T_ATT T_INT { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1),
-                                                    BinaryOperation::ASSIGN, new Integer($3)); }
+                                                    BinaryOperation::ASSIGN, $3),
+                                                    BinaryOperation::COMMA, $5); }
+    | T_ID T_ATT type { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1),
+                                                    BinaryOperation::ASSIGN, $3); }
     ;
+
+type:
+    T_INT {$$ = new Integer($1);}
+    |T_FLOAT
+    |T_TRUE
+    |T_FALSE
 
 %%

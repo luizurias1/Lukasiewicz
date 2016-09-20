@@ -19,7 +19,7 @@ std::string BinaryOperation::printInOrder() {
     std::string output = left->printInOrder();
     if(operation != COMMA)
         output += " ";
-    
+
     output += operationToString(operation) + " ";
     return output + right->printInOrder();
 }
@@ -75,12 +75,12 @@ std::string UnaryOperation::operationToString(Type operation) {
         case MINUS:
             return "-";
         default:
-            return "unknown";        
+            return "unknown";
     }
 }
 
 Integer::Integer(int value) : TreeNode() {
-    this->value = value;    
+    this->value = value;
 }
 
 Integer::~Integer() {
@@ -138,6 +138,6 @@ std::string VariableDeclaration::typeToString(Type type) {
         case INTEGER:
             return "int";
         default:
-            return "unknown";        
+            return "unknown";
     }
 }

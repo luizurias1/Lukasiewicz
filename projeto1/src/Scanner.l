@@ -8,29 +8,39 @@ void yyerror(const char* s, ...);
 
 %option noyywrap nodefault yylineno
 
+float ([0-9]*\.[0-9]+)|([0-9]+\.[0-9]*)
 digs [0-9]+
 id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 
 %%
 
 [ \t]               ; /* Spaces and tabs are ignored */
-
-"int" 		        {return T_TYPE_INT;} /* Type integer */
-
-{id}	            {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_ID;} /* Identifier */
+\|                  {return T_OR;}
+"int" 		          {return T_TYPE_INT;} /* Type integer */
+"float"             {return T_TYPE_FLOAT;}
+"bool"              {return T_TYPE_BOOL;}
+"true"              {return T_TRUE;}
+"false"             {return T_FALSE;}
+{id}	              {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_ID;} /* Identifier */
 {digs}              {yylval.integer = std::atoi(yytext); return T_INT;} /* Integer number */
-
+{float}             {yylval.real = strdup(yytext); return T_FLOAT;}
 "+"                 {return T_PLUS;} /* Binary operator PLUS */
 "-"                 {return T_MINUS;} /* Binary/unary operator MINUS */
 \*                  {return T_TIMES;} /* Binary operator TIMES */
 "/"                 {return T_DIVIDE;} /* Binary operator DIVIDE */
+"=="                {return T_EQUAL;}
+"!="                {return T_NOT_EQUAL;}
+">="                {return T_GREATER_EQUAL;}
+"<="                {return T_LOWER_EQUAL;}
+"<"                 {return T_LOWER;}
+">"                 {return T_GREATER;}
 "="                 {return T_ATT;} /* Binary operator ASSIGN */
-
 ","                 {return T_COMMA;} /* Comma */
 "("                 {return T_OPEN_PAR;} /* Open parenthesis */
 ")"                 {return T_CLOSING_PAR;} /* Closing parenthesis */
 \n                  {return T_NL;} /* New line */
-
+"&"                 {return T_AND;}
+"!"                 {return T_NOT;}
 .                   {yyerror("unknown symbol %c\n", *yytext);} /* Every other character produces a lexical error */
 
 %%
