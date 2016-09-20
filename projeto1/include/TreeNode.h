@@ -86,13 +86,13 @@ class Integer : public TreeNode {
 class Float : public TreeNode {
 
     public:
-        Float(float value);
+        Float(std::string value);
         virtual ~Float();
         std::string printInOrder();
         std::string printPreOrder();
 
     private:
-        float value;
+        std::string value;
 
 };
 

@@ -74,20 +74,20 @@ UnaryOperation::~UnaryOperation() {
 
 std::string UnaryOperation::printInOrder() {
     std::string output = "";
-    output += operationToString(operation) + "u ";
+    output += operationToString(operation) + " ";
     return output + right->printInOrder();
 }
 
 std::string UnaryOperation::printPreOrder() {
     std::string output = "";
-    output += operationToString(operation) + "u ";
+    output += operationToString(operation) + " ";
     return output + right->printPreOrder();
 }
 
 std::string UnaryOperation::operationToString(Type operation) {
     switch(operation) {
         case MINUS:
-            return "-";
+            return "-u";
         case NOT:
             return "!";
         default:
@@ -103,14 +103,24 @@ Boolean::~Boolean() {
 }
 
 std::string Boolean::printPreOrder() {
-    return std::to_string(value) + " ";
+    switch(value){
+      case true:
+          return "true ";
+      default:
+          return "false ";
+    }
 }
 
 std::string Boolean::printInOrder() {
-    return std::to_string(value);
+  switch(value){
+    case true:
+       return "true";
+    default:
+       return "false";
+  }
 }
 
-Float::Float(float value) : TreeNode() {
+Float::Float(std::string value) : TreeNode() {
     this->value = value;
 }
 
@@ -118,11 +128,11 @@ Float::~Float() {
 }
 
 std::string Float::printPreOrder() {
-    return std::to_string(value) + " ";
+    return value + " ";
 }
 
 std::string Float::printInOrder() {
-    return std::to_string(value);
+    return value;
 }
 
 Integer::Integer(int value) : TreeNode() {
@@ -183,6 +193,10 @@ std::string VariableDeclaration::typeToString(Type type) {
     switch(type) {
         case INTEGER:
             return "int";
+        case BOOLEAN:
+            return "bool";
+        case FLOAT:
+            return "float";
         default:
             return "unknown";
     }

@@ -23,7 +23,7 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 "false"             {return T_FALSE;}
 {id}	              {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_ID;} /* Identifier */
 {digs}              {yylval.integer = std::atoi(yytext); return T_INT;} /* Integer number */
-{float}             {yylval.real = std::stof(yytext); return T_FLOAT;}
+{float}             {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_FLOAT;}
 "+"                 {return T_PLUS;} /* Binary operator PLUS */
 "-"                 {return T_MINUS;} /* Binary/unary operator MINUS */
 \*                  {return T_TIMES;} /* Binary operator TIMES */
