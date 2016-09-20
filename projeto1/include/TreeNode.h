@@ -27,7 +27,12 @@ class BinaryOperation : public TreeNode {
             TIMES,
             DIVIDE,
             ASSIGN,
-            COMMA
+            COMMA,
+            EQUAL,
+            GREATER,
+            GREATER_EQUAL,
+            LOWER,
+            LOWER_EQUAL
         };
 
         BinaryOperation(TreeNode* left, Type operation, TreeNode* right);
@@ -47,7 +52,8 @@ class UnaryOperation : public TreeNode {
 
     public:
         enum Type {
-            MINUS
+            MINUS,
+            NOT
         };
 
         UnaryOperation(Type operation, TreeNode* right);
@@ -75,6 +81,32 @@ class Integer : public TreeNode {
 
 };
 
+class Float : public TreeNode {
+
+    public:
+        Float(float value);
+        virtual ~Float();
+        std::string printInOrder();
+        std::string printPreOrder();
+
+    private:
+        float value;
+
+};
+
+class Boolean : public TreeNode {
+
+    public:
+        Boolean(bool value);
+        virtual ~Boolean();
+        std::string printInOrder();
+        std::string printPreOrder();
+
+    private:
+        bool value;
+
+};
+
 class Variable : public TreeNode {
 
     public:
@@ -92,6 +124,8 @@ class VariableDeclaration : public TreeNode {
 
     public:
         enum Type {
+            BOOLEAN,
+            FLOAT,
             INTEGER
         };
 

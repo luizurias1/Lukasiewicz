@@ -45,6 +45,16 @@ std::string BinaryOperation::operationToString(Type operation) {
             return "=";
         case COMMA:
             return ",";
+        case EQUAL:
+            return "==";
+        case GREATER:
+            return ">";
+        case GREATER_EQUAL:
+            return ">=";
+        case LOWER:
+            return "<";
+        case LOWER_EQUAL:
+            return "<=";
         default:
             return "unknown";
     }
@@ -74,9 +84,41 @@ std::string UnaryOperation::operationToString(Type operation) {
     switch(operation) {
         case MINUS:
             return "-";
+        case NOT:
+            return "!";
         default:
             return "unknown";
     }
+}
+
+Boolean::Boolean(bool value) : TreeNode() {
+    this->value = value;
+}
+
+Boolean::~Boolean() {
+}
+
+std::string Boolean::printPreOrder() {
+    return std::to_string(value) + " ";
+}
+
+std::string Boolean::printInOrder() {
+    return std::to_string(value);
+}
+
+Float::Float(float value) : TreeNode() {
+    this->value = value;
+}
+
+Float::~Float() {
+}
+
+std::string Float::printPreOrder() {
+    return std::to_string(value) + " ";
+}
+
+std::string Float::printInOrder() {
+    return std::to_string(value);
 }
 
 Integer::Integer(int value) : TreeNode() {
