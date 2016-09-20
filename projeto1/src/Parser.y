@@ -103,11 +103,11 @@ expr:
 
 op_relation:
     expr T_GREATER expr { $$ = new BinaryOperation($1, BinaryOperation::GREATER, $3); }
-    | expr T_OR expr { $$ = new BinaryOperation($1, BinaryOperation::OR, $3); }
-    | expr T_LOWER expr { $$ = new BinaryOperation($1, BinaryOperation::LOWER, $3); }
     | expr T_GREATER_EQUAL expr { $$ = new BinaryOperation($1, BinaryOperation::GREATER_EQUAL, $3); }
+    | expr T_LOWER expr { $$ = new BinaryOperation($1, BinaryOperation::LOWER, $3); }
     | expr T_LOWER_EQUAL expr { $$ = new BinaryOperation($1, BinaryOperation::LOWER_EQUAL, $3); }
     | expr T_AND expr { $$ = new BinaryOperation($1, BinaryOperation::AND, $3); }
+    | expr T_OR expr { $$ = new BinaryOperation($1, BinaryOperation::OR, $3); }
     ;
 
 declar:
@@ -125,8 +125,8 @@ declar:
 
 type:
     T_INT {$$ = new Integer($1);}
-    |T_FLOAT {$$ = new Float($1);}
-    |T_TRUE {$$ = new Boolean(true);}
-    |T_FALSE {$$ = new Boolean(false);}
+    | T_FLOAT {$$ = new Float($1);}
+    | T_TRUE {$$ = new Boolean(true);}
+    | T_FALSE {$$ = new Boolean(false);}
 
 %%

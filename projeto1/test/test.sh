@@ -53,7 +53,7 @@ do
         
         # Runs the test and stores the output
         OUTPUT="$(./lukacompiler < $i 2>/dev/null)"
-        OUTPUT_ERRORS=$(./lukacompiler < $i 2>&1 1>/dev/null)
+        OUTPUT_ERRORS="$(./lukacompiler < $i 2>&1 1>/dev/null)"
         EXPECTED_OUTPUT="$(cat $OUTPUT_FILE)"
         TESTS_RUN=$((TESTS_RUN+1))
         

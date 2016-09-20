@@ -10,8 +10,9 @@ void SyntaxTree::print() {
     for (TreeNode* line: lines) {
         std::string toPrint = line->printPreOrder();
         
-        if(toPrint.back() == ' ')
-            toPrint.back() = '\0';
+        if(toPrint.back() == ' ') {
+            toPrint = toPrint.substr(0, toPrint.length()-1);
+        }
         
         std::cout << toPrint << std::endl;
     }

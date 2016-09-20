@@ -103,7 +103,7 @@ Boolean::~Boolean() {
 }
 
 std::string Boolean::printPreOrder() {
-    switch(value){
+    switch(value) {
       case true:
           return "true ";
       default:
@@ -112,7 +112,7 @@ std::string Boolean::printPreOrder() {
 }
 
 std::string Boolean::printInOrder() {
-  switch(value){
+  switch(value) {
     case true:
        return "true";
     default:
