@@ -2,7 +2,7 @@ FLEX = flex
 BISON = bison
 CC = clang++
 CFLAGS = -std=c++11 -fcxx-exceptions -Wno-deprecated-register -Wall
-EXECUTABLE = lukasiewicz
+EXECUTABLE = lukacompiler
 TEST_EXECUTABLE = test/test.sh
 
 # Directories and Files
