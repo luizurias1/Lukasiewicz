@@ -58,7 +58,7 @@ TreeNode* SymbolTable::useVariable(std::string id) {
     if(!checkId(id))
         yyerror("semantic error: undeclared variable %s\n", id.c_str());
     if(!entryList[id].initialized)
-        yyerror("Variable not initialized yet! %s\n", id.c_str());
+        yyerror("semantic error: uninitialized variable %s\n", id.c_str());
     
     return new Variable(id); //Creates variable node anyway
 }

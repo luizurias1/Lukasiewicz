@@ -52,12 +52,16 @@ do
         echo -e "$HEAD_RUN Expected output file: $OUTPUT_FILE"
         
         # Runs the test and stores the output
-        OUTPUT="$(./lukasiewicz < $i 2>&1)"
+        OUTPUT="$(./lukacompiler < $i 2>/dev/null)"
+        OUTPUT_ERRORS=$(./lukacompiler < $i 2>&1 1>/dev/null)
         EXPECTED_OUTPUT="$(cat $OUTPUT_FILE)"
         TESTS_RUN=$((TESTS_RUN+1))
         
         # If expected output is equal to the output, then prints success
         if [ "$EXPECTED_OUTPUT" = "$OUTPUT" ]; then 
+            TESTS_SUCCESS=$((TESTS_SUCCESS+1))
+            echo -e "$HEAD_RESULT SUCCESS!"
+        elif [ "$EXPECTED_OUTPUT" = "$OUTPUT_ERRORS" ]; then
             TESTS_SUCCESS=$((TESTS_SUCCESS+1))
             echo -e "$HEAD_RESULT SUCCESS!"
         else
@@ -66,7 +70,7 @@ do
             echo -e "$HEAD_EXPECTED"
             echo -e "$EXPECTED_OUTPUT\n"
             echo -e "$HEAD_OUTPUT"
-            echo -e "$OUTPUT\n"
+            echo -e "$OUTPUT\n$OUTPUT_ERRORS\n"
         fi
 
     else

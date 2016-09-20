@@ -31,7 +31,7 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 ")"                 {return T_CLOSING_PAR;} /* Closing parenthesis */
 \n                  {return T_NL;} /* New line */
 
-.                   {yyerror("unknown symbol %c\n", *yytext);} /* Every other character produces a lexical error */
+[^0-9a-zA-Z_\+\-\*\/\=\,\(\)\t \n]+	{yyerror("lexical error: unknown symbol %s\n", yytext);} /* Every other character produces a lexical error */
 
 %%
 
