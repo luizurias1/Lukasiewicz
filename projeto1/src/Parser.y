@@ -1,10 +1,10 @@
 %{
-#include "SymbolTable.h"
+#include "SemanticAnalyzer.h"
 #include "SyntaxTree.h"
 #include "TreeNode.h"
 #include <iostream>
 
-SymbolTable SYMBOL_TABLE;
+SemanticAnalyzer SEMANTIC_ANALYZER;
 SyntaxTree* SYNTAX_TREE;
 extern int yylex();
 extern void yyerror(const char* s, ...);
@@ -31,7 +31,7 @@ extern void yyerror(const char* s, ...);
  */
 %token <integer> T_INT
 %token <id> T_ID T_FLOAT
-%token <id> T_TYPE_BOOL T_TYPE_FLOAT T_TYPE_INT
+%token T_TYPE_BOOL T_TYPE_FLOAT T_TYPE_INT
 %token T_PLUS T_TIMES T_MINUS T_DIVIDE T_OPEN_PAR T_CLOSING_PAR T_NL
 %token T_ATT T T_COMMA T_TRUE T_FALSE
 %token T_EQUAL T_NOT_EQUAL T_GREATER T_LOWER T_GREATER_EQUAL T_LOWER_EQUAL
@@ -82,8 +82,10 @@ line:
     | T_TYPE_INT declar_int { $$ = new VariableDeclaration(VariableDeclaration::INTEGER, $2); }
     | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(VariableDeclaration::FLOAT, $2); }
     | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(VariableDeclaration::BOOLEAN, $2); }
-    | T_ID T_ATT expr { $$ = new BinaryOperation(SYMBOL_TABLE.assignVariable($1, $3->classType()),
-                                                    BinaryOperation::ASSIGN, $3); }
+    | T_ID T_ATT expr { $$ = new BinaryOperation(
+                                SEMANTIC_ANALYZER.assignVariable($1, $3->classType()),
+                                BinaryOperation::ASSIGN, $3);
+                        SEMANTIC_ANALYZER.analyzeBinaryOperation($1, BinaryOperation::ASSIGN, $3); }
     ;
 
 // Expressão
@@ -92,9 +94,10 @@ expr:
     | T_FLOAT { $$ = new Float($1); }
     | T_TRUE { $$ = new Boolean(true); }
     | T_FALSE { $$ = new Boolean(false); }
-    | T_ID { $$ = SYMBOL_TABLE.useVariable($1); }
+    | T_ID { $$ = SEMANTIC_ANALYZER.useVariable($1); }
     | T_MINUS expr %prec U_MINUS { $$ = new UnaryOperation(UnaryOperation::MINUS, $2); }
-    | expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3); }
+    | expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3);
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation($1, BinaryOperation::PLUS, $3); }
     | expr T_MINUS expr { $$ = new BinaryOperation($1, BinaryOperation::MINUS, $3); }
     | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3); }
     | expr T_DIVIDE expr { $$ = new BinaryOperation($1, BinaryOperation::DIVIDE, $3); }
@@ -114,50 +117,56 @@ op_relation:
 
 // Declaração de booleano
 declar_bool:
-    T_ID T_COMMA declar_bool { $$ = new BinaryOperation(SYMBOL_TABLE.newVariable($1, TreeNode::BOOLEAN),
+    T_ID T_COMMA declar_bool { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::BOOLEAN),
                                                     BinaryOperation::COMMA, $3); }
-    | T_ID { $$ = SYMBOL_TABLE.newVariable($1, TreeNode::BOOLEAN); }
+    | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::BOOLEAN); }
     | T_ID T_ATT type T_COMMA declar_bool { $$ = new BinaryOperation(
                                                   new BinaryOperation(
-                                                    SYMBOL_TABLE.newAssignedVariable($1, TreeNode::BOOLEAN, $3->classType()),
+                                                    SEMANTIC_ANALYZER.declareAssignVariable($1, TreeNode::BOOLEAN, $3->classType()),
                                                     BinaryOperation::ASSIGN, $3),
                                                     BinaryOperation::COMMA, $5); }
-    | T_ID T_ATT type { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1, TreeNode::BOOLEAN, $3->classType()),
-                                                    BinaryOperation::ASSIGN, $3); }
+    | T_ID T_ATT type { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareAssignVariable(
+                                                    $1, TreeNode::BOOLEAN, $3->classType()),
+                                                 BinaryOperation::ASSIGN, $3);
+                        SEMANTIC_ANALYZER.analyzeBinaryOperation($1, BinaryOperation::ASSIGN, $3); }
     ;
     
 // Declaração de ponto flutuante
 declar_float:
-    T_ID T_COMMA declar_float { $$ = new BinaryOperation(SYMBOL_TABLE.newVariable($1, TreeNode::FLOAT),
+    T_ID T_COMMA declar_float { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::FLOAT),
                                                     BinaryOperation::COMMA, $3); }
-    | T_ID { $$ = SYMBOL_TABLE.newVariable($1, TreeNode::FLOAT); }
+    | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::FLOAT); }
     | T_ID T_ATT type T_COMMA declar_float { $$ = new BinaryOperation(
                                                   new BinaryOperation(
-                                                    SYMBOL_TABLE.newAssignedVariable($1, TreeNode::FLOAT, $3->classType()),
+                                                    SEMANTIC_ANALYZER.declareAssignVariable($1, TreeNode::FLOAT, $3->classType()),
                                                     BinaryOperation::ASSIGN, $3),
                                                     BinaryOperation::COMMA, $5); }
-    | T_ID T_ATT type { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1, TreeNode::FLOAT, $3->classType()),
-                                                    BinaryOperation::ASSIGN, $3); }
+    | T_ID T_ATT type { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareAssignVariable(
+                                                    $1, TreeNode::FLOAT, $3->classType()),
+                                                 BinaryOperation::ASSIGN, $3);
+                        SEMANTIC_ANALYZER.analyzeBinaryOperation($1, BinaryOperation::ASSIGN, $3); }
     ;
     
 // Declaração de inteiro
 declar_int:
-    T_ID T_COMMA declar_int { $$ = new BinaryOperation(SYMBOL_TABLE.newVariable($1, TreeNode::INTEGER),
+    T_ID T_COMMA declar_int { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::INTEGER),
                                                     BinaryOperation::COMMA, $3); }
-    | T_ID { $$ = SYMBOL_TABLE.newVariable($1, TreeNode::INTEGER); }
+    | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::INTEGER); }
     | T_ID T_ATT type T_COMMA declar_int { $$ = new BinaryOperation(
                                                   new BinaryOperation(
-                                                    SYMBOL_TABLE.newAssignedVariable($1, TreeNode::INTEGER, $3->classType()),
+                                                    SEMANTIC_ANALYZER.declareAssignVariable($1, TreeNode::INTEGER, $3->classType()),
                                                     BinaryOperation::ASSIGN, $3),
                                                     BinaryOperation::COMMA, $5); }
-    | T_ID T_ATT type { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1, TreeNode::INTEGER, $3->classType()),
-                                                    BinaryOperation::ASSIGN, $3); }
+    | T_ID T_ATT type { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareAssignVariable(
+                                                    $1, TreeNode::INTEGER, $3->classType()),
+                                                 BinaryOperation::ASSIGN, $3);
+                        SEMANTIC_ANALYZER.analyzeBinaryOperation($1, BinaryOperation::ASSIGN, $3); }
     ;
 
 type:
-    T_INT {$$ = new Integer($1);}
-    | T_FLOAT {$$ = new Float($1);}
-    | T_TRUE {$$ = new Boolean(true);}
-    | T_FALSE {$$ = new Boolean(false);}
+    T_INT { $$ = new Integer($1); }
+    | T_FLOAT { $$ = new Float($1); }
+    | T_TRUE { $$ = new Boolean(true); }
+    | T_FALSE { $$ = new Boolean(false); }
 
 %%

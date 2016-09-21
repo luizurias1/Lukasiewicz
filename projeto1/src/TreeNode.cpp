@@ -35,7 +35,7 @@ std::string BinaryOperation::printPreOrder() {
     return output + right->printPreOrder();
 }
 
-std::string BinaryOperation::operationToString(Type operation) {
+std::string BinaryOperation::operationToString(Type operation) const {
     switch(operation) {
         case PLUS:
             return "+";
@@ -63,6 +63,39 @@ std::string BinaryOperation::operationToString(Type operation) {
             return "&";
         case OR:
             return "|";
+        default:
+            return "unknown";
+    }
+}
+
+const char* BinaryOperation::operationName(Type operation) {
+    switch(operation) {
+        case PLUS:
+            return "addition";
+        case MINUS:
+            return "subtraction";
+        case TIMES:
+            return "multiplication";
+        case DIVIDE:
+            return "division";
+        case ASSIGN:
+            return "attribution";
+        case COMMA:
+            return "commation #haha";
+        case EQUAL:
+            return "comparison";
+        case GREATER:
+            return "comparison";
+        case GREATER_EQUAL:
+            return "comparison";
+        case LOWER:
+            return "comparison";
+        case LOWER_EQUAL:
+            return "comparison";
+        case AND:
+            return "and";
+        case OR:
+            return "or";
         default:
             return "unknown";
     }
@@ -179,6 +212,10 @@ Variable::~Variable() {
 
 TreeNode::ClassType Variable::classType() const {
     return TreeNode::VARIABLE;
+}
+
+std::string Variable::getId() const {
+    return id;
 }
 
 std::string Variable::printInOrder() {

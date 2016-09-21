@@ -54,7 +54,8 @@ class BinaryOperation : public TreeNode {
         TreeNode::ClassType classType() const;
         std::string printInOrder();
         std::string printPreOrder();
-        std::string operationToString(Type operation);
+        std::string operationToString(Type operation) const;
+        static const char* operationName(Type operation);
 
     private:
         Type operation;
@@ -132,6 +133,7 @@ class Variable : public TreeNode {
         Variable(std::string id);
         virtual ~Variable();
         TreeNode::ClassType classType() const;
+        std::string getId() const;
         std::string printInOrder();
         std::string printPreOrder();
 

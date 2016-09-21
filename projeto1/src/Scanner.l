@@ -21,9 +21,9 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 "&"                 {return T_AND;} /* Binary operator AND */
 "!"                 {return T_NOT;} /* Binary operator NOT */
 
-"bool"              {yylval.id = new char[8]; strcpy(yylval.id, "boolean"); return T_TYPE_BOOL;} /* Type boolean */
-"float"             {yylval.id = new char[6]; strcpy(yylval.id, "float"); return T_TYPE_FLOAT;} /* Type float */
-"int" 		        {yylval.id = new char[8]; strcpy(yylval.id, "integer"); return T_TYPE_INT;} /* Type integer */
+"bool"              {return T_TYPE_BOOL;} /* Type boolean */
+"float"             {return T_TYPE_FLOAT;} /* Type float */
+"int" 		        {return T_TYPE_INT;} /* Type integer */
 
 "true"              {return T_TRUE;}
 "false"             {return T_FALSE;}
