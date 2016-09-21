@@ -9,40 +9,44 @@ void yyerror(const char* s, ...);
 %option noyywrap nodefault yylineno
 
 float ([0-9]*\.[0-9]+)|([0-9]+\.[0-9]*)
-digs [0-9]+
+integer [0-9]+
 id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 
 %%
 
 [ \t]               ; /* Spaces and tabs are ignored */
-\|                  {return T_OR;}
-"int" 		          {return T_TYPE_INT;} /* Type integer */
-"float"             {return T_TYPE_FLOAT;}
-"bool"              {return T_TYPE_BOOL;}
+
+\|                  {return T_OR;} /* Binary operator OR */
+"&"                 {return T_AND;} /* Binary operator AND */
+"!"                 {return T_NOT;} /* Binary operator NOT */
+
+"int" 		        {return T_TYPE_INT;} /* Type integer */
+"float"             {return T_TYPE_FLOAT;} /* Type float */
+"bool"              {return T_TYPE_BOOL;} /* Type boolean */
+
 "true"              {return T_TRUE;}
 "false"             {return T_FALSE;}
-{id}	              {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_ID;} /* Identifier */
-{digs}              {yylval.integer = std::atoi(yytext); return T_INT;} /* Integer number */
+{id}	            {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_ID;} /* Identifier */
+{integer}              {yylval.integer = std::atoi(yytext); return T_INT;} /* Integer number */
 {float}             {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_FLOAT;}
 "+"                 {return T_PLUS;} /* Binary operator PLUS */
 "-"                 {return T_MINUS;} /* Binary/unary operator MINUS */
 \*                  {return T_TIMES;} /* Binary operator TIMES */
 "/"                 {return T_DIVIDE;} /* Binary operator DIVIDE */
-"=="                {return T_EQUAL;}
-"!="                {return T_NOT_EQUAL;}
-">="                {return T_GREATER_EQUAL;}
-"<="                {return T_LOWER_EQUAL;}
-"<"                 {return T_LOWER;}
-">"                 {return T_GREATER;}
+"=="                {return T_EQUAL;} /* Binary operator EQUAL */
+"!="                {return T_NOT_EQUAL;} /* Binary operator NOT_EQUAL */
+">="                {return T_GREATER_EQUAL;} /* Binary operator GREATER_EQUAL */
+"<="                {return T_LOWER_EQUAL;} /* Binary operator LOWER_EQUAL */
+">"                 {return T_GREATER;} /* Binary operator GREATER */
+"<"                 {return T_LOWER;} /* Binary operator LOWER */
 "="                 {return T_ATT;} /* Binary operator ASSIGN */
+
 ","                 {return T_COMMA;} /* Comma */
 "("                 {return T_OPEN_PAR;} /* Open parenthesis */
 ")"                 {return T_CLOSING_PAR;} /* Closing parenthesis */
 \n                  {return T_NL;} /* New line */
-"&"                 {return T_AND;}
-"!"                 {return T_NOT;}
 
-[^0-9a-zA-Z_\+\-\*\/\=\,\(\)\t \n]+	{yyerror("lexical error: unknown symbol %s\n", yytext);} /* Every other character produces a lexical error */
+[^0-9\.a-zA-Z_\+\-\*\/\="==""!="">=""<="">=""<"">""&""|""!"\,\(\)\t \n]+	    {yyerror("lexical error: unknown symbol %s\n", yytext);} /* Every other character produces a lexical error */
 
 %%
 

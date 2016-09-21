@@ -81,7 +81,7 @@ line:
     | T_TYPE_INT declar { $$ = new VariableDeclaration(VariableDeclaration::INTEGER, $2);}
     | T_TYPE_FLOAT declar { $$ = new VariableDeclaration(VariableDeclaration::FLOAT, $2);}
     | T_TYPE_BOOL declar { $$ = new VariableDeclaration(VariableDeclaration::BOOLEAN, $2);}
-    | T_ID T_ATT expr { $$ = new BinaryOperation(SYMBOL_TABLE.assignVariable($1),
+    | T_ID T_ATT expr { $$ = new BinaryOperation(SYMBOL_TABLE.assignVariable($1, $3->classType()),
                                                     BinaryOperation::ASSIGN, $3); }
     ;
 
@@ -111,15 +111,15 @@ op_relation:
     ;
 
 declar:
-    T_ID T_COMMA declar { $$ = new BinaryOperation(SYMBOL_TABLE.newVariable($1),
+    T_ID T_COMMA declar { $$ = new BinaryOperation(SYMBOL_TABLE.newVariable($1, TreeNode::UNKNOWN),
                                                     BinaryOperation::COMMA, $3);}
-    | T_ID { $$ = SYMBOL_TABLE.newVariable($1);}
+    | T_ID { $$ = SYMBOL_TABLE.newVariable($1, TreeNode::UNKNOWN);}
     | T_ID T_ATT type T_COMMA declar { $$ = new BinaryOperation(
                                                   new BinaryOperation(
-                                                    SYMBOL_TABLE.newAssignedVariable($1),
+                                                    SYMBOL_TABLE.newAssignedVariable($1, TreeNode::UNKNOWN, $3->classType()),
                                                     BinaryOperation::ASSIGN, $3),
                                                     BinaryOperation::COMMA, $5); }
-    | T_ID T_ATT type { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1),
+    | T_ID T_ATT type { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1, TreeNode::UNKNOWN, $3->classType()),
                                                     BinaryOperation::ASSIGN, $3); }
     ;
 

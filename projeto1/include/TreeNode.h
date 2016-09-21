@@ -11,8 +11,20 @@ class SyntaxTree;
 class TreeNode {
 
     public:
+        enum ClassType {
+            BINARY_OPERATION,
+            UNARY_OPERATION,
+            BOOLEAN,
+            FLOAT,
+            INTEGER,
+            VARIABLE,
+            VARIABLE_DECLARATION,
+            UNKNOWN
+        };
+    
         TreeNode();
         virtual ~TreeNode();
+        virtual TreeNode::ClassType classType() const = 0;
         virtual std::string printInOrder() = 0;
         virtual std::string printPreOrder() = 0;
 
@@ -39,6 +51,7 @@ class BinaryOperation : public TreeNode {
 
         BinaryOperation(TreeNode* left, Type operation, TreeNode* right);
         virtual ~BinaryOperation();
+        TreeNode::ClassType classType() const;
         std::string printInOrder();
         std::string printPreOrder();
         std::string operationToString(Type operation);
@@ -60,6 +73,7 @@ class UnaryOperation : public TreeNode {
 
         UnaryOperation(Type operation, TreeNode* right);
         virtual ~UnaryOperation();
+        TreeNode::ClassType classType() const;
         std::string printInOrder();
         std::string printPreOrder();
         std::string operationToString(Type operation);
@@ -70,37 +84,12 @@ class UnaryOperation : public TreeNode {
 
 };
 
-class Integer : public TreeNode {
-
-    public:
-        Integer(int value);
-        virtual ~Integer();
-        std::string printInOrder();
-        std::string printPreOrder();
-
-    private:
-        int value;
-
-};
-
-class Float : public TreeNode {
-
-    public:
-        Float(std::string value);
-        virtual ~Float();
-        std::string printInOrder();
-        std::string printPreOrder();
-
-    private:
-        std::string value;
-
-};
-
 class Boolean : public TreeNode {
 
     public:
         Boolean(bool value);
         virtual ~Boolean();
+        TreeNode::ClassType classType() const;
         std::string printInOrder();
         std::string printPreOrder();
 
@@ -109,11 +98,40 @@ class Boolean : public TreeNode {
 
 };
 
+class Float : public TreeNode {
+
+    public:
+        Float(std::string value);
+        virtual ~Float();
+        TreeNode::ClassType classType() const;
+        std::string printInOrder();
+        std::string printPreOrder();
+
+    private:
+        std::string value;
+
+};
+
+class Integer : public TreeNode {
+
+    public:
+        Integer(int value);
+        virtual ~Integer();
+        TreeNode::ClassType classType() const;
+        std::string printInOrder();
+        std::string printPreOrder();
+
+    private:
+        int value;
+
+};
+
 class Variable : public TreeNode {
 
     public:
         Variable(std::string id);
         virtual ~Variable();
+        TreeNode::ClassType classType() const;
         std::string printInOrder();
         std::string printPreOrder();
 
@@ -133,6 +151,7 @@ class VariableDeclaration : public TreeNode {
 
         VariableDeclaration(Type type, TreeNode* next);
         virtual ~VariableDeclaration();
+        TreeNode::ClassType classType() const;
         std::string printInOrder();
         std::string printPreOrder();
         std::string typeToString(Type type);

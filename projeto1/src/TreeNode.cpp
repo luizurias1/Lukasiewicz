@@ -15,6 +15,10 @@ BinaryOperation::BinaryOperation(TreeNode* left, Type operation, TreeNode* right
 BinaryOperation::~BinaryOperation() {
 }
 
+TreeNode::ClassType BinaryOperation::classType() const {
+    return TreeNode::BINARY_OPERATION;
+}
+
 std::string BinaryOperation::printInOrder() {
     std::string output = left->printInOrder();
     if(operation != COMMA)
@@ -72,6 +76,10 @@ UnaryOperation::UnaryOperation(Type operation, TreeNode* right) : TreeNode() {
 UnaryOperation::~UnaryOperation() {
 }
 
+TreeNode::ClassType UnaryOperation::classType() const {
+    return TreeNode::UNARY_OPERATION;
+}
+
 std::string UnaryOperation::printInOrder() {
     std::string output = "";
     output += operationToString(operation) + " ";
@@ -102,6 +110,10 @@ Boolean::Boolean(bool value) : TreeNode() {
 Boolean::~Boolean() {
 }
 
+TreeNode::ClassType Boolean::classType() const {
+    return TreeNode::BOOLEAN;
+}
+
 std::string Boolean::printPreOrder() {
     switch(value) {
       case true:
@@ -127,6 +139,10 @@ Float::Float(std::string value) : TreeNode() {
 Float::~Float() {
 }
 
+TreeNode::ClassType Float::classType() const {
+    return TreeNode::FLOAT;
+}
+
 std::string Float::printPreOrder() {
     return value + " ";
 }
@@ -140,6 +156,10 @@ Integer::Integer(int value) : TreeNode() {
 }
 
 Integer::~Integer() {
+}
+
+TreeNode::ClassType Integer::classType() const {
+    return TreeNode::INTEGER;
 }
 
 std::string Integer::printPreOrder() {
@@ -157,6 +177,10 @@ Variable::Variable(std::string id) : TreeNode() {
 Variable::~Variable() {
 }
 
+TreeNode::ClassType Variable::classType() const {
+    return TreeNode::VARIABLE;
+}
+
 std::string Variable::printInOrder() {
     return id;
 }
@@ -171,6 +195,10 @@ VariableDeclaration::VariableDeclaration(Type type, TreeNode* next) : TreeNode()
 }
 
 VariableDeclaration::~VariableDeclaration() {
+}
+
+TreeNode::ClassType VariableDeclaration::classType() const {
+    return TreeNode::VARIABLE_DECLARATION;
 }
 
 std::string VariableDeclaration::printInOrder() {
