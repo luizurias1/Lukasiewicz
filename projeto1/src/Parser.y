@@ -13,8 +13,11 @@ extern void yyerror(const char* s, ...);
 %define parse.trace
 
 %code requires {
+
     class TreeNode;
     class SyntaxTree;
+    class MyVector;
+
 }
 
 /* yylval == %union
@@ -25,6 +28,7 @@ extern void yyerror(const char* s, ...);
     SyntaxTree* syntaxTree;
     int integer;
     char *id;
+    MyVector* linesIf;
 }
 
 /* token defines our terminal symbols (tokens).
@@ -36,13 +40,15 @@ extern void yyerror(const char* s, ...);
 %token T_ATT T T_COMMA T_TRUE T_FALSE
 %token T_EQUAL T_NOT_EQUAL T_GREATER T_LOWER T_GREATER_EQUAL T_LOWER_EQUAL
 %token T_AND T_OR T_NOT
+%token T_IF T_ELSE T_THEN T_OPEN_BRACE T_CLOSE_BRACE
 
 /* type defines the type of our nonterminal symbols.
  * Types should match the names used in the union.
  * Example: %type<node> expr
  */
 %type <syntaxTree> lines program
-%type <node> line expr declar_int declar_float declar_bool type op_relation
+%type <node> line expr declar_int declar_float declar_bool type op_relation op_binary if
+%type <linesIf> then else
 
 /* Operator precedence for mathematical operators
  * The latest it is listed, the highest the precedence
@@ -74,8 +80,9 @@ program:
 
 // linhas
 lines:
-    line { $$ = new SyntaxTree(); if($1 != NULL) $$->insertLine($1); }
-    | line lines { $$ = $2; if($1 != NULL) $2->insertLine($1); }
+    line { $$ = new SyntaxTree(); if($1 != NULL) $$->insertLine($1); std::cout << "newLine$ " << std::endl; }
+    | if lines { $$ = $2; if($1 != NULL) $2->insertLine($1); std::cout << "newLine$ LINES " << std::endl; }
+    | line lines { $$ = $2; if($1 != NULL) $2->insertLine($1); std::cout << "newLine$ LINES " << std::endl; }
     ;
 
 // Linha
@@ -89,6 +96,29 @@ line:
                                                     BinaryOperation::ASSIGN, $3); }
     ;
 
+if:
+    T_IF op_relation T_NL T_THEN T_OPEN_BRACE T_NL then T_CLOSE_BRACE else { $$ = new ConditionalOperation($2, $7->v, $7->v); std::cout << "IF THEN" << std::endl; }
+    | T_IF T_OPEN_PAR op_relation T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_CLOSE_BRACE else { $$ = new ConditionalOperation($3, $9->v, $9->v); std::cout << "IF THEN" << std::endl; }
+
+    | T_IF T_ID T_NL T_THEN T_OPEN_BRACE T_NL then T_CLOSE_BRACE else { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($2), $7->v, $7->v); std::cout << "IF THEN" << std::endl; }
+    | T_IF T_OPEN_PAR T_ID T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_CLOSE_BRACE else { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($3), $9->v, $9->v); std::cout << "IF THEN" << std::endl;  }
+    ;
+
+// Ramo then do if
+then:
+    line { $$ = new MyVector(); $$->v.push_back($1); std::cout << "newLine " << $$->v.size() << std::endl; }
+    | line then { $2->v.insert($2->v.begin(), $1);  std::cout << "newLine LINES " << $2->v.size() << std::endl; }
+    ;
+
+// Ramo else do if
+else:
+    T_ELSE T_OPEN_BRACE  then T_CLOSE_BRACE { $$ = $3; std::cout << "ELSE" << std::endl;  }
+    | epsilon { $$ = NULL; std::cout << "NOELSE" << std::endl;  }
+    ;
+
+epsilon:
+    ;
+
 // Expressão
 expr:
     T_INT { $$ = new Integer($1); }
@@ -97,15 +127,21 @@ expr:
     | T_FALSE { $$ = new Boolean(false); }
     | T_ID { $$ = SYMBOL_TABLE.useVariable($1); }
     | T_MINUS expr %prec U_MINUS { $$ = new UnaryOperation(UnaryOperation::MINUS, $2); }
-    | expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3); }
-    | expr T_MINUS expr { $$ = new BinaryOperation($1, BinaryOperation::MINUS, $3); }
-    | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3); }
-    | expr T_DIVIDE expr { $$ = new BinaryOperation($1, BinaryOperation::DIVIDE, $3); }
     | T_OPEN_PAR expr T_CLOSING_PAR { $$ = $2; }
     | T_NOT expr { $$ = new UnaryOperation(UnaryOperation::NOT, $2); }
     | op_relation
+    | op_binary
     ;
 
+// Operações binárias
+op_binary:
+    expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3); }
+    | expr T_MINUS expr { $$ = new BinaryOperation($1, BinaryOperation::MINUS, $3); }
+    | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3); }
+    | expr T_DIVIDE expr { $$ = new BinaryOperation($1, BinaryOperation::DIVIDE, $3); }
+    ;
+
+// Operações relacionais
 op_relation:
     expr T_GREATER expr { $$ = new BinaryOperation($1, BinaryOperation::GREATER, $3); }
     | expr T_GREATER_EQUAL expr { $$ = new BinaryOperation($1, BinaryOperation::GREATER_EQUAL, $3); }
@@ -156,7 +192,7 @@ declar_int:
     | T_ID T_ATT type { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1, TreeNode::INTEGER, $3->classType()),
                                                     BinaryOperation::ASSIGN, $3); }
     ;
-
+// Tipos
 type:
     T_INT {$$ = new Integer($1);}
     | T_FLOAT {$$ = new Float($1);}

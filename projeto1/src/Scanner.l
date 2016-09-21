@@ -20,11 +20,14 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 \|                  {return T_OR;} /* Binary operator OR */
 "&"                 {return T_AND;} /* Binary operator AND */
 "!"                 {return T_NOT;} /* Binary operator NOT */
-
+"if"                {return T_IF;}
+"then"              {return T_THEN;}
+"else"              {return T_ELSE;}
+"{"                 {return T_OPEN_BRACE;}
+"}"                 {return T_CLOSE_BRACE;}
 "bool"              {yylval.id = new char[8]; strcpy(yylval.id, "boolean"); return T_TYPE_BOOL;} /* Type boolean */
 "float"             {yylval.id = new char[6]; strcpy(yylval.id, "float"); return T_TYPE_FLOAT;} /* Type float */
 "int" 		        {yylval.id = new char[8]; strcpy(yylval.id, "integer"); return T_TYPE_INT;} /* Type integer */
-
 "true"              {return T_TRUE;}
 "false"             {return T_FALSE;}
 {id}	            {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_ID;} /* Identifier */
@@ -47,7 +50,7 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 ")"                 {return T_CLOSING_PAR;} /* Closing parenthesis */
 \n                  {return T_NL;} /* New line */
 
-[^0-9\.a-zA-Z_\+\-\*\/\="==""!="">=""<="">=""<"">""&""|""!"\,\(\)\t \n]+	    {yyerror("lexical error: unknown symbol %s\n", yytext);} /* Every other character produces a lexical error */
+[^0-9\.a-zA-Z_\+\-\*\/\="==""!="">=""<="">=""<"">""&""|""!"\,\(\)\t \n\{\}]+	    {yyerror("lexical error: unknown symbol %s\n", yytext);} /* Every other character produces a lexical error */
 
 %%
 

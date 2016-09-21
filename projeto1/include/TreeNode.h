@@ -2,6 +2,7 @@
 #define TREENODE_H_
 
 #include <string>
+#include <vector>
 
 class SyntaxTree;
 
@@ -19,9 +20,10 @@ class TreeNode {
             INTEGER,
             VARIABLE,
             VARIABLE_DECLARATION,
+            CONDITIONAL,
             UNKNOWN
         };
-    
+
         TreeNode();
         virtual ~TreeNode();
         virtual TreeNode::ClassType classType() const = 0;
@@ -162,5 +164,28 @@ class VariableDeclaration : public TreeNode {
 
 };
 
+class ConditionalOperation : public TreeNode {
+
+    public:
+      ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then, std::vector<TreeNode*> el);
+      virtual ~ConditionalOperation();
+      std::string printInOrder();
+      std::string printPreOrder();
+      TreeNode::ClassType classType() const;
+
+    private:
+        TreeNode* condition;
+        std::vector<TreeNode*> then;
+        std::vector<TreeNode*> el;
+
+};
+
+class MyVector {
+    public:
+      MyVector() {}
+
+      virtual ~MyVector() {}
+      std::vector<TreeNode*> v;
+    };
 
 #endif
