@@ -67,10 +67,12 @@ extern void yyerror(const char* s, ...);
 
 %%
 
+// Programa
 program:
     lines { SYNTAX_TREE = $1;}
     ;
 
+// linhas
 lines:
     line { $$ = new SyntaxTree(); if($1 != NULL) $$->insertLine($1); }
     | line lines { $$ = $2; if($1 != NULL) $2->insertLine($1); }
