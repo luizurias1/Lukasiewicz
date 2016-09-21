@@ -76,9 +76,10 @@ lines:
     | line lines { $$ = $2; if($1 != NULL) $2->insertLine($1); }
     ;
 
+// Linha
 line:
     T_NL { $$ = NULL; }
-    | error T_NL { yyerrok; $$ = NULL; }    
+    | error T_NL { yyerrok; $$ = NULL; }
     | T_TYPE_INT declar_int { $$ = new VariableDeclaration(VariableDeclaration::INTEGER, $2); }
     | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(VariableDeclaration::FLOAT, $2); }
     | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(VariableDeclaration::BOOLEAN, $2); }
@@ -125,7 +126,7 @@ declar_bool:
     | T_ID T_ATT type { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1, TreeNode::BOOLEAN, $3->classType()),
                                                     BinaryOperation::ASSIGN, $3); }
     ;
-    
+
 // Declaração de ponto flutuante
 declar_float:
     T_ID T_COMMA declar_float { $$ = new BinaryOperation(SYMBOL_TABLE.newVariable($1, TreeNode::FLOAT),
@@ -139,7 +140,7 @@ declar_float:
     | T_ID T_ATT type { $$ = new BinaryOperation(SYMBOL_TABLE.newAssignedVariable($1, TreeNode::FLOAT, $3->classType()),
                                                     BinaryOperation::ASSIGN, $3); }
     ;
-    
+
 // Declaração de inteiro
 declar_int:
     T_ID T_COMMA declar_int { $$ = new BinaryOperation(SYMBOL_TABLE.newVariable($1, TreeNode::INTEGER),
