@@ -32,6 +32,7 @@ class Symbol {
         Symbol();
         Symbol(DataType dataType, IdentifierType idType, int64_t value, bool initialized);
         virtual ~Symbol();
+        void setDataType(DataType type);
         DataType getDataType() const;
     
     private:
@@ -70,8 +71,7 @@ class SymbolTable {
     private:
         Symbol::DataType classToDataType(TreeNode::ClassType type) const;
         std::string classToString(TreeNode::ClassType type) const;
-        std::string dataTypeToString(Symbol::DataType type) const;
-    
+        std::string dataTypeToString(Symbol::DataType type) const; 
         std::map<std::string, Symbol> entryList;
     
 };

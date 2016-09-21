@@ -13,6 +13,10 @@ Symbol::Symbol(DataType dataType, IdentifierType idType, int64_t value, bool ini
 Symbol::~Symbol() {
 }
 
+void Symbol::setDataType(Symbol::DataType type) {
+    this->dataType = type;
+}
+
 Symbol::DataType Symbol::getDataType() const {
     return this->dataType;
 }
@@ -49,7 +53,7 @@ TreeNode* SymbolTable::assignVariable(std::string id, TreeNode::ClassType assign
         yyerror("semantic error: undeclared variable %s\n", id.c_str());
     
     if(getSymbolType(id) != classToDataType(assignedType))
-        yyerror("semantic error: attribution operation %s but received %s\n",
+        yyerror("semantic error: attribution operation expected %s but received %s\n",
                 dataTypeToString(getSymbolType(id)).c_str(), classToString(assignedType).c_str());
     else
         entryList[id].initialized = true;
@@ -64,7 +68,7 @@ TreeNode* SymbolTable::newAssignedVariable(std::string id, TreeNode::ClassType d
        addSymbol(id, Symbol(classToDataType(dataType), Symbol::VARIABLE, 0, false)); // Adds variable to symbol table
     
     if(dataType != assignedType)
-        yyerror("semantic error: attribution operation %s but received %s\n",
+        yyerror("semantic error: attribution operation expected %s but received %s\n",
                 classToString(dataType).c_str(), classToString(assignedType).c_str());
     else
         entryList[id].initialized = true;
