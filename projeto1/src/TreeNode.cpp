@@ -234,35 +234,42 @@ ConditionalOperation::ConditionalOperation(TreeNode* condition, std::vector<Tree
     this->condition = condition;
     this->then = then;
     this->el = el;
+    this->identation = "";
 }
 
+ConditionalOperation::ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then) : TreeNode() {
+    this->condition = condition;
+    this->then = then;
+}
 
 ConditionalOperation::~ConditionalOperation() {
 }
 
 std::string ConditionalOperation::printInOrder(){
     std::string output = "if: ";
+    std::string identation = "  ";
     output += condition->printPreOrder() + "\nthen:\n";
 
-    for (TreeNode* line: then)
-      output+= line->printPreOrder() + "\n";
-
+    for (TreeNode* line: then){
+      output+= "  "+line->printPreOrder() + "\n";
+    }
     if(el.size() > 0) {
         output += "else:\n";
         for (TreeNode* line: el)
-          output+= line->printPreOrder() + "\n";
+          output+= identation+line->printPreOrder() + "\n";
     }
 
     return output;
 }
+
 
 std::string ConditionalOperation::printPreOrder(){
     std::string output = "if: ";
     output += condition->printPreOrder() + "\nthen:\n";
 
-    for (TreeNode* line: then)
+    for (TreeNode* line: then){
       output+= line->printPreOrder() + "\n";
-
+}
     if(el.size() > 0) {
         output += "else:\n";
         for (TreeNode* line: el)
@@ -271,7 +278,6 @@ std::string ConditionalOperation::printPreOrder(){
 
     return output;
 }
-
 TreeNode::ClassType ConditionalOperation::classType() const{
       return TreeNode::CONDITIONAL;
 

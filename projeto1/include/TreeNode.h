@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 class SyntaxTree;
 
@@ -168,6 +169,7 @@ class ConditionalOperation : public TreeNode {
 
     public:
       ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then, std::vector<TreeNode*> el);
+      ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then);
       virtual ~ConditionalOperation();
       std::string printInOrder();
       std::string printPreOrder();
