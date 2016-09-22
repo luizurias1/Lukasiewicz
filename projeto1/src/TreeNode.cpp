@@ -1,12 +1,21 @@
 #include "TreeNode.h"
 
-TreeNode::TreeNode() {
+TreeNode::TreeNode(Data::Type type) {
+    this->type = type;
 }
 
 TreeNode::~TreeNode() {
 }
 
-BinaryOperation::BinaryOperation(TreeNode* left, Type operation, TreeNode* right) : TreeNode() {
+Data::Type TreeNode::dataType() const {
+    return this->type;
+}
+
+void TreeNode::setType(Data::Type type) {
+    this->type = type;
+}
+
+BinaryOperation::BinaryOperation(TreeNode* left, BinaryOperation::Type operation, TreeNode* right) : TreeNode(Data::UNKNOWN) {
     this->left = left;
     this->operation = operation;
     this->right = right;
@@ -35,7 +44,7 @@ std::string BinaryOperation::printPreOrder() {
     return output + right->printPreOrder();
 }
 
-std::string BinaryOperation::operationToString(Type operation) const {
+std::string BinaryOperation::operationToString(BinaryOperation::Type operation) const {
     switch(operation) {
         case PLUS:
             return "+";
@@ -68,7 +77,7 @@ std::string BinaryOperation::operationToString(Type operation) const {
     }
 }
 
-const char* BinaryOperation::operationName(Type operation) {
+const char* BinaryOperation::operationName(BinaryOperation::Type operation) {
     switch(operation) {
         case PLUS:
             return "addition";
@@ -101,7 +110,7 @@ const char* BinaryOperation::operationName(Type operation) {
     }
 }
 
-UnaryOperation::UnaryOperation(Type operation, TreeNode* right) : TreeNode() {
+UnaryOperation::UnaryOperation(UnaryOperation::Type operation, TreeNode* right) : TreeNode(Data::UNKNOWN) {
     this->operation = operation;
     this->right = right;
 }
@@ -125,7 +134,7 @@ std::string UnaryOperation::printPreOrder() {
     return output + right->printPreOrder();
 }
 
-std::string UnaryOperation::operationToString(Type operation) {
+std::string UnaryOperation::operationToString(UnaryOperation::Type operation) {
     switch(operation) {
         case MINUS:
             return "-u";
@@ -136,7 +145,7 @@ std::string UnaryOperation::operationToString(Type operation) {
     }
 }
 
-Boolean::Boolean(bool value) : TreeNode() {
+Boolean::Boolean(bool value) : TreeNode(Data::BOOLEAN) {
     this->value = value;
 }
 
@@ -165,7 +174,7 @@ std::string Boolean::printInOrder() {
   }
 }
 
-Float::Float(std::string value) : TreeNode() {
+Float::Float(std::string value) : TreeNode(Data::FLOAT) {
     this->value = value;
 }
 
@@ -184,7 +193,7 @@ std::string Float::printInOrder() {
     return value;
 }
 
-Integer::Integer(int value) : TreeNode() {
+Integer::Integer(int value) : TreeNode(Data::INTEGER) {
     this->value = value;
 }
 
@@ -203,7 +212,7 @@ std::string Integer::printInOrder() {
     return std::to_string(value);
 }
 
-Variable::Variable(std::string id) : TreeNode() {
+Variable::Variable(std::string id, Data::Type type) : TreeNode(type) {
     this->id = id;
 }
 
@@ -226,8 +235,7 @@ std::string Variable::printPreOrder() {
     return id + " ";
 }
 
-VariableDeclaration::VariableDeclaration(Type type, TreeNode* next) : TreeNode() {
-    this->type = type;
+VariableDeclaration::VariableDeclaration(Data::Type type, TreeNode* next) : TreeNode(type) {
     this->next = next;
 }
 
@@ -254,13 +262,53 @@ std::string VariableDeclaration::printPreOrder() {
     return output;
 }
 
-std::string VariableDeclaration::typeToString(Type type) {
+std::string VariableDeclaration::typeToString(Data::Type type) {
     switch(type) {
-        case INTEGER:
+        case Data::INTEGER:
             return "int";
-        case BOOLEAN:
+        case Data::BOOLEAN:
             return "bool";
-        case FLOAT:
+        case Data::FLOAT:
+            return "float";
+        default:
+            return "unknown";
+    }
+}
+
+TypeCasting::TypeCasting(Data::Type type, TreeNode* next) : TreeNode(type) {
+    this->next = next;
+}
+
+TypeCasting::~TypeCasting() {
+}
+
+TreeNode::ClassType TypeCasting::classType() const {
+    return TreeNode::TYPE_CASTING;
+}
+
+std::string TypeCasting::printInOrder() {
+    std::string output = "[" + typeToString(this->type) + "] ";
+    if (next != NULL) {
+        output += next->printInOrder();
+    }
+    return output;
+}
+
+std::string TypeCasting::printPreOrder() {
+    std::string output = "[" + typeToString(this->type) + "] ";
+    if (next != NULL) {
+        output += next->printPreOrder();
+    }
+    return output;
+}
+
+std::string TypeCasting::typeToString(Data::Type type) {
+    switch(type) {
+        case Data::INTEGER:
+            return "int";
+        case Data::BOOLEAN:
+            return "bool";
+        case Data::FLOAT:
             return "float";
         default:
             return "unknown";

@@ -25,15 +25,18 @@ extern void yyerror(const char* s, ...);
     SyntaxTree* syntaxTree;
     int integer;
     char *id;
+    int dataType;
 }
 
 /* token defines our terminal symbols (tokens).
  */
 %token <integer> T_INT
 %token <id> T_ID T_FLOAT
-%token T_TYPE_BOOL T_TYPE_FLOAT T_TYPE_INT
-%token T_PLUS T_TIMES T_MINUS T_DIVIDE T_OPEN_PAR T_CLOSING_PAR T_NL
-%token T_ATT T T_COMMA T_TRUE T_FALSE
+%token T_TRUE T_FALSE
+%token <dataType> T_TYPE_BOOL T_TYPE_FLOAT T_TYPE_INT
+%token T_OPEN_PAR T_CLOSING_PAR T_OPEN_BRACKET T_CLOSING_BRACKET T_NL
+%token T_PLUS T_TIMES T_MINUS T_DIVIDE
+%token T_ATT T T_COMMA
 %token T_EQUAL T_NOT_EQUAL T_GREATER T_LOWER T_GREATER_EQUAL T_LOWER_EQUAL
 %token T_AND T_OR T_NOT
 
@@ -43,6 +46,7 @@ extern void yyerror(const char* s, ...);
  */
 %type <syntaxTree> lines program
 %type <node> line expr declar_int declar_float declar_bool type op_relation
+%type <dataType> data_type
 
 /* Operator precedence for mathematical operators
  * The latest it is listed, the highest the precedence
@@ -79,13 +83,13 @@ lines:
 line:
     T_NL { $$ = NULL; }
     | error T_NL { yyerrok; $$ = NULL; }    
-    | T_TYPE_INT declar_int { $$ = new VariableDeclaration(VariableDeclaration::INTEGER, $2); }
-    | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(VariableDeclaration::FLOAT, $2); }
-    | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(VariableDeclaration::BOOLEAN, $2); }
+    | T_TYPE_INT declar_int { $$ = new VariableDeclaration(Data::INTEGER, $2); }
+    | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(Data::FLOAT, $2); }
+    | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2); }
     | T_ID T_ATT expr { $$ = new BinaryOperation(
                                 SEMANTIC_ANALYZER.assignVariable($1, $3->classType()),
                                 BinaryOperation::ASSIGN, $3);
-                        SEMANTIC_ANALYZER.analyzeBinaryOperation($1, BinaryOperation::ASSIGN, $3); }
+                        SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     ;
 
 // Expressão
@@ -97,13 +101,23 @@ expr:
     | T_ID { $$ = SEMANTIC_ANALYZER.useVariable($1); }
     | T_MINUS expr %prec U_MINUS { $$ = new UnaryOperation(UnaryOperation::MINUS, $2); }
     | expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3);
-                         SEMANTIC_ANALYZER.analyzeBinaryOperation($1, BinaryOperation::PLUS, $3); }
-    | expr T_MINUS expr { $$ = new BinaryOperation($1, BinaryOperation::MINUS, $3); }
-    | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3); }
-    | expr T_DIVIDE expr { $$ = new BinaryOperation($1, BinaryOperation::DIVIDE, $3); }
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | expr T_MINUS expr { $$ = new BinaryOperation($1, BinaryOperation::MINUS, $3);
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3);
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | expr T_DIVIDE expr { $$ = new BinaryOperation($1, BinaryOperation::DIVIDE, $3);
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     | T_OPEN_PAR expr T_CLOSING_PAR { $$ = $2; }
     | T_NOT expr { $$ = new UnaryOperation(UnaryOperation::NOT, $2); }
     | op_relation
+    | T_OPEN_BRACKET data_type T_CLOSING_BRACKET expr { $$ = new TypeCasting((Data::Type) $2, $4); }
+    ;
+
+data_type:
+    T_TYPE_BOOL
+    | T_TYPE_FLOAT
+    | T_TYPE_INT
     ;
 
 op_relation:
@@ -128,7 +142,7 @@ declar_bool:
     | T_ID T_ATT type { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareAssignVariable(
                                                     $1, TreeNode::BOOLEAN, $3->classType()),
                                                  BinaryOperation::ASSIGN, $3);
-                        SEMANTIC_ANALYZER.analyzeBinaryOperation($1, BinaryOperation::ASSIGN, $3); }
+                        SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     ;
     
 // Declaração de ponto flutuante
@@ -144,7 +158,7 @@ declar_float:
     | T_ID T_ATT type { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareAssignVariable(
                                                     $1, TreeNode::FLOAT, $3->classType()),
                                                  BinaryOperation::ASSIGN, $3);
-                        SEMANTIC_ANALYZER.analyzeBinaryOperation($1, BinaryOperation::ASSIGN, $3); }
+                        SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     ;
     
 // Declaração de inteiro
@@ -160,7 +174,7 @@ declar_int:
     | T_ID T_ATT type { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareAssignVariable(
                                                     $1, TreeNode::INTEGER, $3->classType()),
                                                  BinaryOperation::ASSIGN, $3);
-                        SEMANTIC_ANALYZER.analyzeBinaryOperation($1, BinaryOperation::ASSIGN, $3); }
+                        SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     ;
 
 type:

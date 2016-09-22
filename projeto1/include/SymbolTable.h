@@ -1,6 +1,7 @@
 #ifndef SYMBOLTABLE_H_
 #define SYMBOLTABLE_H_
 
+#include "TreeNode.h"
 #include <map>
 #include <string>
 
@@ -11,26 +12,19 @@ class Symbol {
     
     friend class SymbolTable;
     
-    public:
-        enum DataType {
-            BOOLEAN,
-            FLOAT,
-            INTEGER,
-            UNKNOWN
-        };
-    
+    public:    
         enum IdentifierType {
             VARIABLE
         };
     
         Symbol();
-        Symbol(DataType dataType, IdentifierType idType, bool initialized);
+        Symbol(Data::Type dataType, IdentifierType idType, bool initialized);
         virtual ~Symbol();
-        DataType getDataType() const;
-        void setDataType(DataType type);
+        Data::Type getDataType() const;
+        void setDataType(Data::Type type);
     
     private:
-        DataType dataType;
+        Data::Type dataType;
         IdentifierType idType;
         bool initialized;
     
@@ -47,7 +41,7 @@ class SymbolTable {
     
         bool existsVariable(std::string varId) const;
         bool isVariableInitialized(std::string varId) const;
-        Symbol::DataType getSymbolType(std::string varId) const;
+        Data::Type getSymbolType(std::string varId) const;
     
         void addSymbol(const std::string varId, Symbol newSymbol);
         void setInitializedVariable(const std::string varId);

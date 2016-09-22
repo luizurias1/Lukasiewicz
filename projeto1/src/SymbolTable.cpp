@@ -1,12 +1,12 @@
 #include "SymbolTable.h"
 
 Symbol::Symbol() {
-    this->dataType = Symbol::UNKNOWN;
+    this->dataType = Data::UNKNOWN;
     this->idType = Symbol::VARIABLE;
     this->initialized = false;
 }
 
-Symbol::Symbol(DataType dataType, IdentifierType idType, bool initialized) {
+Symbol::Symbol(Data::Type dataType, IdentifierType idType, bool initialized) {
     this->dataType = dataType;
     this->idType = idType;
     this->initialized = initialized;
@@ -15,11 +15,11 @@ Symbol::Symbol(DataType dataType, IdentifierType idType, bool initialized) {
 Symbol::~Symbol() {
 }
 
-Symbol::DataType Symbol::getDataType() const {
+Data::Type Symbol::getDataType() const {
     return this->dataType;
 }
 
-void Symbol::setDataType(Symbol::DataType type) {
+void Symbol::setDataType(Data::Type type) {
     this->dataType = type;
 }
 
@@ -37,7 +37,7 @@ bool SymbolTable::isVariableInitialized(std::string varId) const {
     return entryList.at(varId).initialized;
 }
 
-Symbol::DataType SymbolTable::getSymbolType(std::string varId) const {
+Data::Type SymbolTable::getSymbolType(std::string varId) const {
     return entryList.at(varId).dataType;
 }
 

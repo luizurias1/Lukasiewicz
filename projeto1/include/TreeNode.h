@@ -3,7 +3,20 @@
 
 #include <string>
 
+class SemanticAnalyzer;
 class SyntaxTree;
+
+/**
+ * Namespace de dados.
+ */
+namespace Data {
+    enum Type {
+        BOOLEAN = 0,
+        FLOAT = 1,
+        INTEGER = 2,
+        UNKNOWN = 3
+    };
+}
 
 /**
  * Nodo da árvore sintática.
@@ -17,20 +30,28 @@ class TreeNode {
             BOOLEAN,
             FLOAT,
             INTEGER,
+            TYPE_CASTING,
             VARIABLE,
             VARIABLE_DECLARATION,
             UNKNOWN
         };
     
-        TreeNode();
+        TreeNode(Data::Type type);
         virtual ~TreeNode();
+        Data::Type dataType() const;
+        void setType(Data::Type type);
         virtual TreeNode::ClassType classType() const = 0;
         virtual std::string printInOrder() = 0;
         virtual std::string printPreOrder() = 0;
+    
+    protected:
+        Data::Type type;
 
 };
 
 class BinaryOperation : public TreeNode {
+    
+    friend class SemanticAnalyzer;
 
     public:
         enum Type {
@@ -130,7 +151,7 @@ class Integer : public TreeNode {
 class Variable : public TreeNode {
 
     public:
-        Variable(std::string id);
+        Variable(std::string id, Data::Type type);
         virtual ~Variable();
         TreeNode::ClassType classType() const;
         std::string getId() const;
@@ -145,21 +166,29 @@ class Variable : public TreeNode {
 class VariableDeclaration : public TreeNode {
 
     public:
-        enum Type {
-            BOOLEAN,
-            FLOAT,
-            INTEGER
-        };
-
-        VariableDeclaration(Type type, TreeNode* next);
+        VariableDeclaration(Data::Type type, TreeNode* next);
         virtual ~VariableDeclaration();
         TreeNode::ClassType classType() const;
         std::string printInOrder();
         std::string printPreOrder();
-        std::string typeToString(Type type);
+        std::string typeToString(Data::Type type);
 
     private:
-        Type type;
+        TreeNode* next;
+
+};
+
+class TypeCasting : public TreeNode {
+
+    public:
+        TypeCasting(Data::Type type, TreeNode* next);
+        virtual ~TypeCasting();
+        TreeNode::ClassType classType() const;
+        std::string printInOrder();
+        std::string printPreOrder();
+        std::string typeToString(Data::Type type);
+
+    private:
         TreeNode* next;
 
 };

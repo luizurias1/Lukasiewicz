@@ -2,7 +2,6 @@
 #define SEMANTICANALYZER_H_
 
 #include "SymbolTable.h"
-#include "TreeNode.h"
 #include <string>
 
 class SemanticAnalyzer;
@@ -19,17 +18,16 @@ class SemanticAnalyzer {
         SemanticAnalyzer();
         virtual ~SemanticAnalyzer();
     
-        void analyzeBinaryOperation(TreeNode* left, BinaryOperation::Type op, TreeNode* right) const;
-        void analyzeBinaryOperation(std::string leftVar, BinaryOperation::Type op, TreeNode* right) const;
+        void analyzeBinaryOperation(BinaryOperation* binaryOp);
         TreeNode* declareVariable(std::string varId, TreeNode::ClassType dataType);
         TreeNode* assignVariable(std::string varId, TreeNode::ClassType assignedType);
         TreeNode* declareAssignVariable(std::string id, TreeNode::ClassType dataType, TreeNode::ClassType assignedType);
         TreeNode* useVariable(std::string varId);
     
     private:
-        Symbol::DataType classToDataType(TreeNode::ClassType type) const;
+        Data::Type classToDataType(TreeNode::ClassType type) const;
         std::string classToString(TreeNode::ClassType type) const;
-        std::string dataTypeToString(Symbol::DataType type) const;
+        std::string dataTypeToString(Data::Type type) const;
         SymbolTable symbolTable;
     
 };

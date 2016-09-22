@@ -1,2 +1,12 @@
 int a = 0
 a = a + true
+
+bool b = false
+b = a | true
+
+float c = 2.45
+c = true + 3
+
+int d = 23
+d = false + a
+d = 2 + true
