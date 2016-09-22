@@ -1,5 +1,4 @@
 #include "SemanticAnalyzer.h"
-#include <iostream>
 
 SemanticAnalyzer::SemanticAnalyzer() {
 }
@@ -11,17 +10,8 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
     TreeNode* left = binaryOp->left;
     BinaryOperation::Type op = binaryOp->operation;
     TreeNode* right = binaryOp->right;
-    
-    if(left->dataType() == right->dataType() &&
-       left->dataType() == Data::INTEGER)
-        binaryOp->setType(Data::INTEGER);
-    else if(left->dataType() == right->dataType() &&
-       left->dataType() == Data::FLOAT)
-        binaryOp->setType(Data::FLOAT);
-    else if(left->dataType() == right->dataType() &&
-       left->dataType() == Data::BOOLEAN)
-        binaryOp->setType(Data::BOOLEAN);
-        
+            
+    // Adiciona uma conversão int -> float obrigatória caso necessário
     switch(left->dataType()) {
         case Data::FLOAT:
             if(right->dataType() == Data::INTEGER) {
@@ -29,7 +19,7 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
             }
             break;
         case Data::INTEGER:
-            if(right->dataType() == Data::FLOAT) {
+            if(right->dataType() == Data::FLOAT && op != BinaryOperation::ASSIGN) {
                 binaryOp->left = new TypeCasting(Data::FLOAT, left);
             }
             break;
@@ -37,75 +27,20 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
             break;
     }
     
-    if(left->dataType() == Data::UNKNOWN || right->dataType() == Data::UNKNOWN)
+    // Define o tipo da operação binária de acordo com o operando esquerdo
+    if(binaryOp->left->dataType() != Data::UNKNOWN)
+        binaryOp->setType(binaryOp->left->dataType());
+    
+    // Se algum dos tipos é desconhecido, a análise de operandos não se aplica
+    if(binaryOp->left->dataType() == Data::UNKNOWN || binaryOp->right->dataType() == Data::UNKNOWN)
         return;
     
+    // Se os operandos diferem, gera erro semântico
     if(binaryOp->left->dataType() != binaryOp->right->dataType())
         yyerror("semantic error: %s operation expected %s but received %s\n",
             BinaryOperation::operationName(op),
             dataTypeToString(binaryOp->left->dataType()).c_str(),
             dataTypeToString(binaryOp->right->dataType()).c_str());
-    /*
-    bool rightIsVar = right->classType() == TreeNode::VARIABLE;
-    Symbol::DataType rightType = Symbol::UNKNOWN;
-    
-    if(rightIsVar)
-        rightType = symbolTable.getSymbolType(((Variable*) right)->getId());
-    
-    switch(left->classType()) {
-        case TreeNode::BOOLEAN:
-            if(right->classType() != TreeNode::BOOLEAN)
-                yyerror("semantic error: %s operation expected %s but received %s\n",
-                    BinaryOperation::operationName(op),
-                    classToString(left->classType()).c_str(),
-                    classToString(right->classType()).c_str());
-            break;
-        case TreeNode::FLOAT:
-            if(right->classType() != TreeNode::FLOAT)
-                yyerror("semantic error: %s operation expected %s but received %s\n",
-                    BinaryOperation::operationName(op),
-                    classToString(left->classType()).c_str(),
-                    classToString(right->classType()).c_str());
-            
-            // Garantir que inteiro é convertido para float
-            if((rightIsVar && rightType == Variable::INTEGER)
-               || (right->classType() == TreeNode::INTEGER))
-                right = new TypeCasting(Data::FLOAT, right);
-            break;
-        case TreeNode::INTEGER:
-            if(right->classType() != TreeNode::INTEGER) {
-                yyerror("semantic error: %s operation expected %s but received %s\n",
-                    BinaryOperation::operationName(op),
-                    classToString(left->classType()).c_str(),
-                    classToString(right->classType()).c_str());
-            }
-            
-            // Garantir que inteiro é convertido para float
-            if((rightIsVar && rightType == Variable::FLOAT)
-               || (right->classType() == TreeNode::FLOAT))
-                left = new TypeCasting(Data::FLOAT, left);
-            break;
-        case TreeNode::VARIABLE:
-            Variable* leftVar = (Variable*) left;
-            Symbol::DataType leftType = symbolTable.getSymbolType(leftVar->getId());
-            
-            if(classToDataType(right->classType()) != Symbol::UNKNOWN &&
-                leftType != classToDataType(right->classType())) {
-                yyerror("semantic error: %s operation expected %s but received %s\n",
-                    BinaryOperation::operationName(op),
-                    dataTypeToString(leftType).c_str(),
-                    classToString(right->classType()).c_str());
-            }
-            
-            if((leftType == Variable::INTEGER && rightIsVar && rightType == Variable::FLOAT)
-               || (leftType == Variable::INTEGER && right->classType() == TreeNode::FLOAT))
-            // Garantir que inteiro é convertido para float
-            if((rightIsVar && rightType == Variable::FLOAT)
-               || (right->classType() == TreeNode::FLOAT))
-                left = new TypeCasting(Data::FLOAT, left);
-            break;          
-    }
-    */
 }
 
 TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType dataType) {
@@ -118,12 +53,14 @@ TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType 
 }
 
 TreeNode* SemanticAnalyzer::assignVariable(std::string id, TreeNode::ClassType assignedType) {
-    if(!symbolTable.existsVariable(id))
+    if(!symbolTable.existsVariable(id)) {
         yyerror("semantic error: undeclared variable %s\n", id.c_str());
-    else
+        return new Variable(id, Data::UNKNOWN); //Creates variable node anyway
+    } else {
         symbolTable.setInitializedVariable(id);
+        return new Variable(id, symbolTable.getSymbolType(id));
+    }
     
-    return new Variable(id, symbolTable.getSymbolType(id)); //Creates variable node anyway
 }
 
 TreeNode* SemanticAnalyzer::declareAssignVariable(std::string id, TreeNode::ClassType dataType, TreeNode::ClassType assignedType) {
@@ -138,12 +75,13 @@ TreeNode* SemanticAnalyzer::declareAssignVariable(std::string id, TreeNode::Clas
 }
 
 TreeNode* SemanticAnalyzer::useVariable(std::string id) {
-    if(!symbolTable.existsVariable(id))
+    if(!symbolTable.existsVariable(id)) {
         yyerror("semantic error: undeclared variable %s\n", id.c_str());
-    else if(!symbolTable.isVariableInitialized(id))
+        return new Variable(id, Data::UNKNOWN); //Creates variable node anyway
+    } else if(!symbolTable.isVariableInitialized(id)) {
         yyerror("semantic error: uninitialized variable %s\n", id.c_str());
-    
-    return new Variable(id, symbolTable.getSymbolType(id)); //Creates variable node anyway
+    }
+    return new Variable(id, symbolTable.getSymbolType(id));
 }
 
 Data::Type SemanticAnalyzer::classToDataType(TreeNode::ClassType type) const {

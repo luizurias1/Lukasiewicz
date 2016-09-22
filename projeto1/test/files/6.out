@@ -1,1 +1,6 @@
 [Line 3] semantic error: addition operation expected integer but received boolean
+[Line 9] semantic error: addition operation expected boolean but received integer
+[Line 9] semantic error: attribution operation expected float but received boolean
+[Line 12] semantic error: addition operation expected boolean but received integer
+[Line 12] semantic error: attribution operation expected integer but received boolean
+[Line 13] semantic error: addition operation expected integer but received boolean
