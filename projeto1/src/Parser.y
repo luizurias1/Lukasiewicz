@@ -75,13 +75,12 @@ extern void yyerror(const char* s, ...);
 
 // Programa
 program:
-    lines { SYNTAX_TREE = $1;}
+    lines { SYNTAX_TREE = $1; std::cout << "passouGramatica" << std::endl; }
     ;
 
 // linhas
 lines:
     line { $$ = new SyntaxTree(); if($1 != NULL) $$->insertLine($1); std::cout << "newLine$ " << std::endl; }
-    | if lines { $$ = $2; if($1 != NULL) $2->insertLine($1); std::cout << "newLine$ LINES " << std::endl; }
     | line lines { $$ = $2; if($1 != NULL) $2->insertLine($1); std::cout << "newLine$ LINES " << std::endl; }
     ;
 
@@ -94,6 +93,7 @@ line:
     | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(VariableDeclaration::BOOLEAN, $2); }
     | T_ID T_ATT expr { $$ = new BinaryOperation(SYMBOL_TABLE.assignVariable($1, $3->classType()),
                                                     BinaryOperation::ASSIGN, $3); }
+    | if
     ;
 
 if:
@@ -107,7 +107,6 @@ if:
 // Ramo then do if
 then:
     line { $$ = new MyVector(); $$->v.push_back($1); std::cout << "newLine " << $$->v.size() << std::endl; }
-    | line then { $2->v.insert($2->v.begin(), $1);  std::cout << "newLine LINES " << $2->v.size() << std::endl; }
     ;
 
 // Ramo else do if
