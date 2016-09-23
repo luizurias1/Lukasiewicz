@@ -245,20 +245,33 @@ ConditionalOperation::~ConditionalOperation() {
 }
 
 std::string ConditionalOperation::printInOrder(){
-    std::string output = "if: ";
-    std::string identation = "  ";
-    output += condition->printPreOrder() + "\nthen:\n";
+  std::string output = "if: ";
+  std::string identation = "";
+  output += condition->printPreOrder() + "\n" + identation+ "then:\n";
 
-    for (TreeNode* line: then){
-      output+= "  "+line->printPreOrder() + "\n";
+  for (TreeNode* line: then){
+    identation+= "  ";
+    if (line->classType() == TreeNode::CONDITIONAL) {
+          output+= identation+"if:";
+          ConditionalOperation* c = (ConditionalOperation*) line;
+          output+= c->condition->printPreOrder() + "\n" + identation + "then:";
+    } else {
+        identation+= "  ";
+        std::string test =identation+line->printPreOrder() + "\n";
+        // std::cout << test << std::endl;
+        // std::string a =b->printPreOrder() + "\n";
+        // std::cout << a << std::endl;
+        output+=test;
     }
-    if(el.size() > 0) {
-        output += "else:\n";
-        for (TreeNode* line: el)
-          output+= identation+line->printPreOrder() + "\n";
-    }
+    //output+= identation+line->printPreOrder() + "\n";
+}
+  if(el.size() > 0) {
+      output += "else:\n";
+      for (TreeNode* line: el)
+        output+= line->printPreOrder() + "\n";
+  }
 
-    return output;
+  return output;
 }
 
 
@@ -269,9 +282,7 @@ std::string ConditionalOperation::printPreOrder(){
 
     for (TreeNode* line: then){
       identation+= "  ";
-      std::string tipo = typeid(*line).name();
-      char * contain = strstr(tipo.c_str(),"ConditionalOperation");
-      if (contain != NULL) {
+      if (line->classType() == TreeNode::CONDITIONAL) {
             output+= identation+"if:";
             ConditionalOperation* c = (ConditionalOperation*) line;
             output+= c->condition->printPreOrder() + "\n" + identation + "then:";
