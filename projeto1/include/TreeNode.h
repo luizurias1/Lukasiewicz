@@ -1,8 +1,10 @@
 #ifndef TREENODE_H_
 #define TREENODE_H_
 
-#include <string>
+#include <string.h>
+#include <stdio.h>
 #include <vector>
+#include <typeinfo>
 #include <iostream>
 
 class SyntaxTree;
@@ -29,6 +31,7 @@ class TreeNode {
         virtual ~TreeNode();
         virtual TreeNode::ClassType classType() const = 0;
         virtual std::string printInOrder() = 0;
+        //std::string returnIfThen(std::string identation);
         virtual std::string printPreOrder() = 0;
 
 };
@@ -173,6 +176,7 @@ class ConditionalOperation : public TreeNode {
       virtual ~ConditionalOperation();
       std::string printInOrder();
       std::string printPreOrder();
+      //std::string returnIfThen(std::string identation);
       TreeNode::ClassType classType() const;
 
     private:

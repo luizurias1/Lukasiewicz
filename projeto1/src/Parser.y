@@ -75,13 +75,13 @@ extern void yyerror(const char* s, ...);
 
 // Programa
 program:
-    lines { SYNTAX_TREE = $1; std::cout << "passouGramatica" << std::endl; }
+    lines { SYNTAX_TREE = $1; }
     ;
 
 // linhas
 lines:
-    line { $$ = new SyntaxTree(); if($1 != NULL) $$->insertLine($1); std::cout << "line " << std::endl; }
-    | line lines { $$ = $2; if($1 != NULL) $2->insertLine($1); std::cout << "line lines " << std::endl; }
+    line { $$ = new SyntaxTree(); if($1 != NULL) $$->insertLine($1);  }
+    | line lines { $$ = $2; if($1 != NULL) $2->insertLine($1);  }
     ;
 
 // Linha
@@ -93,30 +93,29 @@ line:
     | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(VariableDeclaration::BOOLEAN, $2); }
     | T_ID T_ATT expr { $$ = new BinaryOperation(SYMBOL_TABLE.assignVariable($1, $3->classType()),
                                                     BinaryOperation::ASSIGN, $3); }
-    | if {$$ = $1; std::cout << "line IF " << std::endl;}
+    | if {$$ = $1; }
     ;
 
 if:
-    T_IF op_relation T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else{std::cout << "newLine IF " << $7->v.size() << std::endl; $$ = new ConditionalOperation($2, $7->v, $10->v); std::cout << "IF THEN" << std::endl; }
-    | T_IF op_relation T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE{std::cout << "newLine IF " << $7->v.size() << std::endl; $$ = new ConditionalOperation($2, $7->v); std::cout << "IF THEN" << std::endl; }
-    | T_IF T_OPEN_PAR op_relation T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation($3, $9->v, $12->v); std::cout << "newLine IF ELSE" << $12->v.size() << std::endl; }
-    | T_IF T_OPEN_PAR op_relation T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = new ConditionalOperation($3, $9->v); std::cout << "newLine IF ELSE" << $9->v.size() << std::endl; }
+    T_IF op_relation T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else{ $$ = new ConditionalOperation($2, $7->v, $10->v);  }
+    | T_IF op_relation T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE{ $$ = new ConditionalOperation($2, $7->v); }
+    | T_IF T_OPEN_PAR op_relation T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation($3, $9->v, $12->v);  }
+    | T_IF T_OPEN_PAR op_relation T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = new ConditionalOperation($3, $9->v);  }
 
-    | T_IF T_ID T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($2), $7->v, $10->v); std::cout << "IF THEN" << std::endl; }
-    | T_IF T_ID T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($2), $7->v); std::cout << "IF THEN" << std::endl; }
-    | T_IF T_OPEN_PAR T_ID T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($3), $9->v, $12->v); std::cout << "IF THEN" << std::endl;  }
-    | T_IF T_OPEN_PAR T_ID T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($3), $9->v); std::cout << "IF THEN" << std::endl;  }
+    | T_IF T_ID T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($2), $7->v, $10->v);  }
+    | T_IF T_ID T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($2), $7->v);  }
+    | T_IF T_OPEN_PAR T_ID T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($3), $9->v, $12->v);   }
+    | T_IF T_OPEN_PAR T_ID T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($3), $9->v);   }
     ;
 
 // Ramo then do if
 then:
-    line { $$ = new MyVector(); $$->v.push_back($1); std::cout << "newLine THEN " << $$->v.size() << std::endl; }
-    | line then
+    line { $$ = new MyVector(); $$->v.push_back($1);  }
     ;
 
 // Ramo else do if
 else:
-    T_ELSE T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = $4; std::cout << "ELSE" << std::endl;  }
+    T_ELSE T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = $4;   }
     ;
 
 // Expressão
