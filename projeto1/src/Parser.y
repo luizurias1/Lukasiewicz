@@ -111,6 +111,7 @@ if:
 // Ramo then do if
 then:
     line { $$ = new MyVector(); $$->v.push_back($1); std::cout << "newLine THEN " << $$->v.size() << std::endl; }
+    | line then
     ;
 
 // Ramo else do if

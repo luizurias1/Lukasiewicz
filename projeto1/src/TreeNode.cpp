@@ -234,7 +234,6 @@ ConditionalOperation::ConditionalOperation(TreeNode* condition, std::vector<Tree
     this->condition = condition;
     this->then = then;
     this->el = el;
-    this->identation = "";
 }
 
 ConditionalOperation::ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then) : TreeNode() {
