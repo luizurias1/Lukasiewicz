@@ -176,7 +176,7 @@ class ConditionalOperation : public TreeNode {
       virtual ~ConditionalOperation();
       std::string printInOrder();
       std::string printPreOrder();
-      //std::string returnIfThen(std::string identation);
+      std::string returnIfThen(ConditionalOperation* c, std::string identation);
       TreeNode::ClassType classType() const;
 
     private:

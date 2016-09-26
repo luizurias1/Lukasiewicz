@@ -55,14 +55,14 @@ extern void yyerror(const char* s, ...);
  * left, right, nonassoc
  */
 
+/*relational operators*/
+%left T_OR T_AND
+%left T_GREATER T_LOWER T_GREATER_EQUAL T_LOWER_EQUAL T_NOT_EQUAL
+
 %left T_PLUS T_MINUS
 %left T_TIMES
 %left T_DIVIDE
 %nonassoc U_MINUS error
-
-/*relational operators*/
-%left T_OR T_AND
-%left T_GREATER T_LOWER T_GREATER_EQUAL T_LOWER_EQUAL T_NOT_EQUAL
 
 /*unart operator*/
 %nonassoc T_NOT
@@ -97,15 +97,16 @@ line:
     ;
 
 if:
-    T_IF op_relation T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else{ $$ = new ConditionalOperation($2, $7->v, $10->v);  }
-    | T_IF op_relation T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE{ $$ = new ConditionalOperation($2, $7->v); }
-    | T_IF T_OPEN_PAR op_relation T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation($3, $9->v, $12->v);  }
+    T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else{ $$ = new ConditionalOperation($2, $7->v, $10->v);  }
+    | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE{ $$ = new ConditionalOperation($2, $7->v); }
+    /*| T_IF T_OPEN_PAR op_relation T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation($3, $9->v, $12->v);  }
     | T_IF T_OPEN_PAR op_relation T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = new ConditionalOperation($3, $9->v);  }
 
     | T_IF T_ID T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($2), $7->v, $10->v);  }
     | T_IF T_ID T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($2), $7->v);  }
     | T_IF T_OPEN_PAR T_ID T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($3), $9->v, $12->v);   }
     | T_IF T_OPEN_PAR T_ID T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($3), $9->v);   }
+    */
     ;
 
 // Ramo then do if
