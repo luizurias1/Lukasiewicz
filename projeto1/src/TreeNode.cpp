@@ -289,20 +289,8 @@ std::string ConditionalOperation::printPreOrder(){
             }
       } else {
           output+=identation+line->printPreOrder();
-          // std::cout << "ELSE" << std::endl;
-          // for(int i=0; i < then.size(); i++){
-          // std::cout << "for then" << std::endl;
-          // identation+= "  ";
-          // std::string test =identation+then[i]->printPreOrder() + "\n";
-          // std::cout << test << std::endl;
-          //
-          // // identation.erase(identation.end()-2,identation.end());
-          // // std::string a =b->printPreOrder() + "\n";
-          // // std::cout << a << std::endl;
-          // output+=test;
-        // }
+
       }
-      //output+= identation+line->printPreOrder() + "\n";
 }
     if(el.size() > 0) {
         output += "\nelse:\n";
