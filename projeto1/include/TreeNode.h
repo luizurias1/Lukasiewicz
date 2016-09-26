@@ -2,6 +2,7 @@
 #define TREENODE_H_
 
 #include <string>
+#include <vector>
 
 class SemanticAnalyzer;
 class SyntaxTree;
@@ -33,9 +34,10 @@ class TreeNode {
             TYPE_CASTING,
             VARIABLE,
             VARIABLE_DECLARATION,
+            LOOP_DECLARATION,
             UNKNOWN
         };
-    
+
         TreeNode(Data::Type type);
         virtual ~TreeNode();
         Data::Type dataType() const;
@@ -43,14 +45,37 @@ class TreeNode {
         virtual TreeNode::ClassType classType() const = 0;
         virtual std::string printInOrder() = 0;
         virtual std::string printPreOrder() = 0;
-    
+
     protected:
         Data::Type type;
 
 };
 
+class LoopDeclaration : public TreeNode {
+
+    public:
+        enum Type {
+            FOR,
+            DO
+        };
+
+        LoopDeclaration(TreeNode* init, TreeNode* test, TreeNode* interation, std::vector<TreeNode*> body);
+        virtual ~LoopDeclaration();
+        TreeNode::ClassType classType() const;
+        std::string printInOrder();
+        std::string printPreOrder();
+        std::string operationToString(Type operation) const;
+
+    private:
+        TreeNode* init;
+        TreeNode* test;
+        TreeNode* interation;
+        std::vector<TreeNode*> body;
+
+};
+
 class BinaryOperation : public TreeNode {
-    
+
     friend class SemanticAnalyzer;
 
     public:

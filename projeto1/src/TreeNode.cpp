@@ -15,6 +15,101 @@ void TreeNode::setType(Data::Type type) {
     this->type = type;
 }
 
+LoopDeclaration::LoopDeclaration(TreeNode* init, TreeNode* test, TreeNode* interation, std::vector<TreeNode*> body) : TreeNode(Data::UNKNOWN) {
+    this->init = init;
+    this->test = test;
+    this->interation = interation;
+    this->body = body;
+}
+
+LoopDeclaration::~LoopDeclaration() {
+}
+
+TreeNode::ClassType LoopDeclaration::classType() const {
+    return TreeNode::LOOP_DECLARATION;
+}
+
+std::string LoopDeclaration::printInOrder() {
+    std::string output = operationToString(LoopDeclaration::FOR);
+    if (init != NULL){
+      output += init->printPreOrder();
+      output = output.substr(0, output.size()-1);
+    }
+    output += ", ";
+
+    output += test->printPreOrder();
+    output = output.substr(0, output.size()-1);
+
+    output += ", ";
+    if (interation != NULL){
+      output += interation->printPreOrder();
+    }
+    output += "\n";
+    output += operationToString(LoopDeclaration::DO);
+
+    if (body.size() > 0){
+      int i;
+      std::string tab = "  ";
+      for (i = 0; i < body.size(); i ++){
+        output += "\n";
+        if (body[i]->classType() == BINARY_OPERATION){
+            output += tab;
+            output += body[i]->printPreOrder();
+        }
+      }
+    }else{
+      output += "\n";
+    }
+
+    return output;
+}
+
+std::string LoopDeclaration::printPreOrder() {
+    std::string output = operationToString(LoopDeclaration::FOR);
+    if (init != NULL){
+      output += init->printPreOrder();
+      output = output.substr(0, output.size()-1);
+    }
+    output += ", ";
+
+    output += test->printPreOrder();
+    output = output.substr(0, output.size()-1);
+
+    output += ", ";
+    if (interation != NULL){
+      output += interation->printPreOrder();
+    }
+    output += "\n";
+    output += operationToString(LoopDeclaration::DO);
+
+    if (body.size() > 0){
+      int i;
+      std::string tab = "  ";
+      for (i = 0; i < body.size(); i ++){
+        output += "\n";
+        if (body[i]->classType() == BINARY_OPERATION){
+            output += tab;
+            output += body[i]->printPreOrder();
+        }
+      }
+    }else{
+      output += "\n";
+    }
+
+    return output;
+}
+
+std::string LoopDeclaration::operationToString(LoopDeclaration::Type operation) const {
+    switch(operation) {
+        case FOR:
+            return "for: ";
+        case DO:
+            return "do:";
+        default:
+            return "unknown";
+    }
+}
+
 BinaryOperation::BinaryOperation(TreeNode* left, BinaryOperation::Type operation, TreeNode* right) : TreeNode(Data::UNKNOWN) {
     this->left = left;
     this->operation = operation;
