@@ -266,29 +266,48 @@ std::string ConditionalOperation::printPreOrder(){
     std::string output = "if: ";
     std::string identation = "";
     output += condition->printPreOrder() + "\n" + identation+ "then:\n";
+    // std::cout << "else" << el.size() << std::endl;
+    // std::cout << "then" << then.size() << std::endl;
+  for (TreeNode* line: then){
 
-    for (TreeNode* line: then){
       identation+= "  ";
-      std::string tipo = typeid(*line).name();
-      char * contain = strstr(tipo.c_str(),"ConditionalOperation");
-      if (contain != NULL) {
+      // std::cout << "entrou for" <<std::endl;
+      if (line->classType() == TreeNode::CONDITIONAL) {
             output+= identation+"if:";
             ConditionalOperation* c = (ConditionalOperation*) line;
+            // std::cout << "else" << c->el.size() << std::endl;
             output+= c->condition->printPreOrder() + "\n" + identation + "then:";
+            // output+= "\n"+identation+c->then[0]->printPreOrder();
+            identation+="  ";
+            for(TreeNode* line: c->then){
+              output+= "\n"+identation+line->printPreOrder();
+            }
+            if(c->el.size() > 0) {
+                output += "\nelse:\n";
+                for (TreeNode* line: c->el)
+                  output+= identation+line->printPreOrder();
+            }
       } else {
-          identation+= "  ";
-          std::string test =identation+line->printPreOrder() + "\n";
+          output+=identation+line->printPreOrder();
+          // std::cout << "ELSE" << std::endl;
+          // for(int i=0; i < then.size(); i++){
+          // std::cout << "for then" << std::endl;
+          // identation+= "  ";
+          // std::string test =identation+then[i]->printPreOrder() + "\n";
           // std::cout << test << std::endl;
-          // std::string a =b->printPreOrder() + "\n";
-          // std::cout << a << std::endl;
-          output+=test;
+          //
+          // // identation.erase(identation.end()-2,identation.end());
+          // // std::string a =b->printPreOrder() + "\n";
+          // // std::cout << a << std::endl;
+          // output+=test;
+        // }
       }
       //output+= identation+line->printPreOrder() + "\n";
 }
     if(el.size() > 0) {
-        output += "else:\n";
+        output += "\nelse:\n";
         for (TreeNode* line: el)
-          output+= line->printPreOrder() + "\n";
+          output+= identation+line->printPreOrder();
     }
 
     return output;
