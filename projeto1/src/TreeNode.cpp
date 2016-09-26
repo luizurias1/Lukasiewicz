@@ -30,7 +30,9 @@ TreeNode::ClassType LoopDeclaration::classType() const {
 }
 
 std::string LoopDeclaration::printInOrder() {
-    std::string output = operationToString(LoopDeclaration::FOR);
+    std::string identation = getTab();
+    std::string output = identation;
+    output += operationToString(LoopDeclaration::FOR);
     if (init != NULL){
       output += init->printPreOrder();
       output = output.substr(0, output.size()-1);
@@ -45,16 +47,22 @@ std::string LoopDeclaration::printInOrder() {
       output += interation->printPreOrder();
     }
     output += "\n";
+    output += getTab();
     output += operationToString(LoopDeclaration::DO);
 
     if (body.size() > 0){
       int i;
-      std::string tab = "  ";
       for (i = 0; i < body.size(); i ++){
         output += "\n";
         if (body[i]->classType() == BINARY_OPERATION){
-            output += tab;
+            identation += "  ";
+            output += identation;
             output += body[i]->printPreOrder();
+        }
+        if (body[i]->classType() == LOOP_DECLARATION){
+          LoopDeclaration* body_local = (LoopDeclaration*) body[i];
+          body_local->setTab(tab + 1);
+          output += body_local->printPreOrder();
         }
       }
     }else{
@@ -65,7 +73,9 @@ std::string LoopDeclaration::printInOrder() {
 }
 
 std::string LoopDeclaration::printPreOrder() {
-    std::string output = operationToString(LoopDeclaration::FOR);
+    std::string identation = getTab();
+    std::string output = identation;
+    output += operationToString(LoopDeclaration::FOR);
     if (init != NULL){
       output += init->printPreOrder();
       output = output.substr(0, output.size()-1);
@@ -80,16 +90,22 @@ std::string LoopDeclaration::printPreOrder() {
       output += interation->printPreOrder();
     }
     output += "\n";
+    output += getTab();
     output += operationToString(LoopDeclaration::DO);
 
     if (body.size() > 0){
       int i;
-      std::string tab = "  ";
       for (i = 0; i < body.size(); i ++){
         output += "\n";
         if (body[i]->classType() == BINARY_OPERATION){
-            output += tab;
+            identation += "  ";
+            output += identation;
             output += body[i]->printPreOrder();
+        }
+        if (body[i]->classType() == LOOP_DECLARATION){
+          LoopDeclaration* body_local = (LoopDeclaration*) body[i];
+          body_local->setTab(tab + 1);
+          output += body_local->printPreOrder();
         }
       }
     }else{
@@ -108,6 +124,19 @@ std::string LoopDeclaration::operationToString(LoopDeclaration::Type operation) 
         default:
             return "unknown";
     }
+}
+
+void LoopDeclaration::setTab(int number){
+  tab = number;
+}
+
+std::string LoopDeclaration::getTab(){
+  int i;
+  std::string tabulation = "";
+  for (i = 1; i <= tab; i ++){
+    tabulation += "  ";
+  }
+  return tabulation;
 }
 
 BinaryOperation::BinaryOperation(TreeNode* left, BinaryOperation::Type operation, TreeNode* right) : TreeNode(Data::UNKNOWN) {

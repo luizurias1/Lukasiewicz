@@ -65,12 +65,15 @@ class LoopDeclaration : public TreeNode {
         std::string printInOrder();
         std::string printPreOrder();
         std::string operationToString(Type operation) const;
+        void setTab(int number);
+        std::string getTab();
 
     private:
         TreeNode* init;
         TreeNode* test;
         TreeNode* interation;
         std::vector<TreeNode*> body;
+        int tab = 0;
 
 };
 

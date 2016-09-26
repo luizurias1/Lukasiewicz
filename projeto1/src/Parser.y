@@ -98,6 +98,7 @@ line:
 
 body:
     line T_NL {$$ = new MyVector(); $$->v.push_back($1); }
+    | T_NL {$$ = new MyVector();}
     | {$$ = new MyVector();}
     ;
 
