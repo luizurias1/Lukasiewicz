@@ -84,8 +84,8 @@ program:
 
 // linhas
 lines:
-    line { $$ = new SyntaxTree(); if($1 != NULL) $$->insertLine($1);  }
-    | line lines { $$ = $2; if($1 != NULL) $2->insertLine($1);  }
+    line {$$ = new SyntaxTree(); if($1 != NULL) $$->insertLine($1);  }
+    | line lines {$$ = $2; if($1 != NULL) $2->insertLine($1);  }
     ;
 
 // Linha
@@ -99,9 +99,9 @@ line:
                                 SEMANTIC_ANALYZER.assignVariable($1, $3->classType()),
                                 BinaryOperation::ASSIGN, $3);
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
-    | if {$$ = $1; }
+    | if {$$ = $1;}
     ;
-    
+
 // Linha
 line2:
     T_NL { $$ = NULL; }
@@ -116,21 +116,21 @@ line2:
     ;
 
 if:
-    T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation($2, $7->v, $10->v);  }
-    | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = new ConditionalOperation($2, $7->v); }
+    T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL  then else { $$ = new ConditionalOperation($2, $7->v, $8->v);  }
+    | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL then { $$ = new ConditionalOperation($2, $7->v); }
     ;
 
 // Ramo then do if
 then:
-    line2 { $$ = new MyVector(); $$->v.push_back($1);  }
-    | if { $$ = new MyVector(); $$->v.push_back($1);  }
-    | line2 then { $$ = $2; $$->v.push_back($1);  }
-    | if then { $$ = $2; $$->v.push_back($1);  }
+    line2 T_NL T_CLOSE_BRACE { $$ = new MyVector(); if($1 != 0) $$->v.push_back($1); }
+    | if T_NL T_CLOSE_BRACE  { $$ = new MyVector(); if($1 != 0) $$->v.push_back($1);  }
+    | line2 then {$$ = $2; if($1 != 0) $$->v.push_back($1);  }
+    | {$$ = NULL;}
     ;
 
 // Ramo else do if
 else:
-    T_ELSE T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = $4;   }
+    T_ELSE T_OPEN_BRACE T_NL then {$$ = $4;}
     ;
 
 // Expressão
@@ -233,5 +233,5 @@ type:
     | T_FLOAT { $$ = new Float($1); }
     | T_TRUE { $$ = new Boolean(true); }
     | T_FALSE { $$ = new Boolean(false); }
-
+    ;
 %%

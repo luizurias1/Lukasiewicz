@@ -364,8 +364,7 @@ std::string ConditionalOperation::printPreOrder(){
               ConditionalOperation* c = (ConditionalOperation*) line;
               output+="\n"+returnIfThen(c,identation);
       } else {
-        identation+= "  ";
-        output+="\n"+identation+line->printPreOrder();
+        output+="\n"+identation+"  "+line->printPreOrder();
       }
     }
     if(el.size() > 0) {
@@ -375,8 +374,7 @@ std::string ConditionalOperation::printPreOrder(){
             ConditionalOperation* c = (ConditionalOperation*) line;
             output+="\n"+returnIfThen(c,identation);
           }else {
-            identation+="  ";
-            output+="\n"+identation+line->printPreOrder();
+            output+="\n"+identation+"  "+line->printPreOrder();
           }
     }
   }
@@ -392,8 +390,7 @@ std::string ConditionalOperation::returnIfThen(ConditionalOperation* c, std::str
           ConditionalOperation* c = (ConditionalOperation*) line;
           output+="\n"+returnIfThen(c,identation);
         }else {
-          identation+="  ";
-          output+="\n"+identation+line->printPreOrder();
+          output+="\n"+identation+"  "+line->printPreOrder();
         }
       }
       if(c->el.size() > 0) {
@@ -403,8 +400,7 @@ std::string ConditionalOperation::returnIfThen(ConditionalOperation* c, std::str
               ConditionalOperation* c = (ConditionalOperation*) line;
               output+="\n"+returnIfThen(c,identation);
             }else {
-              identation+="  ";
-              output+="\n"+identation+line->printPreOrder();
+              output+="\n"+identation+"  "+line->printPreOrder();
             }
           }
       }
