@@ -50,7 +50,7 @@ extern void yyerror(const char* s, ...);
  * Example: %type<node> expr
  */
 %type <syntaxTree> lines program
-%type <node> line expr declar_int declar_float declar_bool type op_relation op_binary if
+%type <node> line line2 expr declar_int declar_float declar_bool type op_relation op_binary if
 %type <linesIf> then else
 %type <dataType> data_type
 
@@ -101,24 +101,31 @@ line:
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     | if {$$ = $1; }
     ;
-
+    
+// Linha
+line2:
+    T_NL { $$ = NULL; }
+    | error T_NL { yyerrok; $$ = NULL; }
+    | T_TYPE_INT declar_int { $$ = new VariableDeclaration(Data::INTEGER, $2); }
+    | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(Data::FLOAT, $2); }
+    | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2); }
+    | T_ID T_ATT expr { $$ = new BinaryOperation(
+                                SEMANTIC_ANALYZER.assignVariable($1, $3->classType()),
+                                BinaryOperation::ASSIGN, $3);
+                        SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    ;
 
 if:
-    T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else{ $$ = new ConditionalOperation($2, $7->v, $10->v);  }
-    | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE{ $$ = new ConditionalOperation($2, $7->v); }
-    /*| T_IF T_OPEN_PAR op_relation T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation($3, $9->v, $12->v);  }
-    | T_IF T_OPEN_PAR op_relation T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = new ConditionalOperation($3, $9->v);  }
-
-    | T_IF T_ID T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($2), $7->v, $10->v);  }
-    | T_IF T_ID T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($2), $7->v);  }
-    | T_IF T_OPEN_PAR T_ID T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($3), $9->v, $12->v);   }
-    | T_IF T_OPEN_PAR T_ID T_CLOSING_PAR T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = new ConditionalOperation(SYMBOL_TABLE.useVariable($3), $9->v);   }
-    */
+    T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE else { $$ = new ConditionalOperation($2, $7->v, $10->v);  }
+    | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL then T_NL T_CLOSE_BRACE { $$ = new ConditionalOperation($2, $7->v); }
     ;
 
 // Ramo then do if
 then:
-    line { $$ = new MyVector(); $$->v.push_back($1);  }
+    line2 { $$ = new MyVector(); $$->v.push_back($1);  }
+    | if { $$ = new MyVector(); $$->v.push_back($1);  }
+    | line2 then { $$ = $2; $$->v.push_back($1);  }
+    | if then { $$ = $2; $$->v.push_back($1);  }
     ;
 
 // Ramo else do if
