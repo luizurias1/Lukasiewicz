@@ -205,10 +205,10 @@ class ConditionalOperation : public TreeNode {
       ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then, std::vector<TreeNode*> el);
       ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then);
       virtual ~ConditionalOperation();
+      TreeNode::ClassType classType() const;
       std::string printInOrder();
       std::string printPreOrder();
       std::string returnIfThen(ConditionalOperation* c, std::string identation);
-      TreeNode::ClassType classType() const;
 
     private:
         TreeNode* condition;

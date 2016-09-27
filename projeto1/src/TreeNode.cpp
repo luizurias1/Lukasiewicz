@@ -315,18 +315,22 @@ std::string TypeCasting::typeToString(Data::Type type) {
     }
 }
 
-ConditionalOperation::ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then, std::vector<TreeNode*> el) : TreeNode() {
+ConditionalOperation::ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then, std::vector<TreeNode*> el) : TreeNode(Data::UNKNOWN) {
     this->condition = condition;
     this->then = then;
     this->el = el;
 }
 
-ConditionalOperation::ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then) : TreeNode() {
+ConditionalOperation::ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then) : TreeNode(Data::UNKNOWN) {
     this->condition = condition;
     this->then = then;
 }
 
 ConditionalOperation::~ConditionalOperation() {
+}
+
+ConditionalOperation::ClassType ConditionalOperation::classType() const {
+    return TreeNode::CONDITIONAL;
 }
 
 std::string ConditionalOperation::printInOrder(){
@@ -395,9 +399,3 @@ std::string ConditionalOperation::returnIfThen(ConditionalOperation* c, std::str
     return output;
 
 }
-
-TreeNode::ClassType ConditionalOperation::classType() const{
-      return TreeNode::CONDITIONAL;
-
-}
-

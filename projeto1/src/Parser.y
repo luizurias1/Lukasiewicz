@@ -92,9 +92,9 @@ lines:
 line:
     T_NL { $$ = NULL; }
     | error T_NL { yyerrok; $$ = NULL; }
-    | T_TYPE_INT declar_int { $$ = new VariableDeclaration(VariableDeclaration::INTEGER, $2); }
-    | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(VariableDeclaration::FLOAT, $2); }
-    | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(VariableDeclaration::BOOLEAN, $2); }
+    | T_TYPE_INT declar_int { $$ = new VariableDeclaration(Data::INTEGER, $2); }
+    | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(Data::FLOAT, $2); }
+    | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2); }
     | T_ID T_ATT expr { $$ = new BinaryOperation(
                                 SEMANTIC_ANALYZER.assignVariable($1, $3->classType()),
                                 BinaryOperation::ASSIGN, $3);
