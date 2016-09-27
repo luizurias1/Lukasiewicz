@@ -11,6 +11,6 @@ int main(int argc, char **argv) {
     SYNTAX_TREE->print();   // prints the ASTs
     //std::cout << "##Computing the lines" << std::endl;
     //SYNTAX_TREE->computeTree(); // computes the ASTs
-    
+
     return 0;
 }

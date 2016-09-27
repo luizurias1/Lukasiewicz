@@ -1,7 +1,11 @@
 #ifndef TREENODE_H_
 #define TREENODE_H_
 
-#include <string>
+#include <string.h>
+#include <stdio.h>
+#include <vector>
+#include <typeinfo>
+#include <iostream>
 
 class SemanticAnalyzer;
 class SyntaxTree;
@@ -33,6 +37,7 @@ class TreeNode {
             TYPE_CASTING,
             VARIABLE,
             VARIABLE_DECLARATION,
+            CONDITIONAL,
             UNKNOWN
         };
     
@@ -42,6 +47,7 @@ class TreeNode {
         void setType(Data::Type type);
         virtual TreeNode::ClassType classType() const = 0;
         virtual std::string printInOrder() = 0;
+        //std::string returnIfThen(std::string identation);
         virtual std::string printPreOrder() = 0;
     
     protected:
@@ -193,5 +199,31 @@ class TypeCasting : public TreeNode {
 
 };
 
+class ConditionalOperation : public TreeNode {
+
+    public:
+      ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then, std::vector<TreeNode*> el);
+      ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then);
+      virtual ~ConditionalOperation();
+      TreeNode::ClassType classType() const;
+      std::string printInOrder();
+      std::string printPreOrder();
+      std::string returnIfThen(ConditionalOperation* c, std::string identation);
+
+    private:
+        TreeNode* condition;
+        std::vector<TreeNode*> then;
+        std::vector<TreeNode*> el;
+
+};
+
+class MyVector {
+
+    public:
+      MyVector() {}
+      virtual ~MyVector() {}
+      std::vector<TreeNode*> v;
+
+};
 
 #endif
