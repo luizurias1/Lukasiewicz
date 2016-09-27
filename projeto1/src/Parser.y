@@ -3,7 +3,6 @@
 #include "SyntaxTree.h"
 #include "TreeNode.h"
 #include <iostream>
-
 SemanticAnalyzer SEMANTIC_ANALYZER;
 SyntaxTree* SYNTAX_TREE;
 extern int yylex();
@@ -43,15 +42,15 @@ extern void yyerror(const char* s, ...);
 %token T_ATT T T_COMMA
 %token T_EQUAL T_NOT_EQUAL T_GREATER T_LOWER T_GREATER_EQUAL T_LOWER_EQUAL
 %token T_AND T_OR T_NOT
-%token T_IF T_ELSE T_THEN T_OPEN_BRACE T_CLOSE_BRACE
+%token T_IF T_ELSE T_THEN T_OPEN_BRACE T_CLOSING_BRACE T_FOR
 
 /* type defines the type of our nonterminal symbols.
  * Types should match the names used in the union.
  * Example: %type<node> expr
  */
 %type <syntaxTree> lines program
-%type <node> line expr declar_int declar_float declar_bool type op_relation op_binary if
-%type <linesIf> else scope
+%type <node> line expr declar_int declar_float declar_bool type op_relation op_binary if init test interation
+%type <linesIf> else scope body
 %type <dataType> data_type
 
 /* Operator precedence for mathematical operators
@@ -101,6 +100,7 @@ line:
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     | if {$$ = $1;
             SEMANTIC_ANALYZER.analyzeBinaryOperation((ConditionalOperation*) $$); }
+    | T_FOR init T_COMMA test T_COMMA interation T_OPEN_BRACE T_NL body T_CLOSING_BRACE {$$ = new LoopDeclaration($2, $4, $6, $9->v);}
     ;
 
 if:
@@ -108,7 +108,7 @@ if:
     ;
 
 scope:
-    line T_NL T_CLOSE_BRACE { $$ = new MyVector(); if($1 != NULL) $$->v.insert( $$->v.begin(), $1); }
+    line T_NL T_CLOSING_BRACE { $$ = new MyVector(); if($1 != NULL) $$->v.insert( $$->v.begin(), $1); }
     | line scope {$$ = $2; if($1 != NULL) $$->v.insert( $$->v.begin(), $1);  }
     ;
 
@@ -116,6 +116,45 @@ scope:
 else: { $$ = new MyVector(); }
     | T_ELSE T_OPEN_BRACE T_NL scope {$$ = $4; }
     ;
+
+body:
+    line T_NL {$$ = new MyVector(); $$->v.push_back($1); }
+    | T_NL {$$ = new MyVector();}
+    | {$$ = new MyVector();}
+    ;
+
+init:
+    T_ID T_ATT T_INT {$$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($1),
+      BinaryOperation::ASSIGN, new Integer($3));}
+    | T_ID T_ATT T_FLOAT {$$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($1),
+      BinaryOperation::ASSIGN, new Float($3));}
+    | {$$ = NULL;}
+    ;
+
+test:
+    T_ID T_GREATER T_INT {$$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($1),
+      BinaryOperation::GREATER, new Integer($3));}
+    | T_ID T_GREATER_EQUAL T_INT {$$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($1),
+      BinaryOperation::GREATER_EQUAL, new Integer($3));}
+    | T_ID T_LOWER T_INT {$$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($1),
+      BinaryOperation::LOWER, new Integer($3));}
+    | T_ID T_LOWER_EQUAL T_INT {$$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($1),
+      BinaryOperation::LOWER_EQUAL, new Integer($3));}
+    | T_ID T_GREATER T_FLOAT {$$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($1),
+      BinaryOperation::GREATER, new Float($3));}
+    | T_ID T_GREATER_EQUAL T_FLOAT {$$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($1),
+      BinaryOperation::GREATER_EQUAL, new Float($3));}
+    | T_ID T_LOWER T_FLOAT {$$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($1),
+      BinaryOperation::LOWER, new Float($3));}
+    | T_ID T_LOWER_EQUAL T_FLOAT {$$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($1),
+      BinaryOperation::LOWER_EQUAL, new Float($3));}
+    ;
+
+interation:
+    T_ID T_ATT expr {$$ = new BinaryOperation(SEMANTIC_ANALYZER.assignVariable($1, $3->classType()),
+      BinaryOperation::ASSIGN, $3); SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | {$$ = NULL;}
+;
 
 // Expressão
 expr:

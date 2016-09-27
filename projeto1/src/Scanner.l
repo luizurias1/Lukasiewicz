@@ -16,15 +16,15 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 %%
 
 [ \t]               ; /* Spaces and tabs are ignored */
-
 \|                  {return T_OR;} /* Binary operator OR */
 "&"                 {return T_AND;} /* Binary operator AND */
 "!"                 {return T_NOT;} /* Binary operator NOT */
 "if"                {return T_IF;}
 "then"              {return T_THEN;}
 "else"              {return T_ELSE;}
+"for"               {return T_FOR;} /*Loop*/
 "{"                 {return T_OPEN_BRACE;}
-"}"                 {return T_CLOSE_BRACE;}
+"}"                 {return T_CLOSING_BRACE;}
 "bool"              {yylval.dataType = Data::BOOLEAN; return T_TYPE_BOOL;} /* Type boolean */
 "float"             {yylval.dataType = Data::FLOAT; return T_TYPE_FLOAT;} /* Type float */
 "int" 		    {yylval.dataType = Data::INTEGER; return T_TYPE_INT;} /* Type integer */
@@ -44,12 +44,13 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 ">"                 {return T_GREATER;} /* Binary operator GREATER */
 "<"                 {return T_LOWER;} /* Binary operator LOWER */
 "="                 {return T_ATT;} /* Binary operator ASSIGN */
-
 ","                 {return T_COMMA;} /* Comma */
 "("                 {return T_OPEN_PAR;} /* Open parenthesis */
 ")"                 {return T_CLOSING_PAR;} /* Closing parenthesis */
 "["                 {return T_OPEN_BRACKET;} /* Open bracket */
 "]"                 {return T_CLOSING_BRACKET;} /* Closing bracket */
+"{"                 {return T_OPEN_BRACE;} /* Open brace */
+"}"                 {return T_CLOSING_BRACE;} /* Closing brace */
 \n                  {return T_NL;} /* New line */
 
 [^0-9\.a-zA-Z_\+\-\*\/\="==""!="">=""<="">=""<"">""&""|""!"\,\(\)\t \n\{\}]+	    {yyerror("lexical error: unknown symbol %s\n", yytext);} /* Every other character produces a lexical error */

@@ -38,6 +38,7 @@ class TreeNode {
             VARIABLE,
             VARIABLE_DECLARATION,
             CONDITIONAL,
+            LOOP_DECLARATION,
             UNKNOWN
         };
 
@@ -217,6 +218,32 @@ class ConditionalOperation : public TreeNode {
         TreeNode* condition;
         std::vector<TreeNode*> then;
         std::vector<TreeNode*> el;
+
+};
+
+class LoopDeclaration : public TreeNode {
+
+    public:
+        enum Type {
+            FOR,
+            DO
+        };
+
+        LoopDeclaration(TreeNode* init, TreeNode* test, TreeNode* interation, std::vector<TreeNode*> body);
+        virtual ~LoopDeclaration();
+        TreeNode::ClassType classType() const;
+        std::string printInOrder();
+        std::string printPreOrder();
+        std::string operationToString(Type operation) const;
+        void setTab(int number);
+        std::string getTab();
+
+    private:
+        TreeNode* init;
+        TreeNode* test;
+        TreeNode* interation;
+        std::vector<TreeNode*> body;
+        int tab = 0;
 
 };
 
