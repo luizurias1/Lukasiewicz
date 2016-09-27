@@ -7,8 +7,7 @@ then {
 		then {
 			f = 2.0
 		}
-	}
-	else {
+	} else {
 		f = 1.0
 	}
 }
