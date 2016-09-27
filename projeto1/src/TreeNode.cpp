@@ -15,130 +15,6 @@ void TreeNode::setType(Data::Type type) {
     this->type = type;
 }
 
-LoopDeclaration::LoopDeclaration(TreeNode* init, TreeNode* test, TreeNode* interation, std::vector<TreeNode*> body) : TreeNode(Data::UNKNOWN) {
-    this->init = init;
-    this->test = test;
-    this->interation = interation;
-    this->body = body;
-}
-
-LoopDeclaration::~LoopDeclaration() {
-}
-
-TreeNode::ClassType LoopDeclaration::classType() const {
-    return TreeNode::LOOP_DECLARATION;
-}
-
-std::string LoopDeclaration::printInOrder() {
-    std::string identation = getTab();
-    std::string output = identation;
-    output += operationToString(LoopDeclaration::FOR);
-    if (init != NULL){
-      output += init->printPreOrder();
-      output = output.substr(0, output.size()-1);
-    }
-    output += ", ";
-
-    output += test->printPreOrder();
-    output = output.substr(0, output.size()-1);
-
-    output += ", ";
-    if (interation != NULL){
-      output += interation->printPreOrder();
-    }
-    output += "\n";
-    output += getTab();
-    output += operationToString(LoopDeclaration::DO);
-
-    if (body.size() > 0){
-      int i;
-      for (i = 0; i < body.size(); i ++){
-        output += "\n";
-        if (body[i]->classType() == BINARY_OPERATION){
-            identation += "  ";
-            output += identation;
-            output += body[i]->printPreOrder();
-        }
-        if (body[i]->classType() == LOOP_DECLARATION){
-          LoopDeclaration* body_local = (LoopDeclaration*) body[i];
-          body_local->setTab(tab + 1);
-          output += body_local->printPreOrder();
-        }
-      }
-    }else{
-      output += "\n";
-    }
-
-    return output;
-}
-
-std::string LoopDeclaration::printPreOrder() {
-    std::string identation = getTab();
-    std::string output = identation;
-    output += operationToString(LoopDeclaration::FOR);
-    if (init != NULL){
-      output += init->printPreOrder();
-      output = output.substr(0, output.size()-1);
-    }
-    output += ", ";
-
-    output += test->printPreOrder();
-    output = output.substr(0, output.size()-1);
-
-    output += ", ";
-    if (interation != NULL){
-      output += interation->printPreOrder();
-    }
-    output += "\n";
-    output += getTab();
-    output += operationToString(LoopDeclaration::DO);
-
-    if (body.size() > 0){
-      int i;
-      for (i = 0; i < body.size(); i ++){
-        output += "\n";
-        if (body[i]->classType() == BINARY_OPERATION){
-            identation += "  ";
-            output += identation;
-            output += body[i]->printPreOrder();
-        }
-        if (body[i]->classType() == LOOP_DECLARATION){
-          LoopDeclaration* body_local = (LoopDeclaration*) body[i];
-          body_local->setTab(tab + 1);
-          output += body_local->printPreOrder();
-        }
-      }
-    }else{
-      output += "\n";
-    }
-
-    return output;
-}
-
-std::string LoopDeclaration::operationToString(LoopDeclaration::Type operation) const {
-    switch(operation) {
-        case FOR:
-            return "for: ";
-        case DO:
-            return "do:";
-        default:
-            return "unknown";
-    }
-}
-
-void LoopDeclaration::setTab(int number){
-  tab = number;
-}
-
-std::string LoopDeclaration::getTab(){
-  int i;
-  std::string tabulation = "";
-  for (i = 1; i <= tab; i ++){
-    tabulation += "  ";
-  }
-  return tabulation;
-}
-
 BinaryOperation::BinaryOperation(TreeNode* left, BinaryOperation::Type operation, TreeNode* right) : TreeNode(Data::UNKNOWN) {
     this->left = left;
     this->operation = operation;
@@ -437,4 +313,224 @@ std::string TypeCasting::typeToString(Data::Type type) {
         default:
             return "unknown";
     }
+}
+
+ConditionalOperation::ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then, std::vector<TreeNode*> el) : TreeNode(Data::UNKNOWN) {
+    this->condition = condition;
+    this->then = then;
+    this->el = el;
+}
+
+ConditionalOperation::ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then) : TreeNode(Data::UNKNOWN) {
+    this->condition = condition;
+    this->then = then;
+}
+
+ConditionalOperation::~ConditionalOperation() {
+}
+
+TreeNode::ClassType ConditionalOperation::classType() const {
+    return TreeNode::CONDITIONAL;
+}
+
+TreeNode* ConditionalOperation::getCondition() {
+  return this->condition;
+}
+
+std::string ConditionalOperation::printInOrder(){
+    this->printPreOrder();
+}
+
+std::string ConditionalOperation::printPreOrder(){
+    std::string output = "if: ";
+    std::string identation = "";
+    output += condition->printPreOrder();
+    if(output.back() == ' ')
+      output = output.substr(0, output.length()-1);
+    output += "\nthen:";
+
+    for (TreeNode* line: then){
+      if (line->classType() == TreeNode::CONDITIONAL) {
+              ConditionalOperation* c = (ConditionalOperation*) line;
+              output+="\n"+returnIfThen(c, identation);
+      } else {
+        output += "\n  " + line->printPreOrder();
+        if(output.back() == ' ')
+          output = output.substr(0, output.length()-1);
+      }
+
+    }
+    if(el.size() > 0) {
+        output += identation+"\nelse:";
+        for (TreeNode* line: el){
+            if(line->classType() == TreeNode::CONDITIONAL){
+              ConditionalOperation* c = (ConditionalOperation*) line;
+              output += "\n"+returnIfThen(c,identation);
+            }else {
+              output += "\n  " + line->printPreOrder();
+              if(output.back() == ' ')
+                output = output.substr(0, output.length()-1);
+            }
+        }
+    }
+    return output;
+}
+
+std::string ConditionalOperation::returnIfThen(ConditionalOperation* c, std::string identation){
+    identation+="  ";
+    std::string output = identation+"if: ";
+    output += c->condition->printPreOrder();
+    if(output.back() == ' ')
+      output = output.substr(0, output.length()-1);
+    output += "\n" + identation + "then:";
+
+    for(TreeNode* line: c->then){
+      if(line->classType() == TreeNode::CONDITIONAL){
+        ConditionalOperation* c = (ConditionalOperation*) line;
+        output+="\n"+returnIfThen(c,identation);
+      }else {
+        output+="\n"+identation+"  "+line->printPreOrder();
+        if(output.back() == ' ')
+          output = output.substr(0, output.length()-1);
+      }
+    }
+
+    if(c->el.size() > 0) {
+        output += "\n"+ identation+"else:";
+        for (TreeNode* line: c->el){
+          if(line->classType() == TreeNode::CONDITIONAL){
+            ConditionalOperation* c = (ConditionalOperation*) line;
+            output+="\n"+returnIfThen(c,identation);
+          }else {
+            output+="\n"+identation+"  "+line->printPreOrder();
+            if(output.back() == ' ')
+              output = output.substr(0, output.length()-1);
+          }
+        }
+    }
+    return output;
+}
+
+LoopDeclaration::LoopDeclaration(TreeNode* init, TreeNode* test, TreeNode* interation, std::vector<TreeNode*> body) : TreeNode(Data::UNKNOWN) {
+    this->init = init;
+    this->test = test;
+    this->interation = interation;
+    this->body = body;
+}
+
+LoopDeclaration::~LoopDeclaration() {
+}
+
+TreeNode::ClassType LoopDeclaration::classType() const {
+    return TreeNode::LOOP_DECLARATION;
+}
+
+std::string LoopDeclaration::printInOrder() {
+    std::string identation = getTab();
+    std::string output = identation;
+    output += operationToString(LoopDeclaration::FOR);
+    if (init != NULL){
+      output += init->printPreOrder();
+      output = output.substr(0, output.size()-1);
+    }
+    output += ", ";
+
+    output += test->printPreOrder();
+    output = output.substr(0, output.size()-1);
+
+    output += ", ";
+    if (interation != NULL){
+      output += interation->printPreOrder();
+    }
+    output += "\n";
+    output += getTab();
+    output += operationToString(LoopDeclaration::DO);
+
+    if (body.size() > 0){
+      int i;
+      for (i = 0; i < body.size(); i ++){
+        output += "\n";
+        if (body[i]->classType() == BINARY_OPERATION){
+            identation += "  ";
+            output += identation;
+            output += body[i]->printPreOrder();
+        }
+        if (body[i]->classType() == LOOP_DECLARATION){
+          LoopDeclaration* body_local = (LoopDeclaration*) body[i];
+          body_local->setTab(tab + 1);
+          output += body_local->printPreOrder();
+        }
+      }
+    }else{
+      output += "\n";
+    }
+
+    return output;
+}
+
+std::string LoopDeclaration::printPreOrder() {
+    std::string identation = getTab();
+    std::string output = identation;
+    output += operationToString(LoopDeclaration::FOR);
+    if (init != NULL){
+      output += init->printPreOrder();
+      output = output.substr(0, output.size()-1);
+    }
+    output += ", ";
+
+    output += test->printPreOrder();
+    output = output.substr(0, output.size()-1);
+
+    output += ", ";
+    if (interation != NULL){
+      output += interation->printPreOrder();
+    }
+    output += "\n";
+    output += getTab();
+    output += operationToString(LoopDeclaration::DO);
+
+    if (body.size() > 0){
+      int i;
+      for (i = 0; i < body.size(); i ++){
+        output += "\n";
+        if (body[i]->classType() == BINARY_OPERATION){
+            identation += "  ";
+            output += identation;
+            output += body[i]->printPreOrder();
+        }
+        if (body[i]->classType() == LOOP_DECLARATION){
+          LoopDeclaration* body_local = (LoopDeclaration*) body[i];
+          body_local->setTab(tab + 1);
+          output += body_local->printPreOrder();
+        }
+      }
+    }else{
+      output += "\n";
+    }
+
+    return output;
+}
+
+std::string LoopDeclaration::operationToString(LoopDeclaration::Type operation) const {
+    switch(operation) {
+        case FOR:
+            return "for: ";
+        case DO:
+            return "do:";
+        default:
+            return "unknown";
+    }
+}
+
+void LoopDeclaration::setTab(int number){
+  tab = number;
+}
+
+std::string LoopDeclaration::getTab(){
+  int i;
+  std::string tabulation = "";
+  for (i = 1; i <= tab; i ++){
+    tabulation += "  ";
+  }
+  return tabulation;
 }

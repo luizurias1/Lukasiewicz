@@ -1,8 +1,11 @@
 #ifndef TREENODE_H_
 #define TREENODE_H_
 
-#include <string>
+#include <string.h>
+#include <stdio.h>
 #include <vector>
+#include <typeinfo>
+#include <iostream>
 
 class SemanticAnalyzer;
 class SyntaxTree;
@@ -34,6 +37,7 @@ class TreeNode {
             TYPE_CASTING,
             VARIABLE,
             VARIABLE_DECLARATION,
+            CONDITIONAL,
             LOOP_DECLARATION,
             UNKNOWN
         };
@@ -44,36 +48,11 @@ class TreeNode {
         void setType(Data::Type type);
         virtual TreeNode::ClassType classType() const = 0;
         virtual std::string printInOrder() = 0;
+        //std::string returnIfThen(std::string identation);
         virtual std::string printPreOrder() = 0;
 
     protected:
         Data::Type type;
-
-};
-
-class LoopDeclaration : public TreeNode {
-
-    public:
-        enum Type {
-            FOR,
-            DO
-        };
-
-        LoopDeclaration(TreeNode* init, TreeNode* test, TreeNode* interation, std::vector<TreeNode*> body);
-        virtual ~LoopDeclaration();
-        TreeNode::ClassType classType() const;
-        std::string printInOrder();
-        std::string printPreOrder();
-        std::string operationToString(Type operation) const;
-        void setTab(int number);
-        std::string getTab();
-
-    private:
-        TreeNode* init;
-        TreeNode* test;
-        TreeNode* interation;
-        std::vector<TreeNode*> body;
-        int tab = 0;
 
 };
 
@@ -221,5 +200,60 @@ class TypeCasting : public TreeNode {
 
 };
 
+class ConditionalOperation : public TreeNode {
+
+    friend class SemanticAnalyzer;
+
+    public:
+      ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then, std::vector<TreeNode*> el);
+      ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then);
+      virtual ~ConditionalOperation();
+      TreeNode::ClassType classType() const;
+      TreeNode* getCondition();
+      std::string printInOrder();
+      std::string printPreOrder();
+      std::string returnIfThen(ConditionalOperation* c, std::string identation);
+
+    private:
+        TreeNode* condition;
+        std::vector<TreeNode*> then;
+        std::vector<TreeNode*> el;
+
+};
+
+class LoopDeclaration : public TreeNode {
+
+    public:
+        enum Type {
+            FOR,
+            DO
+        };
+
+        LoopDeclaration(TreeNode* init, TreeNode* test, TreeNode* interation, std::vector<TreeNode*> body);
+        virtual ~LoopDeclaration();
+        TreeNode::ClassType classType() const;
+        std::string printInOrder();
+        std::string printPreOrder();
+        std::string operationToString(Type operation) const;
+        void setTab(int number);
+        std::string getTab();
+
+    private:
+        TreeNode* init;
+        TreeNode* test;
+        TreeNode* interation;
+        std::vector<TreeNode*> body;
+        int tab = 0;
+
+};
+
+class MyVector {
+
+    public:
+      MyVector() {}
+      virtual ~MyVector() {}
+      std::vector<TreeNode*> v;
+
+};
 
 #endif

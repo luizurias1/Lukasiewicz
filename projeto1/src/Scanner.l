@@ -19,15 +19,20 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 \|                  {return T_OR;} /* Binary operator OR */
 "&"                 {return T_AND;} /* Binary operator AND */
 "!"                 {return T_NOT;} /* Binary operator NOT */
+"if"                {return T_IF;}
+"then"              {return T_THEN;}
+"else"              {return T_ELSE;}
+"for"               {return T_FOR;} /*Loop*/
+"{"                 {return T_OPEN_BRACE;}
+"}"                 {return T_CLOSING_BRACE;}
 "bool"              {yylval.dataType = Data::BOOLEAN; return T_TYPE_BOOL;} /* Type boolean */
 "float"             {yylval.dataType = Data::FLOAT; return T_TYPE_FLOAT;} /* Type float */
-"int" 		          {yylval.dataType = Data::INTEGER; return T_TYPE_INT;} /* Type integer */
-"true"              {return T_TRUE;} /* Boolean value TRUE */
-"false"             {return T_FALSE;} /* Boolean value FALSE */
-"for"               {return T_FOR;} /*Loop*/
-{id}	              {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_ID;} /* Identifier */
-{integer}           {yylval.integer = std::atoi(yytext); return T_INT;} /* Integer number */
-{float}             {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_FLOAT;} /* Float number */
+"int" 		    {yylval.dataType = Data::INTEGER; return T_TYPE_INT;} /* Type integer */
+"true"              {return T_TRUE;}
+"false"             {return T_FALSE;}
+{id}	            {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_ID;} /* Identifier */
+{integer}              {yylval.integer = std::atoi(yytext); return T_INT;} /* Integer number */
+{float}             {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_FLOAT;}
 "+"                 {return T_PLUS;} /* Binary operator PLUS */
 "-"                 {return T_MINUS;} /* Binary/unary operator MINUS */
 \*                  {return T_TIMES;} /* Binary operator TIMES */
@@ -48,7 +53,7 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 "}"                 {return T_CLOSING_BRACE;} /* Closing brace */
 \n                  {return T_NL;} /* New line */
 
-[^0-9\.a-zA-Z_\+\-\*\/\="==""!="">=""<="">=""<"">""&""|""!""{""}"\,\(\)\t \n]+	    {yyerror("lexical error: unknown symbol %s\n", yytext);} /* Every other character produces a lexical error */
+[^0-9\.a-zA-Z_\+\-\*\/\="==""!="">=""<="">=""<"">""&""|""!"\,\(\)\t \n\{\}]+	    {yyerror("lexical error: unknown symbol %s\n", yytext);} /* Every other character produces a lexical error */
 
 %%
 
