@@ -50,8 +50,8 @@ extern void yyerror(const char* s, ...);
  * Example: %type<node> expr
  */
 %type <syntaxTree> lines program
-%type <node> line line2 expr declar_int declar_float declar_bool type op_relation op_binary if
-%type <linesIf> then else
+%type <node> line expr declar_int declar_float declar_bool type op_relation op_binary if
+%type <linesIf> else scope
 %type <dataType> data_type
 
 /* Operator precedence for mathematical operators
@@ -102,37 +102,20 @@ line:
     | if {$$ = $1;}
     ;
 
-// Linha
-line2:
-    T_NL { $$ = NULL; }
-    | error T_NL { yyerrok; $$ = NULL; }
-    | T_TYPE_INT declar_int { $$ = new VariableDeclaration(Data::INTEGER, $2); }
-    | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(Data::FLOAT, $2); }
-    | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2); }
-    | T_ID T_ATT expr { $$ = new BinaryOperation(
-                                SEMANTIC_ANALYZER.assignVariable($1, $3->classType()),
-                                BinaryOperation::ASSIGN, $3);
-                        SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
-    ;
-
 if:
-    T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL  then else { $$ = new ConditionalOperation($2, $7->v, $8->v);  }
-    | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL then { $$ = new ConditionalOperation($2, $7->v); }
+    T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL scope else { $$ = new ConditionalOperation($2, $7->v, $8->v);  }
     ;
 
-// Ramo then do if
-then:
-    line2 T_NL T_CLOSE_BRACE { $$ = new MyVector(); if($1 != 0) $$->v.push_back($1); }
-    | if T_NL T_CLOSE_BRACE  { $$ = new MyVector(); if($1 != 0) $$->v.push_back($1);  }
-    | line2 then {$$ = $2; if($1 != 0) $$->v.push_back($1);  }
-    | {$$ = NULL;}
+scope:
+    line T_NL T_CLOSE_BRACE { $$ = new MyVector(); if($1 != NULL) $$->v.insert( $$->v.begin(), $1); }
+    | line scope {$$ = $2; if($1 != NULL) $$->v.insert( $$->v.begin(), $1);  }
     ;
 
 // Ramo else do if
-else:
-    T_ELSE T_OPEN_BRACE T_NL then {$$ = $4;}
+else: { $$ = new MyVector(); }
+    | T_ELSE T_OPEN_BRACE T_NL scope {$$ = $4; }
     ;
-
+    
 // Expressão
 expr:
     T_INT { $$ = new Integer($1); }
@@ -141,14 +124,6 @@ expr:
     | T_FALSE { $$ = new Boolean(false); }
     | T_ID { $$ = SEMANTIC_ANALYZER.useVariable($1); }
     | T_MINUS expr %prec U_MINUS { $$ = new UnaryOperation(UnaryOperation::MINUS, $2); }
-    | expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3);
-                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
-    | expr T_MINUS expr { $$ = new BinaryOperation($1, BinaryOperation::MINUS, $3);
-                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
-    | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3);
-                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
-    | expr T_DIVIDE expr { $$ = new BinaryOperation($1, BinaryOperation::DIVIDE, $3);
-                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     | T_OPEN_PAR expr T_CLOSING_PAR { $$ = $2; }
     | T_NOT expr { $$ = new UnaryOperation(UnaryOperation::NOT, $2); }
     | op_relation
@@ -164,10 +139,14 @@ data_type:
 
 // Operações binárias
 op_binary:
-    expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3); }
-    | expr T_MINUS expr { $$ = new BinaryOperation($1, BinaryOperation::MINUS, $3); }
-    | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3); }
-    | expr T_DIVIDE expr { $$ = new BinaryOperation($1, BinaryOperation::DIVIDE, $3); }
+    expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3);
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | expr T_MINUS expr { $$ = new BinaryOperation($1, BinaryOperation::MINUS, $3);
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3);
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | expr T_DIVIDE expr { $$ = new BinaryOperation($1, BinaryOperation::DIVIDE, $3);
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     ;
 
 // Operações relacionais
