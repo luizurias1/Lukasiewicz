@@ -1,8 +1,0 @@
-int a = 0, b = 1, c, d
- bool teste_falso = false
-if a > b
-then {
-c=10
- }
-
-
