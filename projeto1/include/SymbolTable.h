@@ -5,11 +5,6 @@
 #include <map>
 #include <string>
 
-class SymbolTable;
-
-extern SymbolTable SYMBOL_TABLE;
-extern void yyerror(const char* s, ...);
-
 /**
  * Símbolo gerado na análise sintática.
  */
@@ -17,29 +12,21 @@ class Symbol {
     
     friend class SymbolTable;
     
-    public:
-        enum DataType {
-            BOOLEAN,
-            FLOAT,
-            INTEGER,
-            UNKNOWN
-        };
-    
+    public:    
         enum IdentifierType {
             VARIABLE
         };
     
         Symbol();
-        Symbol(DataType dataType, IdentifierType idType, int64_t value, bool initialized);
+        Symbol(Data::Type dataType, IdentifierType idType, bool initialized);
         virtual ~Symbol();
-        void setDataType(DataType type);
-        DataType getDataType() const;
+        Data::Type getDataType() const;
+        void setDataType(Data::Type type);
     
     private:
-        DataType dataType;
+        Data::Type dataType;
         IdentifierType idType;
-        int64_t value;      /*Space to store a value while we are doing interpretation.*/
-        bool initialized;   /*Defines if symbol has been initialized or not.*/
+        bool initialized;
     
 };
 
@@ -52,26 +39,14 @@ class SymbolTable {
         SymbolTable();
         virtual ~SymbolTable();
     
-        /*checkId returns true if the variable has been defined and false if it does not exist*/
-        bool checkId(std::string id);
-        void addSymbol(std::string id, Symbol newSymbol);
-        Symbol::DataType getSymbolType(std::string id);
-        
-        // Nova variável
-        TreeNode* newVariable(std::string id, TreeNode::ClassType dataType);
+        bool existsVariable(std::string varId) const;
+        bool isVariableInitialized(std::string varId) const;
+        Data::Type getSymbolType(std::string varId) const;
     
-        // Marcar variável como inicializada
-        TreeNode* assignVariable(std::string id, TreeNode::ClassType assignedType);
-    
-        TreeNode* newAssignedVariable(std::string id, TreeNode::ClassType dataType, TreeNode::ClassType assignedType);
-        
-        // Usar variável
-        TreeNode* useVariable(std::string id);
+        void addSymbol(const std::string varId, Symbol newSymbol);
+        void setInitializedVariable(const std::string varId);
     
     private:
-        Symbol::DataType classToDataType(TreeNode::ClassType type) const;
-        std::string classToString(TreeNode::ClassType type) const;
-        std::string dataTypeToString(Symbol::DataType type) const; 
         std::map<std::string, Symbol> entryList;
     
 };
