@@ -370,9 +370,16 @@ std::string ConditionalOperation::printPreOrder(){
     }
     if(el.size() > 0) {
         output += identation+"\nelse:";
-        for (TreeNode* line: el)
-          output+= "\n"+identation+line->printPreOrder();
+        for (TreeNode* line: el){
+          if(line->classType() == TreeNode::CONDITIONAL){
+            ConditionalOperation* c = (ConditionalOperation*) line;
+            output+="\n"+returnIfThen(c,identation);
+          }else {
+            identation+="  ";
+            output+="\n"+identation+line->printPreOrder();
+          }
     }
+  }
     return output;
 }
 
@@ -392,8 +399,13 @@ std::string ConditionalOperation::returnIfThen(ConditionalOperation* c, std::str
       if(c->el.size() > 0) {
           output += "\n"+ identation+"else:";
           for (TreeNode* line: c->el){
-            identation+="  ";
-            output+= "\n"+identation+line->printPreOrder();
+            if(line->classType() == TreeNode::CONDITIONAL){
+              ConditionalOperation* c = (ConditionalOperation*) line;
+              output+="\n"+returnIfThen(c,identation);
+            }else {
+              identation+="  ";
+              output+="\n"+identation+line->printPreOrder();
+            }
           }
       }
     return output;
