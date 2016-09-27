@@ -329,81 +329,84 @@ ConditionalOperation::ConditionalOperation(TreeNode* condition, std::vector<Tree
 ConditionalOperation::~ConditionalOperation() {
 }
 
-ConditionalOperation::ClassType ConditionalOperation::classType() const {
+TreeNode::ClassType ConditionalOperation::classType() const {
     return TreeNode::CONDITIONAL;
 }
 
-std::string ConditionalOperation::printInOrder(){
-  std::string output = "if: ";
-  std::string identation = "";
-  output += condition->printPreOrder() + "\n" + identation+ "then:\n";
-for (TreeNode* line: then){
-    if (line->classType() == TreeNode::CONDITIONAL) {
-            ConditionalOperation* c = (ConditionalOperation*) line;
-            output+=returnIfThen(c,identation);
-    } else {
-      identation+= "  ";
-      output+=identation+line->printPreOrder();
-    }
+TreeNode* ConditionalOperation::getCondition() {
+  return this->condition;
 }
-  if(el.size() > 0) {
-      output += identation+"\nelse:";
-      for (TreeNode* line: el)
-        output+= "\n"+identation+line->printPreOrder();
-  }
 
-  return output;
+std::string ConditionalOperation::printInOrder(){
+    this->printPreOrder();
 }
 
 std::string ConditionalOperation::printPreOrder(){
     std::string output = "if: ";
     std::string identation = "";
-    output += condition->printPreOrder() + "\n" + identation+ "then:";
+    output += condition->printPreOrder();
+    if(output.back() == ' ')
+      output = output.substr(0, output.length()-1);
+    output += "\nthen:";
+
     for (TreeNode* line: then){
       if (line->classType() == TreeNode::CONDITIONAL) {
               ConditionalOperation* c = (ConditionalOperation*) line;
-              output+="\n"+returnIfThen(c,identation);
+              output+="\n"+returnIfThen(c, identation);
       } else {
-        output+="\n"+identation+"  "+line->printPreOrder();
+        output += "\n  " + line->printPreOrder();
+        if(output.back() == ' ')
+          output = output.substr(0, output.length()-1);
       }
+
     }
     if(el.size() > 0) {
         output += identation+"\nelse:";
         for (TreeNode* line: el){
-          if(line->classType() == TreeNode::CONDITIONAL){
-            ConditionalOperation* c = (ConditionalOperation*) line;
-            output+="\n"+returnIfThen(c,identation);
-          }else {
-            output+="\n"+identation+"  "+line->printPreOrder();
-          }
+            if(line->classType() == TreeNode::CONDITIONAL){
+              ConditionalOperation* c = (ConditionalOperation*) line;
+              output += "\n"+returnIfThen(c,identation);
+            }else {
+              output += "\n  " + line->printPreOrder();
+              if(output.back() == ' ')
+                output = output.substr(0, output.length()-1);
+            }
+        }
     }
-  }
     return output;
 }
 
 std::string ConditionalOperation::returnIfThen(ConditionalOperation* c, std::string identation){
     identation+="  ";
     std::string output = identation+"if: ";
-    output+=c->condition->printPreOrder() + "\n" + identation + "then:";
-      for(TreeNode* line: c->then){
-        if(line->classType() == TreeNode::CONDITIONAL){
-          ConditionalOperation* c = (ConditionalOperation*) line;
-          output+="\n"+returnIfThen(c,identation);
-        }else {
-          output+="\n"+identation+"  "+line->printPreOrder();
-        }
-      }
-      if(c->el.size() > 0) {
-          output += "\n"+ identation+"else:";
-          for (TreeNode* line: c->el){
-            if(line->classType() == TreeNode::CONDITIONAL){
-              ConditionalOperation* c = (ConditionalOperation*) line;
-              output+="\n"+returnIfThen(c,identation);
-            }else {
-              output+="\n"+identation+"  "+line->printPreOrder();
-            }
-          }
-      }
-    return output;
+    output += c->condition->printPreOrder();
+    if(output.back() == ' ')
+      output = output.substr(0, output.length()-1);
+    output += "\n" + identation + "then:";
 
+    for(TreeNode* line: c->then){
+      if(line->classType() == TreeNode::CONDITIONAL){
+        ConditionalOperation* c = (ConditionalOperation*) line;
+        output+="\n"+returnIfThen(c,identation);
+      }else {
+        output+="\n"+identation+"  "+line->printPreOrder();
+        if(output.back() == ' ')
+          output = output.substr(0, output.length()-1);
+      }
+    }
+
+    if(c->el.size() > 0) {
+        output += "\n"+ identation+"else:";
+        for (TreeNode* line: c->el){
+          if(line->classType() == TreeNode::CONDITIONAL){
+            ConditionalOperation* c = (ConditionalOperation*) line;
+            output+="\n"+returnIfThen(c,identation);
+          }else {
+            output+="\n"+identation+"  "+line->printPreOrder();
+            if(output.back() == ' ')
+              output = output.substr(0, output.length()-1);
+          }
+        }
+    }
+    return output;
 }

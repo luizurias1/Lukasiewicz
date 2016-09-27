@@ -99,7 +99,8 @@ line:
                                 SEMANTIC_ANALYZER.assignVariable($1, $3->classType()),
                                 BinaryOperation::ASSIGN, $3);
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
-    | if {$$ = $1;}
+    | if {$$ = $1;
+            SEMANTIC_ANALYZER.analyzeBinaryOperation((ConditionalOperation*) $$); }
     ;
 
 if:
@@ -115,7 +116,7 @@ scope:
 else: { $$ = new MyVector(); }
     | T_ELSE T_OPEN_BRACE T_NL scope {$$ = $4; }
     ;
-    
+
 // Expressão
 expr:
     T_INT { $$ = new Integer($1); }
@@ -151,10 +152,14 @@ op_binary:
 
 // Operações relacionais
 op_relation:
-    expr T_GREATER expr { $$ = new BinaryOperation($1, BinaryOperation::GREATER, $3); }
-    | expr T_GREATER_EQUAL expr { $$ = new BinaryOperation($1, BinaryOperation::GREATER_EQUAL, $3); }
-    | expr T_LOWER expr { $$ = new BinaryOperation($1, BinaryOperation::LOWER, $3); }
-    | expr T_LOWER_EQUAL expr { $$ = new BinaryOperation($1, BinaryOperation::LOWER_EQUAL, $3); }
+    expr T_GREATER expr { $$ = new BinaryOperation($1, BinaryOperation::GREATER, $3);
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | expr T_GREATER_EQUAL expr { $$ = new BinaryOperation($1, BinaryOperation::GREATER_EQUAL, $3);
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | expr T_LOWER expr { $$ = new BinaryOperation($1, BinaryOperation::LOWER, $3);
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | expr T_LOWER_EQUAL expr { $$ = new BinaryOperation($1, BinaryOperation::LOWER_EQUAL, $3);
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     | expr T_AND expr { $$ = new BinaryOperation($1, BinaryOperation::AND, $3); }
     | expr T_OR expr { $$ = new BinaryOperation($1, BinaryOperation::OR, $3); }
     ;

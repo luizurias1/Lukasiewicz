@@ -40,7 +40,7 @@ class TreeNode {
             CONDITIONAL,
             UNKNOWN
         };
-    
+
         TreeNode(Data::Type type);
         virtual ~TreeNode();
         Data::Type dataType() const;
@@ -49,14 +49,14 @@ class TreeNode {
         virtual std::string printInOrder() = 0;
         //std::string returnIfThen(std::string identation);
         virtual std::string printPreOrder() = 0;
-    
+
     protected:
         Data::Type type;
 
 };
 
 class BinaryOperation : public TreeNode {
-    
+
     friend class SemanticAnalyzer;
 
     public:
@@ -201,11 +201,14 @@ class TypeCasting : public TreeNode {
 
 class ConditionalOperation : public TreeNode {
 
+    friend class SemanticAnalyzer;
+
     public:
       ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then, std::vector<TreeNode*> el);
       ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then);
       virtual ~ConditionalOperation();
       TreeNode::ClassType classType() const;
+      TreeNode* getCondition();
       std::string printInOrder();
       std::string printPreOrder();
       std::string returnIfThen(ConditionalOperation* c, std::string identation);

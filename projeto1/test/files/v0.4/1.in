@@ -3,14 +3,11 @@ int a = 0, b = 1, c, d
 if a > b
 then {
 
-	b = 243
 	if (a > 0)
 	then {
-
 		c = 10
 	}
 
-	c = a + b
 }
 
 if teste_falso
@@ -19,5 +16,4 @@ then {
 
 } else {
 	d = 20
-
 }
