@@ -484,6 +484,8 @@ std::string LoopDeclaration::printPreOrder() {
     output += ", ";
     if (interation != NULL){
       output += interation->printPreOrder();
+      if(output.back() == ' ')
+        output = output.substr(0, output.length()-1);
     }
     output += "\n";
     output += getTab();
@@ -493,19 +495,17 @@ std::string LoopDeclaration::printPreOrder() {
       int i;
       for (i = 0; i < body.size(); i ++){
         output += "\n";
-        if (body[i]->classType() == BINARY_OPERATION){
-            identation += "  ";
-            output += identation;
-            output += body[i]->printPreOrder();
-        }
+
         if (body[i]->classType() == LOOP_DECLARATION){
           LoopDeclaration* body_local = (LoopDeclaration*) body[i];
           body_local->setTab(tab + 1);
           output += body_local->printPreOrder();
+        } else {
+          output += identation+"  "+body[i]->printPreOrder();
+          if(output.back() == ' ')
+            output = output.substr(0, output.length()-1);
         }
       }
-    }else{
-      output += "\n";
     }
 
     return output;

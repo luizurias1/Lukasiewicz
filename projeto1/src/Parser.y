@@ -49,7 +49,7 @@ extern void yyerror(const char* s, ...);
  * Example: %type<node> expr
  */
 %type <syntaxTree> lines program
-%type <node> line expr declar_int declar_float declar_bool type op_relation op_binary if init test interation
+%type <node> line expr declar_int declar_float declar_bool type op_relation op_binary if init test interation for
 %type <linesIf> else scope body
 %type <dataType> data_type
 
@@ -100,15 +100,21 @@ line:
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     | if {$$ = $1;
             SEMANTIC_ANALYZER.analyzeBinaryOperation((ConditionalOperation*) $$); }
-    | T_FOR init T_COMMA test T_COMMA interation T_OPEN_BRACE T_NL body T_CLOSING_BRACE {$$ = new LoopDeclaration($2, $4, $6, $9->v);}
+    | for {$$ = $1;
+             }
     ;
 
 if:
     T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL scope else { $$ = new ConditionalOperation($2, $7->v, $8->v);  }
     ;
+for:
+    | T_FOR init T_COMMA test T_COMMA interation T_OPEN_BRACE T_NL scope {$$ = new LoopDeclaration($2, $4, $6, $9->v);}
+    ;
 
 scope:
-    line T_NL T_CLOSING_BRACE { $$ = new MyVector(); if($1 != NULL) $$->v.insert( $$->v.begin(), $1); }
+
+    | T_CLOSING_BRACE {$$ = new MyVector();}
+    | line T_NL T_CLOSING_BRACE { $$ = new MyVector(); if($1 != NULL) $$->v.insert( $$->v.begin(), $1); }
     | line scope {$$ = $2; if($1 != NULL) $$->v.insert( $$->v.begin(), $1);  }
     ;
 
@@ -116,18 +122,20 @@ scope:
 else: { $$ = new MyVector(); }
     | T_ELSE T_OPEN_BRACE T_NL scope {$$ = $4; }
     ;
-
+/*
 body:
-    line T_NL {$$ = new MyVector(); $$->v.push_back($1); }
-    | T_NL {$$ = new MyVector();}
+    line T_NL T_CLOSING_BRACE {$$ = new MyVector(); $$->v.push_back($1); }
+    | line body {$$ = $2; if($1 != NULL) $$->v.insert( $$->v.begin(), $1);  }
     | {$$ = new MyVector();}
-    ;
+    ;*/
 
 init:
-    T_ID T_ATT T_INT {$$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($1),
-      BinaryOperation::ASSIGN, new Integer($3));}
-    | T_ID T_ATT T_FLOAT {$$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($1),
-      BinaryOperation::ASSIGN, new Float($3));}
+    T_ID T_ATT type { $$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($1),
+                                                 BinaryOperation::ASSIGN, $3);
+                        SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$);  }
+    | T_ID T_ATT type { $$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($1),
+                                                 BinaryOperation::ASSIGN, $3);
+                        SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$);  }
     | {$$ = NULL;}
     ;
 
