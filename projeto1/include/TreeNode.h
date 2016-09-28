@@ -237,13 +237,13 @@ class LoopDeclaration : public TreeNode {
         std::string operationToString(Type operation) const;
         void setTab(int number);
         std::string getTab();
+        int tab = 0;
 
     private:
         TreeNode* init;
         TreeNode* test;
         TreeNode* interation;
         std::vector<TreeNode*> body;
-        int tab = 0;
 
 };
 

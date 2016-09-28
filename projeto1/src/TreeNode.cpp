@@ -353,6 +353,10 @@ std::string ConditionalOperation::printPreOrder(){
       if (line->classType() == TreeNode::CONDITIONAL) {
               ConditionalOperation* c = (ConditionalOperation*) line;
               output+="\n"+returnIfThen(c, identation);
+      } else if (line->classType() == TreeNode::LOOP_DECLARATION) {
+        LoopDeclaration* body_local = (LoopDeclaration*) line;
+        body_local->setTab(body_local->tab + 1);
+        output += '\n'+body_local->printPreOrder();
       } else {
         output += "\n  " + line->printPreOrder();
         if(output.back() == ' ')
@@ -366,7 +370,11 @@ std::string ConditionalOperation::printPreOrder(){
             if(line->classType() == TreeNode::CONDITIONAL){
               ConditionalOperation* c = (ConditionalOperation*) line;
               output += "\n"+returnIfThen(c,identation);
-            }else {
+            }else if (line->classType() == TreeNode::LOOP_DECLARATION) {
+              LoopDeclaration* body_local = (LoopDeclaration*) line;
+              body_local->setTab(body_local->tab + 1);
+              output += '\n'+body_local->printPreOrder();
+            } else {
               output += "\n  " + line->printPreOrder();
               if(output.back() == ' ')
                 output = output.substr(0, output.length()-1);
@@ -388,7 +396,11 @@ std::string ConditionalOperation::returnIfThen(ConditionalOperation* c, std::str
       if(line->classType() == TreeNode::CONDITIONAL){
         ConditionalOperation* c = (ConditionalOperation*) line;
         output+="\n"+returnIfThen(c,identation);
-      }else {
+      }else if (line->classType() == TreeNode::LOOP_DECLARATION) {
+        LoopDeclaration* body_local = (LoopDeclaration*) line;
+        body_local->setTab(body_local->tab + 1);
+        output += '\n'+body_local->printPreOrder();
+      } else {
         output+="\n"+identation+"  "+line->printPreOrder();
         if(output.back() == ' ')
           output = output.substr(0, output.length()-1);
@@ -401,7 +413,11 @@ std::string ConditionalOperation::returnIfThen(ConditionalOperation* c, std::str
           if(line->classType() == TreeNode::CONDITIONAL){
             ConditionalOperation* c = (ConditionalOperation*) line;
             output+="\n"+returnIfThen(c,identation);
-          }else {
+          }else if (line->classType() == TreeNode::LOOP_DECLARATION) {
+            LoopDeclaration* body_local = (LoopDeclaration*) line;
+            body_local->setTab(body_local->tab + 1);
+            output += '\n'+body_local->printPreOrder();
+          } else {
             output+="\n"+identation+"  "+line->printPreOrder();
             if(output.back() == ' ')
               output = output.substr(0, output.length()-1);
@@ -500,7 +516,11 @@ std::string LoopDeclaration::printPreOrder() {
           LoopDeclaration* body_local = (LoopDeclaration*) body[i];
           body_local->setTab(tab + 1);
           output += body_local->printPreOrder();
-        } else {
+        } else if (body[i]->classType() == CONDITIONAL){
+          ConditionalOperation* c = (ConditionalOperation*) body[i];
+          output+= c->returnIfThen(c,identation);
+
+        }else {
           output += identation+"  "+body[i]->printPreOrder();
           if(output.back() == ' ')
             output = output.substr(0, output.length()-1);
