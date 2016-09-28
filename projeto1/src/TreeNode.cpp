@@ -355,7 +355,7 @@ std::string ConditionalOperation::printPreOrder(){
               output+="\n"+returnIfThen(c, identation);
       } else if (line->classType() == TreeNode::LOOP_DECLARATION) {
         LoopDeclaration* body_local = (LoopDeclaration*) line;
-        body_local->setTab(body_local->tab + 1);
+        body_local->setTab(identation.length()/2 + 1);
         output += '\n'+body_local->printPreOrder();
       } else {
         output += "\n  " + line->printPreOrder();
@@ -372,7 +372,7 @@ std::string ConditionalOperation::printPreOrder(){
               output += "\n"+returnIfThen(c,identation);
             }else if (line->classType() == TreeNode::LOOP_DECLARATION) {
               LoopDeclaration* body_local = (LoopDeclaration*) line;
-              body_local->setTab(body_local->tab + 1);
+              body_local->setTab(identation.length()/2 + 1);
               output += '\n'+body_local->printPreOrder();
             } else {
               output += "\n  " + line->printPreOrder();
@@ -398,7 +398,7 @@ std::string ConditionalOperation::returnIfThen(ConditionalOperation* c, std::str
         output+="\n"+returnIfThen(c,identation);
       }else if (line->classType() == TreeNode::LOOP_DECLARATION) {
         LoopDeclaration* body_local = (LoopDeclaration*) line;
-        body_local->setTab(body_local->tab + 1);
+        body_local->setTab(identation.length()/2 + 1);
         output += '\n'+body_local->printPreOrder();
       } else {
         output+="\n"+identation+"  "+line->printPreOrder();
@@ -415,7 +415,7 @@ std::string ConditionalOperation::returnIfThen(ConditionalOperation* c, std::str
             output+="\n"+returnIfThen(c,identation);
           }else if (line->classType() == TreeNode::LOOP_DECLARATION) {
             LoopDeclaration* body_local = (LoopDeclaration*) line;
-            body_local->setTab(body_local->tab + 1);
+            body_local->setTab(identation.length()/2 + 1);
             output += '\n'+body_local->printPreOrder();
           } else {
             output+="\n"+identation+"  "+line->printPreOrder();
