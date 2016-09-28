@@ -17,8 +17,10 @@ class SemanticAnalyzer {
     public:
         SemanticAnalyzer();
         virtual ~SemanticAnalyzer();
-
+        
+        void changeScope(std::string scopeId);
         void analyzeBinaryOperation(ConditionalOperation* conditionalOp);
+        void analyzeBinaryOperation(LoopDeclaration* loop);
         void analyzeBinaryOperation(BinaryOperation* binaryOp);
         TreeNode* declareVariable(std::string varId, TreeNode::ClassType dataType);
         TreeNode* assignVariable(std::string varId, TreeNode::ClassType assignedType);

@@ -6,10 +6,20 @@ SemanticAnalyzer::SemanticAnalyzer() {
 SemanticAnalyzer::~SemanticAnalyzer() {
 }
 
+void SemanticAnalyzer::changeScope(std::string scopeId) {
+    
+}
+
 void SemanticAnalyzer::analyzeBinaryOperation(ConditionalOperation* conditionalOp) {
     if(conditionalOp->condition->dataType() != Data::BOOLEAN)
         yyerror("semantic error: test operation expected boolean but received %s\n",
             dataTypeToString(conditionalOp->condition->dataType()).c_str());
+}
+
+void SemanticAnalyzer::analyzeBinaryOperation(LoopDeclaration* loop) {
+    if(loop->test->dataType() != Data::BOOLEAN)
+        yyerror("semantic error: test operation expected boolean but received %s\n",
+            dataTypeToString(loop->test->dataType()).c_str());
 }
 
 void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {

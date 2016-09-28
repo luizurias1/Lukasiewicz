@@ -223,6 +223,8 @@ class ConditionalOperation : public TreeNode {
 
 class LoopDeclaration : public TreeNode {
 
+    friend class SemanticAnalyzer;
+
     public:
         enum Type {
             FOR,

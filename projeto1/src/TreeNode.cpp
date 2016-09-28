@@ -334,57 +334,56 @@ TreeNode::ClassType ConditionalOperation::classType() const {
 }
 
 TreeNode* ConditionalOperation::getCondition() {
-  return this->condition;
+    return this->condition;
 }
 
-std::string ConditionalOperation::printInOrder(){
-    this->printPreOrder();
+std::string ConditionalOperation::printInOrder() {
+    return this->printPreOrder();
 }
 
-std::string ConditionalOperation::printPreOrder(){
+std::string ConditionalOperation::printPreOrder() {
     std::string output = "if: ";
     std::string identation = "";
     output += condition->printPreOrder();
     if(output.back() == ' ')
-      output = output.substr(0, output.length()-1);
+        output = output.substr(0, output.length()-1);
     output += "\nthen:";
 
-    for (TreeNode* line: then){
-      if (line->classType() == TreeNode::CONDITIONAL) {
-              ConditionalOperation* c = (ConditionalOperation*) line;
-              output+="\n"+returnIfThen(c, identation);
-      } else if (line->classType() == TreeNode::LOOP_DECLARATION) {
-        LoopDeclaration* body_local = (LoopDeclaration*) line;
-        body_local->setTab(identation.length()/2 + 1);
-        output += '\n'+body_local->printPreOrder();
-      } else {
-        output += "\n  " + line->printPreOrder();
-        if(output.back() == ' ')
-          output = output.substr(0, output.length()-1);
-      }
-
+    for (TreeNode* line: then) {
+        if (line->classType() == TreeNode::CONDITIONAL) {
+            ConditionalOperation* c = (ConditionalOperation*) line;
+            output+="\n"+returnIfThen(c, identation);
+        } else if (line->classType() == TreeNode::LOOP_DECLARATION) {
+            LoopDeclaration* body_local = (LoopDeclaration*) line;
+            body_local->setTab(identation.length()/2 + 1);
+            output += '\n'+body_local->printPreOrder();
+        } else {
+            output += "\n  " + line->printPreOrder();
+            if(output.back() == ' ')
+            output = output.substr(0, output.length()-1);
+        }
     }
     if(el.size() > 0) {
         output += identation+"\nelse:";
-        for (TreeNode* line: el){
-            if(line->classType() == TreeNode::CONDITIONAL){
-              ConditionalOperation* c = (ConditionalOperation*) line;
-              output += "\n"+returnIfThen(c,identation);
+        for (TreeNode* line: el) {
+            if(line->classType() == TreeNode::CONDITIONAL) {
+                ConditionalOperation* c = (ConditionalOperation*) line;
+                output += "\n"+returnIfThen(c,identation);
             }else if (line->classType() == TreeNode::LOOP_DECLARATION) {
-              LoopDeclaration* body_local = (LoopDeclaration*) line;
-              body_local->setTab(identation.length()/2 + 1);
-              output += '\n'+body_local->printPreOrder();
+                LoopDeclaration* body_local = (LoopDeclaration*) line;
+                body_local->setTab(identation.length()/2 + 1);
+                output += '\n'+body_local->printPreOrder();
             } else {
-              output += "\n  " + line->printPreOrder();
-              if(output.back() == ' ')
-                output = output.substr(0, output.length()-1);
+                output += "\n  " + line->printPreOrder();
+                if(output.back() == ' ')
+                    output = output.substr(0, output.length()-1);
             }
         }
     }
     return output;
 }
 
-std::string ConditionalOperation::returnIfThen(ConditionalOperation* c, std::string identation){
+std::string ConditionalOperation::returnIfThen(ConditionalOperation* c, std::string identation) {
     identation+="  ";
     std::string output = identation+"if: ";
     output += c->condition->printPreOrder();
@@ -392,8 +391,8 @@ std::string ConditionalOperation::returnIfThen(ConditionalOperation* c, std::str
       output = output.substr(0, output.length()-1);
     output += "\n" + identation + "then:";
 
-    for(TreeNode* line: c->then){
-      if(line->classType() == TreeNode::CONDITIONAL){
+    for(TreeNode* line: c->then) {
+      if(line->classType() == TreeNode::CONDITIONAL) {
         ConditionalOperation* c = (ConditionalOperation*) line;
         output+="\n"+returnIfThen(c,identation);
       }else if (line->classType() == TreeNode::LOOP_DECLARATION) {
@@ -409,8 +408,8 @@ std::string ConditionalOperation::returnIfThen(ConditionalOperation* c, std::str
 
     if(c->el.size() > 0) {
         output += "\n"+ identation+"else:";
-        for (TreeNode* line: c->el){
-          if(line->classType() == TreeNode::CONDITIONAL){
+        for (TreeNode* line: c->el) {
+          if(line->classType() == TreeNode::CONDITIONAL) {
             ConditionalOperation* c = (ConditionalOperation*) line;
             output+="\n"+returnIfThen(c,identation);
           }else if (line->classType() == TreeNode::LOOP_DECLARATION) {
@@ -445,9 +444,9 @@ std::string LoopDeclaration::printInOrder() {
     std::string identation = getTab();
     std::string output = identation;
     output += operationToString(LoopDeclaration::FOR);
-    if (init != NULL){
-      output += init->printPreOrder();
-      output = output.substr(0, output.size()-1);
+    if (init != NULL) {
+        output += init->printPreOrder();
+        output = output.substr(0, output.size()-1);
     }
     output += ", ";
 
@@ -455,30 +454,30 @@ std::string LoopDeclaration::printInOrder() {
     output = output.substr(0, output.size()-1);
 
     output += ", ";
-    if (interation != NULL){
-      output += interation->printPreOrder();
+    if (interation != NULL) {
+        output += interation->printPreOrder();
     }
     output += "\n";
     output += getTab();
     output += operationToString(LoopDeclaration::DO);
 
-    if (body.size() > 0){
-      int i;
-      for (i = 0; i < body.size(); i ++){
+    if (body.size() > 0) {
+        int i;
+        for (i = 0; i < body.size(); i ++) {
+            output += "\n";
+            if (body[i]->classType() == BINARY_OPERATION) {
+                identation += "  ";
+                output += identation;
+                output += body[i]->printPreOrder();
+            }
+            if (body[i]->classType() == LOOP_DECLARATION) {
+                LoopDeclaration* body_local = (LoopDeclaration*) body[i];
+                body_local->setTab(tab + 1);
+                output += body_local->printPreOrder();
+            }
+        }
+    } else {
         output += "\n";
-        if (body[i]->classType() == BINARY_OPERATION){
-            identation += "  ";
-            output += identation;
-            output += body[i]->printPreOrder();
-        }
-        if (body[i]->classType() == LOOP_DECLARATION){
-          LoopDeclaration* body_local = (LoopDeclaration*) body[i];
-          body_local->setTab(tab + 1);
-          output += body_local->printPreOrder();
-        }
-      }
-    }else{
-      output += "\n";
     }
 
     return output;
@@ -488,9 +487,9 @@ std::string LoopDeclaration::printPreOrder() {
     std::string identation = getTab();
     std::string output = identation;
     output += operationToString(LoopDeclaration::FOR);
-    if (init != NULL){
-      output += init->printPreOrder();
-      output = output.substr(0, output.size()-1);
+    if (init != NULL) {
+        output += init->printPreOrder();
+        output = output.substr(0, output.size()-1);
     }
     output += ", ";
 
@@ -498,36 +497,34 @@ std::string LoopDeclaration::printPreOrder() {
     output = output.substr(0, output.size()-1);
 
     output += ", ";
-    if (interation != NULL){
-      output += interation->printPreOrder();
-      if(output.back() == ' ')
-        output = output.substr(0, output.length()-1);
+    if (interation != NULL) {
+        output += interation->printPreOrder();
+        if(output.back() == ' ')
+            output = output.substr(0, output.length()-1);
     }
     output += "\n";
     output += getTab();
     output += operationToString(LoopDeclaration::DO);
 
-    if (body.size() > 0){
-      int i;
-      for (i = 0; i < body.size(); i ++){
-        output += "\n";
+    if (body.size() > 0) {
+        int i;
+        for (i = 0; i < body.size(); i ++) {
+            output += "\n";
 
-        if (body[i]->classType() == LOOP_DECLARATION){
-          LoopDeclaration* body_local = (LoopDeclaration*) body[i];
-          body_local->setTab(tab + 1);
-          output += body_local->printPreOrder();
-        } else if (body[i]->classType() == CONDITIONAL){
-          ConditionalOperation* c = (ConditionalOperation*) body[i];
-          output+= c->returnIfThen(c,identation);
-
-        }else {
-          output += identation+"  "+body[i]->printPreOrder();
-          if(output.back() == ' ')
-            output = output.substr(0, output.length()-1);
+            if (body[i]->classType() == LOOP_DECLARATION) {
+                LoopDeclaration* body_local = (LoopDeclaration*) body[i];
+                body_local->setTab(tab + 1);
+                output += body_local->printPreOrder();
+            } else if (body[i]->classType() == CONDITIONAL) {
+                ConditionalOperation* c = (ConditionalOperation*) body[i];
+                output+= c->returnIfThen(c,identation);
+            } else {
+                output += identation+"  "+body[i]->printPreOrder();
+                if(output.back() == ' ')
+                    output = output.substr(0, output.length()-1);
+            }
         }
-      }
     }
-
     return output;
 }
 
@@ -542,15 +539,15 @@ std::string LoopDeclaration::operationToString(LoopDeclaration::Type operation) 
     }
 }
 
-void LoopDeclaration::setTab(int number){
-  tab = number;
+void LoopDeclaration::setTab(int number) {
+    tab = number;
 }
 
-std::string LoopDeclaration::getTab(){
-  int i;
-  std::string tabulation = "";
-  for (i = 1; i <= tab; i ++){
-    tabulation += "  ";
-  }
-  return tabulation;
+std::string LoopDeclaration::getTab() {
+    int i;
+    std::string tabulation = "";
+    for (i = 1; i <= tab; i ++) {
+        tabulation += "  ";
+    }
+    return tabulation;
 }
