@@ -541,3 +541,28 @@ std::string LoopDeclaration::getTab() {
     }
     return tabulation;
 }
+
+Pointer::Pointer(TreeNode* type, std::string value) : TreeNode(Data::UNKNOWN) {
+    this->value = value;
+    this->type = type;
+}
+
+Pointer::~Pointer() {
+}
+
+TreeNode::ClassType Pointer::classType() const {
+    return TreeNode::POINTER;
+}
+
+std::string Pointer::printPreOrder() {
+    // switch(value) {
+    //   case true:
+    //       return "true ";
+    //   default:
+    //       return "false ";
+    // }
+}
+
+std::string Pointer::printInOrder() {
+  printPreOrder();
+}

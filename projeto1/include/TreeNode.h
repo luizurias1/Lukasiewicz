@@ -114,6 +114,21 @@ class UnaryOperation : public TreeNode {
 
 };
 
+class Pointer : public TreeNode {
+
+    public:
+        Pointer(TreeNode* type, std::string value);
+        virtual ~Pointer();
+        TreeNode::ClassType classType() const;
+        std::string printInOrder();
+        std::string printPreOrder();
+
+    private:
+        std::string value;
+        TreeNode* type;
+
+};
+
 class Boolean : public TreeNode {
 
     public:

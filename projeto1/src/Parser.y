@@ -181,7 +181,9 @@ connective:
 
 // Declaração de booleano
 declar_bool:
-    T_ID T_COMMA declar_bool { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::BOOLEAN),
+    pointer T_ID
+    | pointer T_ID T_COMMA declar_bool
+    | T_ID T_COMMA declar_bool { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::BOOLEAN),
                                                     BinaryOperation::COMMA, $3); }
     | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::BOOLEAN); }
     | T_ID T_ATT data T_COMMA declar_bool { $$ = new BinaryOperation(
@@ -197,7 +199,9 @@ declar_bool:
 
 // Declaração de ponto flutuante
 declar_float:
-    T_ID T_COMMA declar_float { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::FLOAT),
+    pointer T_ID
+    | pointer T_ID T_COMMA declar_float
+    | T_ID T_COMMA declar_float { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::FLOAT),
                                                     BinaryOperation::COMMA, $3); }
     | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::FLOAT); }
     | T_ID T_ATT data T_COMMA declar_float { $$ = new BinaryOperation(

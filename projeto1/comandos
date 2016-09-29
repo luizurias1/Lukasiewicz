@@ -5,3 +5,9 @@ int ref ref doublepointer
 int ref ip, jp
 ip = addr i
 ref ip = ref jp
+float ref floatpointer
+float ref ref floatpointer
+float ref a, b
+bool ref floatpointer
+bool ref ref floatpointer
+bool ref a, b
