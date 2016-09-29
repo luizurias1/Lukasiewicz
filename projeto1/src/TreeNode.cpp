@@ -442,46 +442,7 @@ TreeNode::ClassType LoopDeclaration::classType() const {
 }
 
 std::string LoopDeclaration::printInOrder() {
-    std::string identation = getTab();
-    std::string output = identation;
-    output += "for: ";
-    if (init != NULL) {
-        output += init->printPreOrder();
-        output = output.substr(0, output.size()-1);
-    }
-    output += ", ";
-
-    output += test->printPreOrder();
-    output = output.substr(0, output.size()-1);
-
-    output += ", ";
-    if (interation != NULL) {
-        output += interation->printPreOrder();
-    }
-    output += "\n";
-    output += getTab();
-    output += "do:";
-
-    if (body.size() > 0) {
-        int i;
-        for (i = 0; i < body.size(); i ++) {
-            output += "\n";
-            if (body[i]->classType() == BINARY_OPERATION) {
-                identation += "  ";
-                output += identation;
-                output += body[i]->printPreOrder();
-            }
-            if (body[i]->classType() == LOOP_DECLARATION) {
-                LoopDeclaration* body_local = (LoopDeclaration*) body[i];
-                body_local->setTab(tab + 1);
-                output += body_local->printPreOrder();
-            }
-        }
-    } else {
-        output += "\n";
-    }
-
-    return output;
+  printPreOrder();
 }
 
 std::string LoopDeclaration::printPreOrder() {
@@ -555,12 +516,12 @@ TreeNode::ClassType Pointer::classType() const {
 }
 
 std::string Pointer::printPreOrder() {
-    // switch(value) {
-    //   case true:
-    //       return "true ";
-    //   default:
-    //       return "false ";
-    // }
+  std::string output = "";
+  if (type->classType() == INTEGER){
+    output += "int ref var: ";
+    output += value;
+  }
+  return output;
 }
 
 std::string Pointer::printInOrder() {
