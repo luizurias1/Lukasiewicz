@@ -41,7 +41,7 @@
 %token T_ATT T T_COMMA
 %token T_EQUAL T_NOT_EQUAL T_GREATER T_LOWER T_GREATER_EQUAL T_LOWER_EQUAL
 %token T_AND T_OR T_NOT
-%token T_IF T_ELSE T_THEN T_FOR
+%token T_IF T_ELSE T_THEN T_FOR T_FUNCTION T_RETURN
 
 /* type defines the type of our nonterminal symbols.
  * Types should match the names used in the union.
@@ -93,26 +93,38 @@ line:
     | T_TYPE_INT declar_int { $$ = new VariableDeclaration(Data::INTEGER, $2); }
     | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(Data::FLOAT, $2); }
     | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2); }
-    | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL change_scope else { $$ = new ConditionalOperation($2, $7->v, $8->v);
+    | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL change_scope T_CLOSING_BRACE else { $$ = new ConditionalOperation($2, $7->v, $9->v);
             SEMANTIC_ANALYZER.analyzeBinaryOperation((ConditionalOperation*) $$); }
-    | T_FOR attribution T_COMMA comparison T_COMMA attribution T_OPEN_BRACE T_NL change_scope { $$ = new LoopDeclaration($2, $4, $6, $9->v);
+    | T_FOR attribution T_COMMA comparison T_COMMA attribution T_OPEN_BRACE T_NL change_scope T_CLOSING_BRACE { $$ = new LoopDeclaration($2, $4, $6, $9->v);
             SEMANTIC_ANALYZER.analyzeBinaryOperation((LoopDeclaration*) $$); }
+//    | data_type T_FUNCTION T_ID T_OPEN_PAR params T_CLOSING_PAR
+//    | data_type T_FUNCTION T_ID function_scope
     ;
 
+function_scope:
+    T_OPEN_PAR new_scope params T_CLOSING_PAR T_OPEN_BRACE T_NL scope T_RETURN expr T_NL T_CLOSING_BRACE end_scope
+    ;
+
+params:
+    
+
+// Change scope
 change_scope:
     new_scope scope end_scope { $$ = $2; }
     ;
 
+// Início de um novo escopo
 new_scope:
     { SEMANTIC_ANALYZER.newScope(); }
     ;
 
 // Escopo
 scope:
-    T_CLOSING_BRACE { $$ = new MyVector(); }
+    { $$ = new MyVector(); }
     | line T_NL scope {$$ = $3; if($1 != NULL) $$->v.insert( $$->v.begin(), $1);  }
     ;
     
+// Fim do escopo atual
 end_scope:
     { SEMANTIC_ANALYZER.returnScope(); }
     ;
@@ -120,12 +132,12 @@ end_scope:
 // Ramo else do if
 else:
     { $$ = new MyVector(); }
-    | T_ELSE T_OPEN_BRACE T_NL change_scope { $$ = $4; }
+    | T_ELSE T_OPEN_BRACE T_NL change_scope T_CLOSING_BRACE { $$ = $4; }
     ;
 
 // Atribuição
 attribution:
-    {$$ = NULL;}
+    { $$ = NULL; }
     | T_ID T_ATT expr { $$ = new BinaryOperation(
                                 SEMANTIC_ANALYZER.assignVariable($1, $3->classType()),
                                 BinaryOperation::ASSIGN, $3);
