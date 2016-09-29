@@ -2,7 +2,7 @@
     #include "SemanticAnalyzer.h"
     #include "SyntaxTree.h"
     #include "TreeNode.h"
-    
+
     SemanticAnalyzer SEMANTIC_ANALYZER;
     SyntaxTree* SYNTAX_TREE;
 
@@ -42,13 +42,14 @@
 %token T_EQUAL T_NOT_EQUAL T_GREATER T_LOWER T_GREATER_EQUAL T_LOWER_EQUAL
 %token T_AND T_OR T_NOT
 %token T_IF T_ELSE T_THEN T_FOR
+%token T_LVALUE T_POINTER
 
 /* type defines the type of our nonterminal symbols.
  * Types should match the names used in the union.
  * Example: %type<node> expr
  */
 %type <syntaxTree> lines program
-%type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution
+%type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution pointer
 %type <vector> else scope change_scope
 %type <dataType> data_type
 
@@ -118,6 +119,8 @@ else:
 // Atribuição
 attribution:
     {$$ = NULL;}
+    | pointer T_ID T_ATT data
+    | T_ID T_ATT T_LVALUE T_ID
     | T_ID T_ATT expr { $$ = new BinaryOperation(
                                 SEMANTIC_ANALYZER.assignVariable($1, $3->classType()),
                                 BinaryOperation::ASSIGN, $3);
@@ -126,7 +129,8 @@ attribution:
 
 // Expressão
 expr:
-    T_INT { $$ = new Integer($1); }
+    T_POINTER T_ID
+    | T_INT { $$ = new Integer($1); }
     | T_FLOAT { $$ = new Float($1); }
     | T_TRUE { $$ = new Boolean(true); }
     | T_FALSE { $$ = new Boolean(false); }
@@ -138,6 +142,11 @@ expr:
     | op_binary
     | comparison
     | connective
+    ;
+
+pointer:
+    T_POINTER
+    | T_POINTER pointer
     ;
 
 // Operações binárias
@@ -204,7 +213,9 @@ declar_float:
 
 // Declaração de inteiro
 declar_int:
-    T_ID T_COMMA declar_int { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::INTEGER),
+    pointer T_ID
+    | pointer T_ID T_COMMA declar_int
+    | T_ID T_COMMA declar_int { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::INTEGER),
                                                     BinaryOperation::COMMA, $3); }
     | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::INTEGER); }
     | T_ID T_ATT data T_COMMA declar_int { $$ = new BinaryOperation(
@@ -217,20 +228,21 @@ declar_int:
                                                  BinaryOperation::ASSIGN, $3);
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     ;
-    
+
 // Dados
 data:
-    T_INT { $$ = new Integer($1); }
+    pointer T_ID
+    | T_INT { $$ = new Integer($1); }
     | T_FLOAT { $$ = new Float($1); }
     | T_TRUE { $$ = new Boolean(true); }
     | T_FALSE { $$ = new Boolean(false); }
     ;
-    
+
 // Tipos de dados
 data_type:
     T_TYPE_BOOL
     | T_TYPE_FLOAT
     | T_TYPE_INT
     ;
-    
+
 %%

@@ -39,6 +39,7 @@ class TreeNode {
             VARIABLE_DECLARATION,
             CONDITIONAL,
             LOOP_DECLARATION,
+            POINTER,
             UNKNOWN
         };
 

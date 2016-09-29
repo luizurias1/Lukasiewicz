@@ -19,6 +19,8 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 \|                  {return T_OR;} /* Binary operator OR */
 "&"                 {return T_AND;} /* Binary operator AND */
 "!"                 {return T_NOT;} /* Binary operator NOT */
+"ref"               {return T_POINTER;} /*Poiter declaration*/
+"addr"              {return T_LVALUE;} /*Lvalue*/
 "if"                {return T_IF;} /*Conditional operator*/
 "then"              {return T_THEN;} /*Then clause*/
 "else"              {return T_ELSE;} /*Else clause*/

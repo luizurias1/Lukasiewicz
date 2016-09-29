@@ -1,21 +1,7 @@
-int j = 0
-if true
-then {
-for j = 0, j < 4, j = J * 9{
-for j = 7, j > 7, j = j - 9{
-if false
-then{
-j = 9
-}else{
-for , j < 10, j = j + 2{
-j = 0
-}
-}
-}
-}
-} else {
-j = 5
-for j = 0, j < 8, j = 4 + 4{
-j = 9
-}
-}
+int ref mypointer
+mypointer = addr i
+i = ref mypointer + 1
+int ref ref doublepointer
+int ref ip, jp
+ip = addr i
+ref ip = ref jp
