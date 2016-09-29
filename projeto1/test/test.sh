@@ -58,7 +58,7 @@ do
         TESTS_RUN=$((TESTS_RUN+1))
         
         # If expected output is equal to the output, then prints success
-        if [ "$EXPECTED_OUTPUT" = "$OUTPUT" ]; then 
+        if [ "$EXPECTED_OUTPUT" = "$OUTPUT" ] && [$OUTPUT_ERRORS != ""]; then 
             TESTS_SUCCESS=$((TESTS_SUCCESS+1))
             echo -e "$HEAD_RESULT SUCCESS!"
         elif [ "$EXPECTED_OUTPUT" = "$OUTPUT_ERRORS" ]; then

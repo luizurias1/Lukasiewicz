@@ -431,6 +431,7 @@ LoopDeclaration::LoopDeclaration(TreeNode* init, TreeNode* test, TreeNode* inter
     this->test = test;
     this->interation = interation;
     this->body = body;
+    this->tab = 0;
 }
 
 LoopDeclaration::~LoopDeclaration() {
@@ -443,7 +444,7 @@ TreeNode::ClassType LoopDeclaration::classType() const {
 std::string LoopDeclaration::printInOrder() {
     std::string identation = getTab();
     std::string output = identation;
-    output += operationToString(LoopDeclaration::FOR);
+    output += "for: ";
     if (init != NULL) {
         output += init->printPreOrder();
         output = output.substr(0, output.size()-1);
@@ -459,7 +460,7 @@ std::string LoopDeclaration::printInOrder() {
     }
     output += "\n";
     output += getTab();
-    output += operationToString(LoopDeclaration::DO);
+    output += "do:";
 
     if (body.size() > 0) {
         int i;
@@ -486,7 +487,7 @@ std::string LoopDeclaration::printInOrder() {
 std::string LoopDeclaration::printPreOrder() {
     std::string identation = getTab();
     std::string output = identation;
-    output += operationToString(LoopDeclaration::FOR);
+    output += "for: ";
     if (init != NULL) {
         output += init->printPreOrder();
         output = output.substr(0, output.size()-1);
@@ -504,7 +505,7 @@ std::string LoopDeclaration::printPreOrder() {
     }
     output += "\n";
     output += getTab();
-    output += operationToString(LoopDeclaration::DO);
+    output += "do:";
 
     if (body.size() > 0) {
         int i;
@@ -526,17 +527,6 @@ std::string LoopDeclaration::printPreOrder() {
         }
     }
     return output;
-}
-
-std::string LoopDeclaration::operationToString(LoopDeclaration::Type operation) const {
-    switch(operation) {
-        case FOR:
-            return "for: ";
-        case DO:
-            return "do:";
-        default:
-            return "unknown";
-    }
 }
 
 void LoopDeclaration::setTab(int number) {

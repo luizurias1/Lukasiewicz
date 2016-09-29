@@ -37,8 +37,9 @@ class SymbolTable {
     
     public:
         SymbolTable();
+        SymbolTable& operator=(const SymbolTable& table);
         virtual ~SymbolTable();
-    
+        void clear();
         bool existsVariable(std::string varId) const;
         bool isVariableInitialized(std::string varId) const;
         Data::Type getSymbolType(std::string varId) const;

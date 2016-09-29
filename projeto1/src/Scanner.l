@@ -23,8 +23,6 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 "then"              {return T_THEN;}
 "else"              {return T_ELSE;}
 "for"               {return T_FOR;} /*Loop*/
-"{"                 {return T_OPEN_BRACE;}
-"}"                 {return T_CLOSING_BRACE;}
 "bool"              {yylval.dataType = Data::BOOLEAN; return T_TYPE_BOOL;} /* Type boolean */
 "float"             {yylval.dataType = Data::FLOAT; return T_TYPE_FLOAT;} /* Type float */
 "int" 		    {yylval.dataType = Data::INTEGER; return T_TYPE_INT;} /* Type integer */

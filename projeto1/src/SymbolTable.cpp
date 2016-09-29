@@ -26,7 +26,16 @@ void Symbol::setDataType(Data::Type type) {
 SymbolTable::SymbolTable() {
 }
 
+SymbolTable& SymbolTable::operator=(const SymbolTable& table) {
+    entryList = table.entryList;
+    return *this;
+}
+
 SymbolTable::~SymbolTable() {
+}
+
+void SymbolTable::clear() {
+    entryList.clear();
 }
 
 bool SymbolTable::existsVariable(std::string varId) const {

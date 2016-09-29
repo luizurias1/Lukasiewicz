@@ -3,6 +3,7 @@
 
 #include "SymbolTable.h"
 #include <string>
+#include <vector>
 
 class SemanticAnalyzer;
 
@@ -14,11 +15,12 @@ extern void yyerror(const char* s, ...);
  */
 class SemanticAnalyzer {
 
-    public:
+    public:    
         SemanticAnalyzer();
         virtual ~SemanticAnalyzer();
         
-        void changeScope(std::string scopeId);
+        void newScope();
+        void returnScope();
         void analyzeBinaryOperation(ConditionalOperation* conditionalOp);
         void analyzeBinaryOperation(LoopDeclaration* loop);
         void analyzeBinaryOperation(BinaryOperation* binaryOp);
@@ -32,6 +34,7 @@ class SemanticAnalyzer {
         std::string classToString(TreeNode::ClassType type) const;
         std::string dataTypeToString(Data::Type type) const;
         SymbolTable symbolTable;
+        std::vector<SymbolTable> scopes;
 
 };
 

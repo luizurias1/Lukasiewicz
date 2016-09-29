@@ -2,7 +2,7 @@
     #include "SemanticAnalyzer.h"
     #include "SyntaxTree.h"
     #include "TreeNode.h"
-
+    
     SemanticAnalyzer SEMANTIC_ANALYZER;
     SyntaxTree* SYNTAX_TREE;
 
@@ -49,7 +49,7 @@
  */
 %type <syntaxTree> lines program
 %type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution
-%type <vector> else scope
+%type <vector> else scope change_scope
 %type <dataType> data_type
 
 /* Operator precedence for mathematical operators
@@ -94,23 +94,26 @@ line:
     | T_TYPE_INT declar_int { $$ = new VariableDeclaration(Data::INTEGER, $2); }
     | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(Data::FLOAT, $2); }
     | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2); }
-    | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL scope else { $$ = new ConditionalOperation($2, $7->v, $8->v);
+    | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL change_scope else { $$ = new ConditionalOperation($2, $7->v, $8->v);
             SEMANTIC_ANALYZER.analyzeBinaryOperation((ConditionalOperation*) $$); }
-    | T_FOR attribution T_COMMA comparison T_COMMA attribution T_OPEN_BRACE T_NL scope {$$ = new LoopDeclaration($2, $4, $6, $9->v);
+    | T_FOR attribution T_COMMA comparison T_COMMA attribution T_OPEN_BRACE T_NL change_scope { $$ = new LoopDeclaration($2, $4, $6, $9->v);
             SEMANTIC_ANALYZER.analyzeBinaryOperation((LoopDeclaration*) $$); }
+    ;
+
+change_scope:
+    scope { SEMANTIC_ANALYZER.returnScope(); }
     ;
 
 // Escopo
 scope:
-    | T_CLOSING_BRACE {$$ = new MyVector();}
-    | line T_NL T_CLOSING_BRACE { $$ = new MyVector(); if($1 != NULL) $$->v.insert( $$->v.begin(), $1); }
+    T_NL T_CLOSING_BRACE { $$ = new MyVector(); SEMANTIC_ANALYZER.newScope(); }
     | line scope {$$ = $2; if($1 != NULL) $$->v.insert( $$->v.begin(), $1);  }
     ;
 
 // Ramo else do if
 else:
     { $$ = new MyVector(); }
-    | T_ELSE T_OPEN_BRACE T_NL scope {$$ = $4; }
+    | T_ELSE T_OPEN_BRACE T_NL change_scope { $$ = $4; }
     ;
 
 // Atribuição

@@ -6,8 +6,13 @@ SemanticAnalyzer::SemanticAnalyzer() {
 SemanticAnalyzer::~SemanticAnalyzer() {
 }
 
-void SemanticAnalyzer::changeScope(std::string scopeId) {
-    
+void SemanticAnalyzer::newScope() {
+    scopes.push_back(this->symbolTable);
+}
+
+void SemanticAnalyzer::returnScope() {
+    this->symbolTable = scopes.back();
+    scopes.pop_back();
 }
 
 void SemanticAnalyzer::analyzeBinaryOperation(ConditionalOperation* conditionalOp) {
