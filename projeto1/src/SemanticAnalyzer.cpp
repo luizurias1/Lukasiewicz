@@ -8,6 +8,7 @@ SemanticAnalyzer::~SemanticAnalyzer() {
 
 void SemanticAnalyzer::newScope() {
     scopes.push_back(this->symbolTable);
+    this->symbolTable.clear();
 }
 
 void SemanticAnalyzer::returnScope() {
@@ -74,7 +75,7 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
 }
 
 TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType dataType) {
-    if(symbolTable.existsVariable(id))
+    if(symbolExists(id, false))
         yyerror("semantic error: re-declaration of variable %s\n", id.c_str());
     else
        symbolTable.addSymbol(id, Symbol(classToDataType(dataType), Symbol::VARIABLE, false)); // Adds variable to symbol table
@@ -83,35 +84,34 @@ TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType 
 }
 
 TreeNode* SemanticAnalyzer::assignVariable(std::string id, TreeNode::ClassType assignedType) {
-    if(!symbolTable.existsVariable(id)) {
+    if(!symbolExists(id, true)) {
         yyerror("semantic error: undeclared variable %s\n", id.c_str());
         return new Variable(id, Data::UNKNOWN); //Creates variable node anyway
     } else {
-        symbolTable.setInitializedVariable(id);
-        return new Variable(id, symbolTable.getSymbolType(id));
+        setInitializedSymbol(id);
+        return new Variable(id, getSymbolType(id));
     }
 
 }
 
 TreeNode* SemanticAnalyzer::declareAssignVariable(std::string id, TreeNode::ClassType dataType, TreeNode::ClassType assignedType) {
-    if(symbolTable.existsVariable(id))
+    if(symbolExists(id, false))
         yyerror("semantic error: re-declaration of variable %s\n", id.c_str());
     else
        symbolTable.addSymbol(id, Symbol(classToDataType(dataType), Symbol::VARIABLE, false)); // Adds variable to symbol table
 
-    symbolTable.setInitializedVariable(id);
-
+    setInitializedSymbol(id);
     return new Variable(id, classToDataType(dataType));
 }
 
 TreeNode* SemanticAnalyzer::useVariable(std::string id) {
-    if(!symbolTable.existsVariable(id)) {
+    if(!symbolExists(id, true)) {
         yyerror("semantic error: undeclared variable %s\n", id.c_str());
         return new Variable(id, Data::UNKNOWN); //Creates variable node anyway
-    } else if(!symbolTable.isVariableInitialized(id)) {
+    } else if(!isSymbolInitialized(id, true)) {
         yyerror("semantic error: uninitialized variable %s\n", id.c_str());
     }
-    return new Variable(id, symbolTable.getSymbolType(id));
+    return new Variable(id, getSymbolType(id));
 }
 
 Data::Type SemanticAnalyzer::classToDataType(TreeNode::ClassType type) const {
@@ -142,4 +142,61 @@ std::string SemanticAnalyzer::dataTypeToString(Data::Type type) const {
         default:
             return "unknown";
     }
+}
+
+Data::Type SemanticAnalyzer::getSymbolType(std::string varId) const {
+    if(symbolTable.existsVariable(varId))
+        return symbolTable.getSymbolType(varId);
+    
+    for(int i = scopes.size() - 1; i >= 0; i--) {
+        SymbolTable t = scopes[i];
+        if(t.existsVariable(varId))
+            return t.getSymbolType(varId);
+    }
+    
+    // Dark zone: you shouldn't reach this zone!
+    return Data::UNKNOWN;
+}
+
+bool SemanticAnalyzer::symbolExists(std::string id, bool checkParentScope) {
+    if(symbolTable.existsVariable(id))
+        return true;
+    
+    if(checkParentScope) {
+        for(SymbolTable t : scopes)
+            if(t.existsVariable(id))
+                return true;
+        return false;
+    }
+    
+    return false;
+}
+
+bool SemanticAnalyzer::isSymbolInitialized(std::string id, bool checkParentScope) const { 
+    if(symbolTable.existsVariable(id))
+        return symbolTable.isVariableInitialized(id);
+    
+    if(checkParentScope) {
+        for(int i = scopes.size() - 1; i >= 0; i--) {
+            SymbolTable t = scopes[i];
+            if(t.existsVariable(id))
+                return t.isVariableInitialized(id);
+        }
+    }
+    
+    // Dark zone: you shouldn't reach this zone!
+    return false;
+}
+
+void SemanticAnalyzer::setInitializedSymbol(std::string id) {
+    if(symbolTable.existsVariable(id))
+        symbolTable.setInitializedVariable(id);
+    else
+        for(int i = scopes.size() - 1; i >= 0; i--) {
+            SymbolTable t = scopes[i];
+            if(scopes[i].existsVariable(id)) {
+                scopes[i].setInitializedVariable(id);
+                break;
+            }
+        }
 }

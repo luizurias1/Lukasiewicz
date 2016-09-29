@@ -49,7 +49,7 @@
  */
 %type <syntaxTree> lines program
 %type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution
-%type <vector> else scope change_scope
+%type <vector> else scope change_scope new_scope end_scope
 %type <dataType> data_type
 
 /* Operator precedence for mathematical operators
@@ -100,13 +100,21 @@ line:
     ;
 
 change_scope:
-    scope { SEMANTIC_ANALYZER.returnScope(); }
+    new_scope scope end_scope { $$ = $2; }
+    ;
+
+new_scope:
+    { SEMANTIC_ANALYZER.newScope(); }
     ;
 
 // Escopo
 scope:
-    T_CLOSING_BRACE { $$ = new MyVector(); SEMANTIC_ANALYZER.newScope(); }
+    T_CLOSING_BRACE { $$ = new MyVector(); }
     | line T_NL scope {$$ = $3; if($1 != NULL) $$->v.insert( $$->v.begin(), $1);  }
+    ;
+    
+end_scope:
+    { SEMANTIC_ANALYZER.returnScope(); }
     ;
 
 // Ramo else do if

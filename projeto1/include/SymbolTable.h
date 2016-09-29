@@ -35,6 +35,8 @@ class Symbol {
  */
 class SymbolTable {
     
+    friend class SemanticAnalyzer;
+    
     public:
         SymbolTable();
         SymbolTable& operator=(const SymbolTable& table);

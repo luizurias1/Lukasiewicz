@@ -30,6 +30,10 @@ class SemanticAnalyzer {
         TreeNode* useVariable(std::string varId);
 
     private:
+        Data::Type getSymbolType(std::string varId) const;
+        bool symbolExists(std::string id, bool checkParentScope);
+        bool isSymbolInitialized(std::string id, bool checkParentScope) const;
+        void setInitializedSymbol(std::string id);
         Data::Type classToDataType(TreeNode::ClassType type) const;
         std::string classToString(TreeNode::ClassType type) const;
         std::string dataTypeToString(Data::Type type) const;

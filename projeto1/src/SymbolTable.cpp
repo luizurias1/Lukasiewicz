@@ -27,7 +27,7 @@ SymbolTable::SymbolTable() {
 }
 
 SymbolTable& SymbolTable::operator=(const SymbolTable& table) {
-    entryList = table.entryList;
+    this->entryList = table.entryList;
     return *this;
 }
 
