@@ -83,14 +83,13 @@ program:
 // Linhas
 lines:
     line { $$ = new SyntaxTree(); if($1 != NULL) $$->insertLine($1);  }
-    | line lines { $$ = $2; if($1 != NULL) $2->insertLine($1);  }
+    | line T_NL lines { $$ = $3; if($1 != NULL) $3->insertLine($1);  }
+    | error T_NL { yyerrok; $$ = NULL; }
     ;
 
 // Linha
 line:
-    T_NL { $$ = NULL; }
-    | error T_NL { yyerrok; $$ = NULL; }
-    | attribution
+    attribution
     | T_TYPE_INT declar_int { $$ = new VariableDeclaration(Data::INTEGER, $2); }
     | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(Data::FLOAT, $2); }
     | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2); }
@@ -106,8 +105,8 @@ change_scope:
 
 // Escopo
 scope:
-    T_NL T_CLOSING_BRACE { $$ = new MyVector(); SEMANTIC_ANALYZER.newScope(); }
-    | line scope {$$ = $2; if($1 != NULL) $$->v.insert( $$->v.begin(), $1);  }
+    T_CLOSING_BRACE { $$ = new MyVector(); SEMANTIC_ANALYZER.newScope(); }
+    | line T_NL scope {$$ = $3; if($1 != NULL) $$->v.insert( $$->v.begin(), $1);  }
     ;
 
 // Ramo else do if
