@@ -74,16 +74,16 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
     }
 }
 
-TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType dataType) {
+TreeNode* SemanticAnalyzer::declareVariable(std::string id, Data::Type dataType) {
     if(symbolExists(id, false))
         yyerror("semantic error: re-declaration of variable %s\n", id.c_str());
     else
-       symbolTable.addSymbol(id, Symbol(classToDataType(dataType), Symbol::VARIABLE, false)); // Adds variable to symbol table
+       symbolTable.addSymbol(id, Symbol(dataType, Symbol::VARIABLE, false)); // Adds variable to symbol table
 
-    return new Variable(id, classToDataType(dataType)); //Creates variable node anyway
+    return new Variable(id, dataType); //Creates variable node anyway
 }
 
-TreeNode* SemanticAnalyzer::assignVariable(std::string id, TreeNode::ClassType assignedType) {
+TreeNode* SemanticAnalyzer::assignVariable(std::string id, Data::Type assignedType) {
     if(!symbolExists(id, true)) {
         yyerror("semantic error: undeclared variable %s\n", id.c_str());
         return new Variable(id, Data::UNKNOWN); //Creates variable node anyway
@@ -94,14 +94,14 @@ TreeNode* SemanticAnalyzer::assignVariable(std::string id, TreeNode::ClassType a
 
 }
 
-TreeNode* SemanticAnalyzer::declareAssignVariable(std::string id, TreeNode::ClassType dataType, TreeNode::ClassType assignedType) {
+TreeNode* SemanticAnalyzer::declareAssignVariable(std::string id, Data::Type dataType, Data::Type assignedType) {
     if(symbolExists(id, false))
         yyerror("semantic error: re-declaration of variable %s\n", id.c_str());
     else
-       symbolTable.addSymbol(id, Symbol(classToDataType(dataType), Symbol::VARIABLE, false)); // Adds variable to symbol table
+       symbolTable.addSymbol(id, Symbol(dataType, Symbol::VARIABLE, false)); // Adds variable to symbol table
 
     setInitializedSymbol(id);
-    return new Variable(id, classToDataType(dataType));
+    return new Variable(id, dataType);
 }
 
 TreeNode* SemanticAnalyzer::useVariable(std::string id) {

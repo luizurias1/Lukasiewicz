@@ -49,7 +49,7 @@
  */
 %type <syntaxTree> lines program
 %type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution
-%type <vector> else scope change_scope new_scope end_scope
+%type <vector> else scope change_scope new_scope end_scope function_scope params
 %type <dataType> data_type
 
 /* Operator precedence for mathematical operators
@@ -97,16 +97,24 @@ line:
             SEMANTIC_ANALYZER.analyzeBinaryOperation((ConditionalOperation*) $$); }
     | T_FOR attribution T_COMMA comparison T_COMMA attribution T_OPEN_BRACE T_NL change_scope T_CLOSING_BRACE { $$ = new LoopDeclaration($2, $4, $6, $9->v);
             SEMANTIC_ANALYZER.analyzeBinaryOperation((LoopDeclaration*) $$); }
-//    | data_type T_FUNCTION T_ID T_OPEN_PAR params T_CLOSING_PAR
-//    | data_type T_FUNCTION T_ID function_scope
+    | data_type T_FUNCTION T_ID T_OPEN_PAR T_CLOSING_PAR
+    | data_type T_FUNCTION T_ID T_OPEN_PAR params T_CLOSING_PAR
+    | data_type T_FUNCTION T_ID function_scope
     ;
 
+// Escopo de uma função (parâmetros + corpo)
 function_scope:
-    T_OPEN_PAR new_scope params T_CLOSING_PAR T_OPEN_BRACE T_NL scope T_RETURN expr T_NL T_CLOSING_BRACE end_scope
+    T_OPEN_PAR new_scope T_CLOSING_PAR T_OPEN_BRACE T_NL scope T_RETURN expr T_NL T_CLOSING_BRACE end_scope { $$ = $6; }
+    | T_OPEN_PAR new_scope params T_CLOSING_PAR T_OPEN_BRACE T_NL scope T_RETURN expr T_NL T_CLOSING_BRACE end_scope { $$ = $7; }
     ;
 
+// Parâmetros de uma função
 params:
-    
+    data_type T_ID { $$ = new MyVector(); $$->v.insert($$->v.begin(), new VariableDeclaration((Data::Type) $1,
+                                            SEMANTIC_ANALYZER.declareAssignVariable($2, (Data::Type) $1, (Data::Type) $1))); }
+    | data_type T_ID T_COMMA params { $$ = $4; $$->v.insert($$->v.begin(), new VariableDeclaration((Data::Type) $1,
+                                            SEMANTIC_ANALYZER.declareAssignVariable($2, (Data::Type) $1, (Data::Type) $1))); }
+    ;
 
 // Change scope
 change_scope:
@@ -139,7 +147,7 @@ else:
 attribution:
     { $$ = NULL; }
     | T_ID T_ATT expr { $$ = new BinaryOperation(
-                                SEMANTIC_ANALYZER.assignVariable($1, $3->classType()),
+                                SEMANTIC_ANALYZER.assignVariable($1, $3->dataType()),
                                 BinaryOperation::ASSIGN, $3);
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     ;
@@ -155,6 +163,7 @@ expr:
     | T_OPEN_PAR expr T_CLOSING_PAR { $$ = $2; }
     | T_NOT expr { $$ = new UnaryOperation(UnaryOperation::NOT, $2); }
     | T_OPEN_BRACKET data_type T_CLOSING_BRACKET expr { $$ = new TypeCasting((Data::Type) $2, $4); }
+    | T_ID T_OPEN_PAR T_CLOSING_PAR
     | op_binary
     | comparison
     | connective
@@ -192,48 +201,48 @@ connective:
 
 // Declaração de booleano
 declar_bool:
-    T_ID T_COMMA declar_bool { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::BOOLEAN),
+    T_ID T_COMMA declar_bool { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, Data::BOOLEAN),
                                                     BinaryOperation::COMMA, $3); }
-    | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::BOOLEAN); }
+    | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, Data::BOOLEAN); }
     | T_ID T_ATT data T_COMMA declar_bool { $$ = new BinaryOperation(
                                                   new BinaryOperation(
-                                                    SEMANTIC_ANALYZER.declareAssignVariable($1, TreeNode::BOOLEAN, $3->classType()),
+                                                    SEMANTIC_ANALYZER.declareAssignVariable($1, Data::BOOLEAN, $3->dataType()),
                                                     BinaryOperation::ASSIGN, $3),
                                                     BinaryOperation::COMMA, $5); }
     | T_ID T_ATT data { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareAssignVariable(
-                                                    $1, TreeNode::BOOLEAN, $3->classType()),
+                                                    $1, Data::BOOLEAN, $3->dataType()),
                                                  BinaryOperation::ASSIGN, $3);
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     ;
 
 // Declaração de ponto flutuante
 declar_float:
-    T_ID T_COMMA declar_float { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::FLOAT),
+    T_ID T_COMMA declar_float { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, Data::FLOAT),
                                                     BinaryOperation::COMMA, $3); }
-    | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::FLOAT); }
+    | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, Data::FLOAT); }
     | T_ID T_ATT data T_COMMA declar_float { $$ = new BinaryOperation(
                                                   new BinaryOperation(
-                                                    SEMANTIC_ANALYZER.declareAssignVariable($1, TreeNode::FLOAT, $3->classType()),
+                                                    SEMANTIC_ANALYZER.declareAssignVariable($1, Data::FLOAT, $3->dataType()),
                                                     BinaryOperation::ASSIGN, $3),
                                                     BinaryOperation::COMMA, $5); }
     | T_ID T_ATT data { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareAssignVariable(
-                                                    $1, TreeNode::FLOAT, $3->classType()),
+                                                    $1, Data::FLOAT, $3->dataType()),
                                                  BinaryOperation::ASSIGN, $3);
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     ;
 
 // Declaração de inteiro
 declar_int:
-    T_ID T_COMMA declar_int { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::INTEGER),
+    T_ID T_COMMA declar_int { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, Data::INTEGER),
                                                     BinaryOperation::COMMA, $3); }
-    | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::INTEGER); }
+    | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, Data::INTEGER); }
     | T_ID T_ATT data T_COMMA declar_int { $$ = new BinaryOperation(
                                                   new BinaryOperation(
-                                                    SEMANTIC_ANALYZER.declareAssignVariable($1, TreeNode::INTEGER, $3->classType()),
+                                                    SEMANTIC_ANALYZER.declareAssignVariable($1, Data::INTEGER, $3->dataType()),
                                                     BinaryOperation::ASSIGN, $3),
                                                     BinaryOperation::COMMA, $5); }
     | T_ID T_ATT data { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareAssignVariable(
-                                                    $1, TreeNode::INTEGER, $3->classType()),
+                                                    $1, Data::INTEGER, $3->dataType()),
                                                  BinaryOperation::ASSIGN, $3);
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     ;
