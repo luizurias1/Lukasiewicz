@@ -79,6 +79,7 @@ class BinaryOperation : public TreeNode {
             LOWER,
             LOWER_EQUAL,
             AND,
+            NOT_EQUAL,
             OR
         };
 

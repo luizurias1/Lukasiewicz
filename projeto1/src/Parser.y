@@ -135,9 +135,10 @@ expr:
     | T_TRUE { $$ = new Boolean(true); }
     | T_FALSE { $$ = new Boolean(false); }
     | T_ID { $$ = SEMANTIC_ANALYZER.useVariable($1); }
+    | T_ID T_OPEN_PAR expr T_CLOSING_PAR {$$ = $3; SEMANTIC_ANALYZER.useVariable($1);}
     | T_MINUS expr %prec U_MINUS { $$ = new UnaryOperation(UnaryOperation::MINUS, $2); }
     | T_OPEN_PAR expr T_CLOSING_PAR { $$ = $2; }
-    | T_NOT expr { $$ = new UnaryOperation(UnaryOperation::NOT, $2); }
+    | T_NOT expr { $$ = new UnaryOperation(UnaryOperation::NOT, $2); $$->setType(Data::BOOLEAN);}
     | T_OPEN_BRACKET data_type T_CLOSING_BRACKET expr { $$ = new TypeCasting((Data::Type) $2, $4); }
     | op_binary
     | comparison
@@ -166,6 +167,8 @@ comparison:
     | expr T_LOWER expr { $$ = new BinaryOperation($1, BinaryOperation::LOWER, $3);
                          SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     | expr T_LOWER_EQUAL expr { $$ = new BinaryOperation($1, BinaryOperation::LOWER_EQUAL, $3);
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | expr T_EQUAL expr { $$ = new BinaryOperation($1, BinaryOperation::EQUAL, $3);
                          SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     ;
 

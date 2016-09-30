@@ -16,6 +16,17 @@ void SemanticAnalyzer::returnScope() {
 }
 
 void SemanticAnalyzer::analyzeBinaryOperation(ConditionalOperation* conditionalOp) {
+    // if(conditionalOp->condition->classType() == TreeNode::BINARY_OPERATION){
+    //   BinaryOperation *bin = (BinaryOperation*) conditionalOp->getCondition();
+    //     if (bin->operation == BinaryOperation::EQUAL || bin->operation == BinaryOperation::GREATER
+    //        || bin->operation == BinaryOperation::GREATER_EQUAL
+    //        || bin->operation == BinaryOperation::LOWER
+    //        || bin->operation == BinaryOperation::LOWER_EQUAL
+    //        || bin->operation == BinaryOperation::AND
+    //        || bin->operation == BinaryOperation::OR){
+    //          conditionalOp->condition->setType(Data::BOOLEAN);
+    //     }
+    // }
     if(conditionalOp->condition->dataType() != Data::BOOLEAN)
         yyerror("semantic error: test operation expected boolean but received %s\n",
             dataTypeToString(conditionalOp->condition->dataType()).c_str());
@@ -54,7 +65,9 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
     if(op == BinaryOperation::GREATER
        || op == BinaryOperation::LOWER
        || op == BinaryOperation::GREATER_EQUAL
-       || op == BinaryOperation::LOWER_EQUAL) {
+       || op == BinaryOperation::LOWER_EQUAL
+       || op == BinaryOperation::EQUAL
+       || op == BinaryOperation::NOT_EQUAL) {
         binaryOp->setType(Data::BOOLEAN);
     } else { // Define o tipo da operação binária de acordo com o operando esquerdo
         binaryOp->setType(left->dataType());
