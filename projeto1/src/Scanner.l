@@ -30,7 +30,7 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 "int"               {yylval.dataType = Data::INTEGER; return T_TYPE_INT;} /* Type integer */
 "true"              {return T_TRUE;}
 "false"             {return T_FALSE;}
-{id}	            {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_ID;} /* Identifier */
+{id}                {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_ID;} /* Identifier */
 {integer}           {yylval.integer = std::atoi(yytext); return T_INT;} /* Integer number */
 {float}             {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_FLOAT;}
 "+"                 {return T_PLUS;} /* Binary operator PLUS */

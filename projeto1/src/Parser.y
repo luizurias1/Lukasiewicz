@@ -2,7 +2,7 @@
     #include "SemanticAnalyzer.h"
     #include "SyntaxTree.h"
     #include "TreeNode.h"
-    
+
     SemanticAnalyzer SEMANTIC_ANALYZER;
     SyntaxTree* SYNTAX_TREE;
 
@@ -48,8 +48,8 @@
  * Example: %type<node> expr
  */
 %type <syntaxTree> lines program
-%type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution
-%type <vector> else scope change_scope new_scope end_scope function_scope params
+%type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution function_call
+%type <vector> else scope change_scope new_scope end_scope function_scope params params_call
 %type <dataType> data_type
 
 /* Operator precedence for mathematical operators
@@ -97,15 +97,14 @@ line:
             SEMANTIC_ANALYZER.analyzeBinaryOperation((ConditionalOperation*) $$); }
     | T_FOR attribution T_COMMA comparison T_COMMA attribution T_OPEN_BRACE T_NL change_scope T_CLOSING_BRACE { $$ = new LoopDeclaration($2, $4, $6, $9->v);
             SEMANTIC_ANALYZER.analyzeBinaryOperation((LoopDeclaration*) $$); }
-    | data_type T_FUNCTION T_ID T_OPEN_PAR T_CLOSING_PAR
-    | data_type T_FUNCTION T_ID T_OPEN_PAR params T_CLOSING_PAR
-    | data_type T_FUNCTION T_ID function_scope
+    | data_type T_FUNCTION T_ID T_OPEN_PAR T_CLOSING_PAR new_scope function_scope end_scope { $$ = NULL; }
+    | data_type T_FUNCTION T_ID T_OPEN_PAR new_scope params T_CLOSING_PAR function_scope end_scope { $$ = NULL; }
     ;
 
 // Escopo de uma função (parâmetros + corpo)
 function_scope:
-    T_OPEN_PAR new_scope T_CLOSING_PAR T_OPEN_BRACE T_NL scope T_RETURN expr T_NL T_CLOSING_BRACE end_scope { $$ = $6; }
-    | T_OPEN_PAR new_scope params T_CLOSING_PAR T_OPEN_BRACE T_NL scope T_RETURN expr T_NL T_CLOSING_BRACE end_scope { $$ = $7; }
+    { $$ = NULL; }
+    | T_OPEN_BRACE T_NL scope T_RETURN expr T_NL T_CLOSING_BRACE { $$ = $3; }
     ;
 
 // Parâmetros de uma função
@@ -131,7 +130,7 @@ scope:
     { $$ = new MyVector(); }
     | line T_NL scope {$$ = $3; if($1 != NULL) $$->v.insert( $$->v.begin(), $1);  }
     ;
-    
+
 // Fim do escopo atual
 end_scope:
     { SEMANTIC_ANALYZER.returnScope(); }
@@ -163,10 +162,20 @@ expr:
     | T_OPEN_PAR expr T_CLOSING_PAR { $$ = $2; }
     | T_NOT expr { $$ = new UnaryOperation(UnaryOperation::NOT, $2); }
     | T_OPEN_BRACKET data_type T_CLOSING_BRACKET expr { $$ = new TypeCasting((Data::Type) $2, $4); }
-    | T_ID T_OPEN_PAR T_CLOSING_PAR
     | op_binary
     | comparison
     | connective
+    | function_call
+    ;
+
+function_call:
+    T_ID T_OPEN_PAR T_CLOSING_PAR { $$ = NULL; }
+    | T_ID T_OPEN_PAR params_call T_CLOSING_PAR { $$ = NULL; }
+    ;
+
+params_call:
+    expr { $$ = new MyVector(); $$->v.insert($$->v.begin(), $1); }
+    | expr T_COMMA params_call { $$ = $3; $$->v.insert($$->v.begin(), $1); }
     ;
 
 // Operações binárias
@@ -246,7 +255,7 @@ declar_int:
                                                  BinaryOperation::ASSIGN, $3);
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     ;
-    
+
 // Dados
 data:
     T_INT { $$ = new Integer($1); }
@@ -254,12 +263,12 @@ data:
     | T_TRUE { $$ = new Boolean(true); }
     | T_FALSE { $$ = new Boolean(false); }
     ;
-    
+
 // Tipos de dados
 data_type:
     T_TYPE_BOOL
     | T_TYPE_FLOAT
     | T_TYPE_INT
     ;
-    
+
 %%
