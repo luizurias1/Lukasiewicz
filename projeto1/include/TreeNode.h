@@ -18,7 +18,9 @@ namespace Data {
         BOOLEAN = 0,
         FLOAT = 1,
         INTEGER = 2,
-        ARRAY = 4,
+        ARRAY_INTEGER = 4,
+        ARRAY_FLOAT = 5,
+        ARRAY_BOOLEAN = 6,
         UNKNOWN = 3
     };
 }
@@ -90,7 +92,7 @@ class BinaryOperation : public TreeNode {
         std::string printPreOrder();
         std::string operationToString(Type operation) const;
         static const char* operationName(Type operation);
-
+        TreeNode* getLeft();
     private:
         Type operation;
         TreeNode* left;

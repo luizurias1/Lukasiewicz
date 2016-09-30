@@ -59,7 +59,7 @@
 
 /*relational operators*/
 %left T_OR T_AND
-%left T_GREATER T_LOWER T_GREATER_EQUAL T_LOWER_EQUAL T_NOT_EQUAL
+%left T_GREATER T_LOWER T_GREATER_EQUAL T_LOWER_EQUAL T_NOT_EQUAL T_EQUAL
 
 %left T_PLUS T_MINUS
 %left T_TIMES
@@ -130,17 +130,17 @@ attribution:
 
 // Expressão
 expr:
-    T_INT { $$ = new Integer($1); }
+    T_INT { $$ = new Integer($1); }//std::cout<< " T_INT "<< std::endl; }
     | T_FLOAT { $$ = new Float($1); }
     | T_TRUE { $$ = new Boolean(true); }
     | T_FALSE { $$ = new Boolean(false); }
     | T_ID { $$ = SEMANTIC_ANALYZER.useVariable($1); }
-    | T_ID T_OPEN_PAR expr T_CLOSING_PAR {$$ = $3; SEMANTIC_ANALYZER.useVariable($1);}
+    | T_ID T_OPEN_PAR expr T_CLOSING_PAR  {$$ = SEMANTIC_ANALYZER.useVariable($1,$3); }//std::cout<< "T_ID T_OPEN_PAR expr T_CLOSING_PAR expr "<< std::endl;}
     | T_MINUS expr %prec U_MINUS { $$ = new UnaryOperation(UnaryOperation::MINUS, $2); }
     | T_OPEN_PAR expr T_CLOSING_PAR { $$ = $2; }
     | T_NOT expr { $$ = new UnaryOperation(UnaryOperation::NOT, $2); $$->setType(Data::BOOLEAN);}
     | T_OPEN_BRACKET data_type T_CLOSING_BRACKET expr { $$ = new TypeCasting((Data::Type) $2, $4); }
-    | op_binary
+    | op_binary //{std::cout<< "op_binary "<< std::endl;}
     | comparison
     | connective
 
@@ -155,7 +155,7 @@ op_binary:
     | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3);
                          SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     | expr T_DIVIDE expr { $$ = new BinaryOperation($1, BinaryOperation::DIVIDE, $3);
-                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }//std::cout<< " expr T_DIVIDE expr "<< std::endl; }
     ;
 
 // Operações binárias relacionais
@@ -169,7 +169,7 @@ comparison:
     | expr T_LOWER_EQUAL expr { $$ = new BinaryOperation($1, BinaryOperation::LOWER_EQUAL, $3);
                          SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     | expr T_EQUAL expr { $$ = new BinaryOperation($1, BinaryOperation::EQUAL, $3);
-                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }//std::cout<< " expr T_EQUAL expr "<< std::endl;}
     ;
 
 // Conectivo lógico

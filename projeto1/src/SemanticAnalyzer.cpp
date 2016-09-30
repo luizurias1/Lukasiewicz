@@ -16,17 +16,6 @@ void SemanticAnalyzer::returnScope() {
 }
 
 void SemanticAnalyzer::analyzeBinaryOperation(ConditionalOperation* conditionalOp) {
-    // if(conditionalOp->condition->classType() == TreeNode::BINARY_OPERATION){
-    //   BinaryOperation *bin = (BinaryOperation*) conditionalOp->getCondition();
-    //     if (bin->operation == BinaryOperation::EQUAL || bin->operation == BinaryOperation::GREATER
-    //        || bin->operation == BinaryOperation::GREATER_EQUAL
-    //        || bin->operation == BinaryOperation::LOWER
-    //        || bin->operation == BinaryOperation::LOWER_EQUAL
-    //        || bin->operation == BinaryOperation::AND
-    //        || bin->operation == BinaryOperation::OR){
-    //          conditionalOp->condition->setType(Data::BOOLEAN);
-    //     }
-    // }
     if(conditionalOp->condition->dataType() != Data::BOOLEAN)
         yyerror("semantic error: test operation expected boolean but received %s\n",
             dataTypeToString(conditionalOp->condition->dataType()).c_str());
@@ -77,8 +66,12 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
     if(left->dataType() == Data::UNKNOWN || right->dataType() == Data::UNKNOWN)
         return;
 
-    if(left->dataType() == Data::ARRAY)
+    if(left->dataType() == Data::ARRAY_INTEGER)
       left->setType(Data::INTEGER);
+    if(left->dataType() == Data::ARRAY_FLOAT)
+      left->setType(Data::FLOAT);
+    if(left->dataType() == Data::ARRAY_BOOLEAN)
+      left->setType(Data::BOOLEAN);
 
     //Se index do array nao for int, gera erro semântico
     if(left->classType() == TreeNode::ARRAY){
@@ -112,15 +105,14 @@ TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType 
         return new Variable(id, classToDataType(dataType)); //Creates variable node anyway
 }
 
-TreeNode* SemanticAnalyzer::assignVariable(std::string id, TreeNode::ClassType assignedType, TreeNode* n) {
+TreeNode* SemanticAnalyzer::assignVariable(std::string id, TreeNode::ClassType assignedType, TreeNode* index) {
 
     if(!symbolTable.existsVariable(id)) {
         yyerror("semantic error: undeclared variable %s\n", id.c_str());
         return new Variable(id, Data::UNKNOWN); //Creates variable node anyway
-    }  else if (symbolTable.getSymbolType(id) == Data::ARRAY){
-
-        symbolTable.setInitializedVariable(id);
-        return new Array (id,symbolTable.getSymbolType(id),n);
+    }  else if (symbolTable.getSymbolType(id) == Data::ARRAY_INTEGER || symbolTable.getSymbolType(id) == Data::ARRAY_FLOAT || symbolTable.getSymbolType(id) == Data::ARRAY_BOOLEAN){
+          symbolTable.setInitializedVariable(id);
+          return new Array (id,symbolTable.getSymbolType(id),index);
     } else{
           symbolTable.setInitializedVariable(id);
           return new Variable(id, symbolTable.getSymbolType(id));
@@ -138,11 +130,13 @@ TreeNode* SemanticAnalyzer::declareAssignVariable(std::string id, TreeNode::Clas
     return new Variable(id, classToDataType(dataType));
 }
 
-TreeNode* SemanticAnalyzer::useVariable(std::string id) {
+TreeNode* SemanticAnalyzer::useVariable(std::string id, TreeNode* index) {
     if(!symbolTable.existsVariable(id)) {
         yyerror("semantic error: undeclared variable %s\n", id.c_str());
         return new Variable(id, Data::UNKNOWN); //Creates variable node anyway
-    } else if(!symbolTable.isVariableInitialized(id)) {
+    } else if (symbolTable.getSymbolType(id) == Data::ARRAY_INTEGER || symbolTable.getSymbolType(id) == Data::ARRAY_FLOAT || symbolTable.getSymbolType(id) == Data::ARRAY_BOOLEAN){
+        return new Array(id,symbolTable.getSymbolType(id),index);
+    }else if(!symbolTable.isVariableInitialized(id)) {
         yyerror("semantic error: uninitialized variable %s\n", id.c_str());
     }
     return new Variable(id, symbolTable.getSymbolType(id));
@@ -157,11 +151,11 @@ Data::Type SemanticAnalyzer::classToDataType(TreeNode::ClassType type) const {
         case TreeNode::INTEGER:
             return Data::INTEGER;
         case TreeNode::ARRAY_INTEGER:
-            return Data::ARRAY;
+            return Data::ARRAY_INTEGER;
         case TreeNode::ARRAY_FLOAT:
-            return Data::ARRAY;
+            return Data::ARRAY_FLOAT;
         case TreeNode::ARRAY_BOOLEAN:
-            return Data::ARRAY;
+            return Data::ARRAY_BOOLEAN;
         default:
             return Data::UNKNOWN;
     }

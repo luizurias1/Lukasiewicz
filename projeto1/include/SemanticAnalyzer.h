@@ -27,7 +27,7 @@ class SemanticAnalyzer {
         TreeNode* declareVariable(std::string varId, TreeNode::ClassType dataType, int size = 0);
         TreeNode* assignVariable(std::string varId, TreeNode::ClassType assignedType, TreeNode * n = NULL);
         TreeNode* declareAssignVariable(std::string id, TreeNode::ClassType dataType, TreeNode::ClassType assignedType);
-        TreeNode* useVariable(std::string varId);
+        TreeNode* useVariable(std::string varId, TreeNode* index = NULL);
 
     private:
         Data::Type classToDataType(TreeNode::ClassType type) const;
