@@ -64,6 +64,21 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
     if(left->dataType() == Data::UNKNOWN || right->dataType() == Data::UNKNOWN)
         return;
 
+    if(left->dataType() == Data::ARRAY)
+      left->setType(Data::INTEGER);
+
+    //Se index do array nao for int, gera erro semântico
+    if(left->classType() == TreeNode::ARRAY){
+      Array *a = (Array*) left;
+      if(a->getNode()->classType() == TreeNode::VARIABLE){
+        Variable *v = (Variable*) a->getNode();
+        Data::Type tipo = symbolTable.getSymbolType(v->getId());
+        if (tipo != Data::INTEGER){
+          yyerror("semantic error: index operator expects integer but received %s\n",dataTypeToString(tipo).c_str());
+        }
+      }
+    }
+
     // Se os operandos diferem, gera erro semântico
     if(left->dataType() != right->dataType()) {
         yyerror("semantic error: %s operation expected %s but received %s\n",
@@ -73,24 +88,30 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
     }
 }
 
-TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType dataType) {
+TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType dataType, int size) {
     if(symbolTable.existsVariable(id))
         yyerror("semantic error: re-declaration of variable %s\n", id.c_str());
     else
        symbolTable.addSymbol(id, Symbol(classToDataType(dataType), Symbol::VARIABLE, false)); // Adds variable to symbol table
-
-    return new Variable(id, classToDataType(dataType)); //Creates variable node anyway
+    if ((dataType == TreeNode::ARRAY_INTEGER) || (dataType == TreeNode::ARRAY_FLOAT) || (dataType == TreeNode::ARRAY_BOOLEAN)){
+       return new Array(id, classToDataType(dataType), size);
+    }else
+        return new Variable(id, classToDataType(dataType)); //Creates variable node anyway
 }
 
-TreeNode* SemanticAnalyzer::assignVariable(std::string id, TreeNode::ClassType assignedType) {
+TreeNode* SemanticAnalyzer::assignVariable(std::string id, TreeNode::ClassType assignedType, TreeNode* n) {
+
     if(!symbolTable.existsVariable(id)) {
         yyerror("semantic error: undeclared variable %s\n", id.c_str());
         return new Variable(id, Data::UNKNOWN); //Creates variable node anyway
-    } else {
-        symbolTable.setInitializedVariable(id);
-        return new Variable(id, symbolTable.getSymbolType(id));
-    }
+    }  else if (symbolTable.getSymbolType(id) == Data::ARRAY){
 
+        symbolTable.setInitializedVariable(id);
+        return new Array (id,symbolTable.getSymbolType(id),n);
+    } else{
+          symbolTable.setInitializedVariable(id);
+          return new Variable(id, symbolTable.getSymbolType(id));
+    }
 }
 
 TreeNode* SemanticAnalyzer::declareAssignVariable(std::string id, TreeNode::ClassType dataType, TreeNode::ClassType assignedType) {
@@ -122,6 +143,12 @@ Data::Type SemanticAnalyzer::classToDataType(TreeNode::ClassType type) const {
             return Data::FLOAT;
         case TreeNode::INTEGER:
             return Data::INTEGER;
+        case TreeNode::ARRAY_INTEGER:
+            return Data::ARRAY;
+        case TreeNode::ARRAY_FLOAT:
+            return Data::ARRAY;
+        case TreeNode::ARRAY_BOOLEAN:
+            return Data::ARRAY;
         default:
             return Data::UNKNOWN;
     }

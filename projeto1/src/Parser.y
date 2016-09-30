@@ -2,7 +2,7 @@
     #include "SemanticAnalyzer.h"
     #include "SyntaxTree.h"
     #include "TreeNode.h"
-    
+
     SemanticAnalyzer SEMANTIC_ANALYZER;
     SyntaxTree* SYNTAX_TREE;
 
@@ -90,7 +90,7 @@ lines:
 // Linha
 line:
     attribution
-    | T_TYPE_INT declar_int { $$ = new VariableDeclaration(Data::INTEGER, $2); }
+    | T_TYPE_INT declar_int { $$ = new VariableDeclaration(Data::INTEGER, $2);  }
     | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(Data::FLOAT, $2); }
     | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2); }
     | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL change_scope else { $$ = new ConditionalOperation($2, $7->v, $8->v);
@@ -122,6 +122,10 @@ attribution:
                                 SEMANTIC_ANALYZER.assignVariable($1, $3->classType()),
                                 BinaryOperation::ASSIGN, $3);
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | T_ID T_OPEN_PAR expr T_CLOSING_PAR T_ATT expr { $$ = new BinaryOperation(
+                                SEMANTIC_ANALYZER.assignVariable($1, $6->classType(),$3),
+                                BinaryOperation::ASSIGN, $6);
+                        SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$);  }
     ;
 
 // Expressão
@@ -138,6 +142,7 @@ expr:
     | op_binary
     | comparison
     | connective
+
     ;
 
 // Operações binárias
@@ -184,6 +189,9 @@ declar_bool:
                                                     $1, TreeNode::BOOLEAN, $3->classType()),
                                                  BinaryOperation::ASSIGN, $3);
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | T_ID T_OPEN_PAR T_INT T_CLOSING_PAR T_COMMA declar_bool {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::ARRAY_BOOLEAN, $3),
+                                                    BinaryOperation::COMMA, $6);}
+    | T_ID T_OPEN_PAR T_INT T_CLOSING_PAR { $$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::ARRAY_BOOLEAN,$3); }
     ;
 
 // Declaração de ponto flutuante
@@ -200,6 +208,9 @@ declar_float:
                                                     $1, TreeNode::FLOAT, $3->classType()),
                                                  BinaryOperation::ASSIGN, $3);
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | T_ID T_OPEN_PAR T_INT T_CLOSING_PAR T_COMMA declar_float{$$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::ARRAY_FLOAT, $3),
+                                                    BinaryOperation::COMMA, $6);}
+    | T_ID T_OPEN_PAR T_INT T_CLOSING_PAR {$$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::ARRAY_FLOAT,$3); }
     ;
 
 // Declaração de inteiro
@@ -216,8 +227,11 @@ declar_int:
                                                     $1, TreeNode::INTEGER, $3->classType()),
                                                  BinaryOperation::ASSIGN, $3);
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+    | T_ID T_OPEN_PAR T_INT T_CLOSING_PAR T_COMMA declar_int {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::ARRAY_INTEGER, $3),
+                                                    BinaryOperation::COMMA, $6);}
+    | T_ID T_OPEN_PAR T_INT T_CLOSING_PAR { $$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::ARRAY_INTEGER,$3); }
     ;
-    
+
 // Dados
 data:
     T_INT { $$ = new Integer($1); }
@@ -225,12 +239,12 @@ data:
     | T_TRUE { $$ = new Boolean(true); }
     | T_FALSE { $$ = new Boolean(false); }
     ;
-    
+
 // Tipos de dados
 data_type:
     T_TYPE_BOOL
     | T_TYPE_FLOAT
     | T_TYPE_INT
     ;
-    
+
 %%
