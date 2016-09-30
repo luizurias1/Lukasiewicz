@@ -503,9 +503,11 @@ std::string LoopDeclaration::getTab() {
     return tabulation;
 }
 
-Pointer::Pointer(TreeNode* type, std::string value) : TreeNode(Data::UNKNOWN) {
+// POINTER NODE
+Pointer::Pointer(TreeNode::ClassType type, std::string value, int number) : TreeNode(Data::UNKNOWN) {
     this->value = value;
     this->type = type;
+    this->number = number;
 }
 
 Pointer::~Pointer() {
@@ -517,10 +519,6 @@ TreeNode::ClassType Pointer::classType() const {
 
 std::string Pointer::printPreOrder() {
   std::string output = "";
-  if (type->classType() == INTEGER){
-    output += "int ref var: ";
-    output += value;
-  }
   return output;
 }
 

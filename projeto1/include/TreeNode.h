@@ -117,7 +117,7 @@ class UnaryOperation : public TreeNode {
 class Pointer : public TreeNode {
 
     public:
-        Pointer(TreeNode* type, std::string value);
+        Pointer(TreeNode::ClassType type, std::string value, int number);
         virtual ~Pointer();
         TreeNode::ClassType classType() const;
         std::string printInOrder();
@@ -125,7 +125,8 @@ class Pointer : public TreeNode {
 
     private:
         std::string value;
-        TreeNode* type;
+        TreeNode::ClassType type;
+        int number;
 
 };
 

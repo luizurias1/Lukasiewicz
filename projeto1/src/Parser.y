@@ -49,9 +49,9 @@
  * Example: %type<node> expr
  */
 %type <syntaxTree> lines program
-%type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution pointer
+%type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution
 %type <vector> else scope change_scope
-%type <dataType> data_type
+%type <dataType> data_type pointer
 
 /* Operator precedence for mathematical operators
  * The latest it is listed, the highest the precedence
@@ -145,8 +145,8 @@ expr:
     ;
 
 pointer:
-    T_POINTER
-    | T_POINTER pointer
+    T_POINTER {$$ = 1;}
+    | T_POINTER pointer {$$ += 1;}
     ;
 
 // Operações binárias
@@ -217,7 +217,7 @@ declar_float:
 
 // Declaração de inteiro
 declar_int:
-    pointer T_ID
+    pointer T_ID { $$ = Pointer(TreeNode::INTEGER, $2, $1); }
     | pointer T_ID T_COMMA declar_int
     | T_ID T_COMMA declar_int { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::INTEGER),
                                                     BinaryOperation::COMMA, $3); }
