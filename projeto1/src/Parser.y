@@ -97,14 +97,14 @@ line:
             SEMANTIC_ANALYZER.analyzeBinaryOperation((ConditionalOperation*) $$); }
     | T_FOR attribution T_COMMA comparison T_COMMA attribution T_OPEN_BRACE T_NL change_scope T_CLOSING_BRACE { $$ = new LoopDeclaration($2, $4, $6, $9->v);
             SEMANTIC_ANALYZER.analyzeBinaryOperation((LoopDeclaration*) $$); }
-    | data_type T_FUNCTION T_ID T_OPEN_PAR T_CLOSING_PAR new_scope function_scope end_scope { $$ = NULL; }
-    | data_type T_FUNCTION T_ID T_OPEN_PAR new_scope params T_CLOSING_PAR function_scope end_scope { $$ = NULL; }
+    | data_type T_FUNCTION T_ID T_OPEN_PAR T_CLOSING_PAR new_scope function_scope end_scope { $$ = new Function($7->v, $7->v, $7->v.front()); }
+    | data_type T_FUNCTION T_ID T_OPEN_PAR new_scope params T_CLOSING_PAR function_scope end_scope { $$ = new Function($6->v, $8->v, $8->v.front()); }
     ;
 
 // Escopo de uma função (parâmetros + corpo)
 function_scope:
-    { $$ = NULL; }
-    | T_OPEN_BRACE T_NL scope T_RETURN expr T_NL T_CLOSING_BRACE { $$ = $3; }
+    { $$ = new MyVector(); }
+    | T_OPEN_BRACE T_NL scope T_RETURN expr T_NL T_CLOSING_BRACE { $$ = $3; $$->v.insert($$->v.begin(), $5); }
     ;
 
 // Parâmetros de uma função

@@ -541,3 +541,26 @@ std::string LoopDeclaration::getTab() {
     }
     return tabulation;
 }
+
+
+
+
+
+Function::Function(std::vector<TreeNode*> params, std::vector<TreeNode*> body, TreeNode* returnValue) : TreeNode(returnValue->dataType()) {
+    this->params = params;
+    this->body = body;
+    this->returnValue = returnValue;
+}
+
+Function::~Function() {
+}
+
+TreeNode::ClassType Function::classType() const {
+    return TreeNode::FUNCTION;
+}
+
+std::string Function::printInOrder() {
+}
+
+std::string Function::printPreOrder() {
+}

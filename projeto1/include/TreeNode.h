@@ -39,6 +39,7 @@ class TreeNode {
             VARIABLE_DECLARATION,
             CONDITIONAL,
             LOOP_DECLARATION,
+            FUNCTION,
             UNKNOWN
         };
 
@@ -240,6 +241,24 @@ class LoopDeclaration : public TreeNode {
         TreeNode* interation;
         std::vector<TreeNode*> body;
         int tab;
+
+};
+
+class Function : public TreeNode {
+
+    friend class SemanticAnalyzer;
+
+    public:
+        Function(std::vector<TreeNode*> params, std::vector<TreeNode*> body, TreeNode* returnValue);
+        virtual ~Function();
+        TreeNode::ClassType classType() const;
+        std::string printInOrder();
+        std::string printPreOrder();
+
+    private:
+        std::vector<TreeNode*> params;
+        std::vector<TreeNode*> body;
+        TreeNode* returnValue;
 
 };
 
