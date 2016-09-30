@@ -76,6 +76,7 @@ class BinaryOperation : public TreeNode {
             LOWER,
             LOWER_EQUAL,
             AND,
+            ADDRESS,
             OR
         };
 
@@ -257,15 +258,24 @@ class MyVector {
 class Pointer : public TreeNode {
 
     public:
-        Pointer(std::string id, Data::Type type);
+        enum ADDRESS{
+          REF,
+          ADDR,
+          UNKNOWN
+        };
+
+        Pointer(std::string id, Data::Type type, ADDRESS a, int count);
         virtual ~Pointer();
         TreeNode::ClassType classType() const;
         std::string getId() const;
         std::string printInOrder();
         std::string printPreOrder();
+        std::string numberOfRefs();
 
     private:
         std::string id;
+        ADDRESS a;
+        int count;
 
 };
 

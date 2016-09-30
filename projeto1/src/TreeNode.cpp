@@ -519,8 +519,10 @@ std::string LoopDeclaration::getTab() {
 }
 
 // POINTER NODE
-Pointer::Pointer(std::string id, Data::Type type) : TreeNode(type) {
+Pointer::Pointer(std::string id, Data::Type type, ADDRESS a, int count) : TreeNode(type) {
     this->id = id;
+    this->a = a;
+    this->count = count;
 }
 
 Pointer::~Pointer() {
@@ -531,13 +533,28 @@ TreeNode::ClassType Pointer::classType() const {
 }
 
 std::string Pointer::printInOrder() {
-    std::string output = " ref var: ";
+    std::string output = numberOfRefs();
+    output += " var: ";
     output += id;
     return  output;
 }
 
 std::string Pointer::printPreOrder() {
-    std::string output = " ref var: ";
-    output += id;
+    std::string output = "";
+    if(a == ADDRESS::ADDR){
+      output = " [addr] ";
+    }else{
+      output = " [ref] " + id + " ";
+    }
+
     return  output;
+}
+
+std::string Pointer::numberOfRefs(){
+  int i;
+  std::string output = "";
+  for(i = 1; i <= count; i++){
+    output += " ref";
+  }
+  return output;
 }

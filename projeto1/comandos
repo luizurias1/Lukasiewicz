@@ -1,3 +1,8 @@
 int ref mypointer
 float ref floatpointer
 bool ref boolpointer
+int i
+i = 0
+mypointer = addr i
+i = ref mypointer + 1
+int ref ref doublepointer

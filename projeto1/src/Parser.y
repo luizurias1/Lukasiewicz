@@ -121,7 +121,9 @@ else:
 attribution:
     {$$ = NULL;}
     | pointer T_ID T_ATT data
-    | T_ID T_ATT T_LVALUE T_ID
+    | T_ID T_ATT T_LVALUE T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.assignVariable($1, SEMANTIC_ANALYZER.useVariable($4)->classType()),
+                                                           BinaryOperation::ASSIGN, SEMANTIC_ANALYZER.useVariable($4));
+                                                   SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     | T_ID T_ATT expr { $$ = new BinaryOperation(
                                 SEMANTIC_ANALYZER.assignVariable($1, $3->classType()),
                                 BinaryOperation::ASSIGN, $3);
@@ -130,7 +132,7 @@ attribution:
 
 // Expressão
 expr:
-    T_POINTER T_ID
+    T_POINTER T_ID {$$ = new Pointer($2, Data::POINTER, Pointer::ADDRESS::REF, 1);}
     | T_INT { $$ = new Integer($1); }
     | T_FLOAT { $$ = new Float($1); }
     | T_TRUE { $$ = new Boolean(true); }
@@ -146,8 +148,8 @@ expr:
     ;
 
 pointer:
-    T_POINTER {$$ = 1;}
-    | T_POINTER pointer {$$ = 1;}
+    T_POINTER {int a = 1; $$ = a;}
+    | T_POINTER pointer {$$ = ($2 + 1);}
     ;
 
 // Operações binárias
@@ -229,8 +231,8 @@ declar_int:
     ;
 
 declar_pointer:
-    pointer T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($2, TreeNode::POINTER); }
-    | pointer T_ID T_COMMA declar_pointer { $$ = SEMANTIC_ANALYZER.declareVariable($2, TreeNode::POINTER); }
+    pointer T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($2, TreeNode::POINTER, $1); }
+    | pointer T_ID T_COMMA declar_pointer
 
 
 // Dados
