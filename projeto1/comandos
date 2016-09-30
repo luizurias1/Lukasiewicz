@@ -1,1 +1,3 @@
 int ref mypointer
+float ref floatpointer
+bool ref boolpointer

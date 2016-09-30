@@ -73,14 +73,19 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
     }
 }
 
+// >>>declareVariable<<<
 TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType dataType) {
     if(symbolTable.existsVariable(id))
         yyerror("semantic error: re-declaration of variable %s\n", id.c_str());
     else
        symbolTable.addSymbol(id, Symbol(classToDataType(dataType), Symbol::VARIABLE, false)); // Adds variable to symbol table
+    if(dataType == TreeNode::POINTER){
+      return new Pointer(id, classToDataType(dataType));
+    }
 
     return new Variable(id, classToDataType(dataType)); //Creates variable node anyway
 }
+// end >>>declareVariable<<<
 
 TreeNode* SemanticAnalyzer::assignVariable(std::string id, TreeNode::ClassType assignedType) {
     if(!symbolTable.existsVariable(id)) {
@@ -122,6 +127,8 @@ Data::Type SemanticAnalyzer::classToDataType(TreeNode::ClassType type) const {
             return Data::FLOAT;
         case TreeNode::INTEGER:
             return Data::INTEGER;
+        case TreeNode::POINTER:
+            return Data::POINTER;
         default:
             return Data::UNKNOWN;
     }

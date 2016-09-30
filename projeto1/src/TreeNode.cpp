@@ -212,6 +212,7 @@ std::string Integer::printInOrder() {
     return std::to_string(value);
 }
 
+//  >>>Variable<<<<
 Variable::Variable(std::string id, Data::Type type) : TreeNode(type) {
     this->id = id;
 }
@@ -234,6 +235,7 @@ std::string Variable::printInOrder() {
 std::string Variable::printPreOrder() {
     return id + " ";
 }
+// end >>>Variable<<<
 
 VariableDeclaration::VariableDeclaration(Data::Type type, TreeNode* next) : TreeNode(type) {
     this->next = next;
@@ -251,6 +253,10 @@ std::string VariableDeclaration::printInOrder() {
     if (next != NULL) {
         output += next->printInOrder();
     }
+    if (next->classType() == TreeNode::POINTER){
+      output = typeToString(this->type);
+      output += next->printInOrder();
+    }
     return output;
 }
 
@@ -259,7 +265,12 @@ std::string VariableDeclaration::printPreOrder() {
     if (next != NULL) {
         output += next->printInOrder();
     }
+    if (next->classType() == TreeNode::POINTER){
+      output = typeToString(this->type);
+      output += next->printInOrder();
+    }
     return output;
+
 }
 
 std::string VariableDeclaration::typeToString(Data::Type type) {
@@ -270,6 +281,8 @@ std::string VariableDeclaration::typeToString(Data::Type type) {
             return "bool";
         case Data::FLOAT:
             return "float";
+        case Data::POINTER:
+            return "int ref";
         default:
             return "unknown";
     }
@@ -310,6 +323,8 @@ std::string TypeCasting::typeToString(Data::Type type) {
             return "bool";
         case Data::FLOAT:
             return "float";
+        case Data::POINTER:
+            return "ref";
         default:
             return "unknown";
     }
@@ -504,10 +519,8 @@ std::string LoopDeclaration::getTab() {
 }
 
 // POINTER NODE
-Pointer::Pointer(TreeNode::ClassType type, std::string value, int number) : TreeNode(Data::UNKNOWN) {
-    this->value = value;
-    this->type = type;
-    this->number = number;
+Pointer::Pointer(std::string id, Data::Type type) : TreeNode(type) {
+    this->id = id;
 }
 
 Pointer::~Pointer() {
@@ -517,11 +530,14 @@ TreeNode::ClassType Pointer::classType() const {
     return TreeNode::POINTER;
 }
 
-std::string Pointer::printPreOrder() {
-  std::string output = "";
-  return output;
+std::string Pointer::printInOrder() {
+    std::string output = " ref var: ";
+    output += id;
+    return  output;
 }
 
-std::string Pointer::printInOrder() {
-  printPreOrder();
+std::string Pointer::printPreOrder() {
+    std::string output = " ref var: ";
+    output += id;
+    return  output;
 }

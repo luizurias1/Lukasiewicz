@@ -18,7 +18,8 @@ namespace Data {
         BOOLEAN = 0,
         FLOAT = 1,
         INTEGER = 2,
-        UNKNOWN = 3
+        UNKNOWN = 3,
+        POINTER = 4
     };
 }
 
@@ -111,22 +112,6 @@ class UnaryOperation : public TreeNode {
     private:
         Type operation;
         TreeNode* right;
-
-};
-
-class Pointer : public TreeNode {
-
-    public:
-        Pointer(TreeNode::ClassType type, std::string value, int number);
-        virtual ~Pointer();
-        TreeNode::ClassType classType() const;
-        std::string printInOrder();
-        std::string printPreOrder();
-
-    private:
-        std::string value;
-        TreeNode::ClassType type;
-        int number;
 
 };
 
@@ -268,5 +253,21 @@ class MyVector {
       std::vector<TreeNode*> v;
 
 };
+
+class Pointer : public TreeNode {
+
+    public:
+        Pointer(std::string id, Data::Type type);
+        virtual ~Pointer();
+        TreeNode::ClassType classType() const;
+        std::string getId() const;
+        std::string printInOrder();
+        std::string printPreOrder();
+
+    private:
+        std::string id;
+
+};
+
 
 #endif

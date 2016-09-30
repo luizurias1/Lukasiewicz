@@ -49,7 +49,7 @@
  * Example: %type<node> expr
  */
 %type <syntaxTree> lines program
-%type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution
+%type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution declar_pointer
 %type <vector> else scope change_scope
 %type <dataType> data_type pointer
 
@@ -91,6 +91,7 @@ lines:
 // Linha
 line:
     attribution
+    | data_type declar_pointer { $$ = new VariableDeclaration((Data::Type) $1, $2); }
     | T_TYPE_INT declar_int { $$ = new VariableDeclaration(Data::INTEGER, $2); }
     | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(Data::FLOAT, $2); }
     | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2); }
@@ -146,7 +147,7 @@ expr:
 
 pointer:
     T_POINTER {$$ = 1;}
-    | T_POINTER pointer {$$ += 1;}
+    | T_POINTER pointer {$$ = 1;}
     ;
 
 // Operações binárias
@@ -181,9 +182,7 @@ connective:
 
 // Declaração de booleano
 declar_bool:
-    pointer T_ID
-    | pointer T_ID T_COMMA declar_bool
-    | T_ID T_COMMA declar_bool { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::BOOLEAN),
+    T_ID T_COMMA declar_bool { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::BOOLEAN),
                                                     BinaryOperation::COMMA, $3); }
     | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::BOOLEAN); }
     | T_ID T_ATT data T_COMMA declar_bool { $$ = new BinaryOperation(
@@ -199,9 +198,7 @@ declar_bool:
 
 // Declaração de ponto flutuante
 declar_float:
-    pointer T_ID
-    | pointer T_ID T_COMMA declar_float
-    | T_ID T_COMMA declar_float { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::FLOAT),
+    T_ID T_COMMA declar_float { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::FLOAT),
                                                     BinaryOperation::COMMA, $3); }
     | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::FLOAT); }
     | T_ID T_ATT data T_COMMA declar_float { $$ = new BinaryOperation(
@@ -217,9 +214,7 @@ declar_float:
 
 // Declaração de inteiro
 declar_int:
-    pointer T_ID { $$ = Pointer(TreeNode::INTEGER, $2, $1); }
-    | pointer T_ID T_COMMA declar_int
-    | T_ID T_COMMA declar_int { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::INTEGER),
+    T_ID T_COMMA declar_int { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::INTEGER),
                                                     BinaryOperation::COMMA, $3); }
     | T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::INTEGER); }
     | T_ID T_ATT data T_COMMA declar_int { $$ = new BinaryOperation(
@@ -232,6 +227,11 @@ declar_int:
                                                  BinaryOperation::ASSIGN, $3);
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     ;
+
+declar_pointer:
+    pointer T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($2, TreeNode::POINTER); }
+    | pointer T_ID T_COMMA declar_pointer { $$ = SEMANTIC_ANALYZER.declareVariable($2, TreeNode::POINTER); }
+
 
 // Dados
 data:
