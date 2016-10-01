@@ -1,14 +1,12 @@
 #ifndef TREENODE_H_
 #define TREENODE_H_
 
-#include <string.h>
-#include <stdio.h>
+#include <string>
 #include <vector>
-#include <typeinfo>
-#include <iostream>
 
 class SemanticAnalyzer;
 class SyntaxTree;
+class TreeNode;
 
 /**
  * Namespace de dados.
@@ -21,6 +19,21 @@ namespace Data {
         UNKNOWN = 3
     };
 }
+
+/**
+ * Vetor de nodos da árvore sintática.
+ */
+class Vector {
+
+    public:
+        Vector();
+        virtual ~Vector();
+        TreeNode* popFront();
+        void pushFront(TreeNode* node);
+        int size() const;
+        std::vector<TreeNode*> internalVector;
+
+};
 
 /**
  * Nodo da árvore sintática.
@@ -40,6 +53,7 @@ class TreeNode {
             CONDITIONAL,
             LOOP_DECLARATION,
             FUNCTION,
+            FUNCTION_CALL,
             UNKNOWN
         };
 
@@ -49,8 +63,13 @@ class TreeNode {
         void setType(Data::Type type);
         virtual TreeNode::ClassType classType() const = 0;
         virtual std::string printInOrder() = 0;
-        //std::string returnIfThen(std::string identation);
         virtual std::string printPreOrder() = 0;
+    
+        static Data::Type classToDataType(TreeNode::ClassType type);
+        static std::string toString(TreeNode::ClassType type);
+        static std::string toString(Data::Type type);
+        static std::string toShortString(TreeNode::ClassType type);
+        static std::string toShortString(Data::Type type);
 
     protected:
         Data::Type type;
@@ -206,8 +225,8 @@ class ConditionalOperation : public TreeNode {
     friend class SemanticAnalyzer;
 
     public:
-      ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then, std::vector<TreeNode*> el);
-      ConditionalOperation(TreeNode* condition, std::vector<TreeNode*> then);
+      ConditionalOperation(TreeNode* condition, Vector* then, Vector* el);
+      ConditionalOperation(TreeNode* condition, Vector* then);
       virtual ~ConditionalOperation();
       TreeNode::ClassType classType() const;
       TreeNode* getCondition();
@@ -227,7 +246,7 @@ class LoopDeclaration : public TreeNode {
     friend class SemanticAnalyzer;
 
     public:
-        LoopDeclaration(TreeNode* init, TreeNode* test, TreeNode* interation, std::vector<TreeNode*> body);
+        LoopDeclaration(TreeNode* init, TreeNode* test, TreeNode* interation, Vector* body);
         virtual ~LoopDeclaration();
         TreeNode::ClassType classType() const;
         std::string printInOrder();
@@ -246,28 +265,40 @@ class LoopDeclaration : public TreeNode {
 
 class Function : public TreeNode {
 
+    friend class ConditionalOperation;
+    friend class LoopDeclaration;
+
+    public:
+        Function(std::string id, Vector* params, Vector* body, TreeNode* returnValue);
+        virtual ~Function();
+        TreeNode::ClassType classType() const;
+        std::string printInOrder();
+        std::string printPreOrder();
+        std::string getTab();
+
+    private:
+        std::string id;
+        std::vector<TreeNode*> params;
+        std::vector<TreeNode*> body;
+        TreeNode* returnValue;
+        int tab;
+
+};
+
+class FunctionCall : public TreeNode {
+
     friend class SemanticAnalyzer;
 
     public:
-        Function(std::vector<TreeNode*> params, std::vector<TreeNode*> body, TreeNode* returnValue);
-        virtual ~Function();
+        FunctionCall(std::string id, Vector* params);
+        virtual ~FunctionCall();
         TreeNode::ClassType classType() const;
         std::string printInOrder();
         std::string printPreOrder();
 
     private:
+        std::string id;
         std::vector<TreeNode*> params;
-        std::vector<TreeNode*> body;
-        TreeNode* returnValue;
-
-};
-
-class MyVector {
-
-    public:
-      MyVector() {}
-      virtual ~MyVector() {}
-      std::vector<TreeNode*> v;
 
 };
 

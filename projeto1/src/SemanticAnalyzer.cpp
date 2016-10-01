@@ -19,13 +19,13 @@ void SemanticAnalyzer::returnScope() {
 void SemanticAnalyzer::analyzeBinaryOperation(ConditionalOperation* conditionalOp) {
     if(conditionalOp->condition->dataType() != Data::BOOLEAN)
         yyerror("semantic error: test operation expected boolean but received %s\n",
-            dataTypeToString(conditionalOp->condition->dataType()).c_str());
+            TreeNode::toString(conditionalOp->condition->dataType()).c_str());
 }
 
 void SemanticAnalyzer::analyzeBinaryOperation(LoopDeclaration* loop) {
     if(loop->test->dataType() != Data::BOOLEAN)
         yyerror("semantic error: test operation expected boolean but received %s\n",
-            dataTypeToString(loop->test->dataType()).c_str());
+            TreeNode::toString(loop->test->dataType()).c_str());
 }
 
 void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
@@ -69,8 +69,8 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
     if(left->dataType() != right->dataType()) {
         yyerror("semantic error: %s operation expected %s but received %s\n",
             BinaryOperation::operationName(op),
-            dataTypeToString(left->dataType()).c_str(),
-            dataTypeToString(right->dataType()).c_str());
+            TreeNode::toString(left->dataType()).c_str(),
+            TreeNode::toString(right->dataType()).c_str());
     }
 }
 
@@ -112,36 +112,6 @@ TreeNode* SemanticAnalyzer::useVariable(std::string id) {
         yyerror("semantic error: uninitialized variable %s\n", id.c_str());
     }
     return new Variable(id, getSymbolType(id));
-}
-
-Data::Type SemanticAnalyzer::classToDataType(TreeNode::ClassType type) const {
-    switch(type) {
-        case TreeNode::BOOLEAN:
-            return Data::BOOLEAN;
-        case TreeNode::FLOAT:
-            return Data::FLOAT;
-        case TreeNode::INTEGER:
-            return Data::INTEGER;
-        default:
-            return Data::UNKNOWN;
-    }
-}
-
-std::string SemanticAnalyzer::classToString(TreeNode::ClassType type) const {
-    return dataTypeToString(classToDataType(type));
-}
-
-std::string SemanticAnalyzer::dataTypeToString(Data::Type type) const {
-    switch(type) {
-        case Data::BOOLEAN:
-            return "boolean";
-        case Data::FLOAT:
-            return "float";
-        case Data::INTEGER:
-            return "integer";
-        default:
-            return "unknown";
-    }
 }
 
 Data::Type SemanticAnalyzer::getSymbolType(std::string varId) const {

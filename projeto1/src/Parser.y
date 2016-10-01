@@ -2,6 +2,7 @@
     #include "SemanticAnalyzer.h"
     #include "SyntaxTree.h"
     #include "TreeNode.h"
+#include <iostream>
 
     SemanticAnalyzer SEMANTIC_ANALYZER;
     SyntaxTree* SYNTAX_TREE;
@@ -15,7 +16,7 @@
 %code requires {
     class TreeNode;
     class SyntaxTree;
-    class MyVector;
+    class Vector;
 }
 
 /* yylval == %union
@@ -26,7 +27,7 @@
     SyntaxTree* syntaxTree;
     int integer;
     char *id;
-    MyVector* vector;
+    Vector* vector;
     int dataType;
 }
 
@@ -93,26 +94,24 @@ line:
     | T_TYPE_INT declar_int { $$ = new VariableDeclaration(Data::INTEGER, $2); }
     | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(Data::FLOAT, $2); }
     | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2); }
-    | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL change_scope T_CLOSING_BRACE else { $$ = new ConditionalOperation($2, $7->v, $9->v);
+    | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL change_scope T_CLOSING_BRACE else { $$ = new ConditionalOperation($2, $7, $9);
             SEMANTIC_ANALYZER.analyzeBinaryOperation((ConditionalOperation*) $$); }
-    | T_FOR attribution T_COMMA comparison T_COMMA attribution T_OPEN_BRACE T_NL change_scope T_CLOSING_BRACE { $$ = new LoopDeclaration($2, $4, $6, $9->v);
+    | T_FOR attribution T_COMMA comparison T_COMMA attribution T_OPEN_BRACE T_NL change_scope T_CLOSING_BRACE { $$ = new LoopDeclaration($2, $4, $6, $9);
             SEMANTIC_ANALYZER.analyzeBinaryOperation((LoopDeclaration*) $$); }
-    | data_type T_FUNCTION T_ID T_OPEN_PAR T_CLOSING_PAR new_scope function_scope end_scope { $$ = new Function($7->v, $7->v, $7->v.front()); }
-    | data_type T_FUNCTION T_ID T_OPEN_PAR new_scope params T_CLOSING_PAR function_scope end_scope { $$ = new Function($6->v, $8->v, $8->v.front()); }
+    | data_type T_FUNCTION T_ID T_OPEN_PAR T_CLOSING_PAR new_scope function_scope end_scope { $$ = NULL; if($7->size() > 0) $$ = new Function($3, new Vector(), $7, $7->popFront()); }
+    | data_type T_FUNCTION T_ID T_OPEN_PAR new_scope params T_CLOSING_PAR function_scope end_scope { $$ = NULL; if($8->size() > 0) $$ = new Function($3, $6, $8, $8->popFront()); }
     ;
 
 // Escopo de uma função (parâmetros + corpo)
 function_scope:
-    { $$ = new MyVector(); }
-    | T_OPEN_BRACE T_NL scope T_RETURN expr T_NL T_CLOSING_BRACE { $$ = $3; $$->v.insert($$->v.begin(), $5); }
+    { $$ = new Vector(); }
+    | T_OPEN_BRACE T_NL scope T_RETURN expr T_NL T_CLOSING_BRACE { $$ = $3; $$->pushFront($5); }
     ;
 
 // Parâmetros de uma função
 params:
-    data_type T_ID { $$ = new MyVector(); $$->v.insert($$->v.begin(), new VariableDeclaration((Data::Type) $1,
-                                            SEMANTIC_ANALYZER.declareAssignVariable($2, (Data::Type) $1, (Data::Type) $1))); }
-    | data_type T_ID T_COMMA params { $$ = $4; $$->v.insert($$->v.begin(), new VariableDeclaration((Data::Type) $1,
-                                            SEMANTIC_ANALYZER.declareAssignVariable($2, (Data::Type) $1, (Data::Type) $1))); }
+    data_type T_ID { $$ = new Vector(); $$->pushFront(SEMANTIC_ANALYZER.declareAssignVariable($2, (Data::Type) $1, (Data::Type) $1)); }
+    | data_type T_ID T_COMMA params { $$ = $4; $$->pushFront(SEMANTIC_ANALYZER.declareAssignVariable($2, (Data::Type) $1, (Data::Type) $1)); }
     ;
 
 // Change scope
@@ -127,8 +126,8 @@ new_scope:
 
 // Escopo
 scope:
-    { $$ = new MyVector(); }
-    | line T_NL scope {$$ = $3; if($1 != NULL) $$->v.insert( $$->v.begin(), $1);  }
+    { $$ = new Vector(); }
+    | line T_NL scope {$$ = $3; if($1 != NULL) $$->pushFront($1);  }
     ;
 
 // Fim do escopo atual
@@ -138,7 +137,7 @@ end_scope:
 
 // Ramo else do if
 else:
-    { $$ = new MyVector(); }
+    { $$ = new Vector(); }
     | T_ELSE T_OPEN_BRACE T_NL change_scope T_CLOSING_BRACE { $$ = $4; }
     ;
 
@@ -169,13 +168,13 @@ expr:
     ;
 
 function_call:
-    T_ID T_OPEN_PAR T_CLOSING_PAR { $$ = NULL; }
-    | T_ID T_OPEN_PAR params_call T_CLOSING_PAR { $$ = NULL; }
+    T_ID T_OPEN_PAR T_CLOSING_PAR { $$ = new FunctionCall($1, new Vector()); }
+    | T_ID T_OPEN_PAR params_call T_CLOSING_PAR { $$ = new FunctionCall($1, $3); }
     ;
 
 params_call:
-    expr { $$ = new MyVector(); $$->v.insert($$->v.begin(), $1); }
-    | expr T_COMMA params_call { $$ = $3; $$->v.insert($$->v.begin(), $1); }
+    expr { $$ = new Vector(); $$->pushFront($1); }
+    | expr T_COMMA params_call { $$ = $3; $$->pushFront($1); }
     ;
 
 // Operações binárias
