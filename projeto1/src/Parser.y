@@ -122,7 +122,8 @@ else:
 attribution:
     {$$ = NULL;}
     | pointer T_ID T_ATT data
-    | T_ID T_ATT T_LVALUE T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.assignVariable($1, SEMANTIC_ANALYZER.useVariable($4)->classType()),
+    | T_ID T_ATT T_LVALUE T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.assignVariable($1, SEMANTIC_ANALYZER.useVariable($4)->classType(),
+                                                              Pointer::ADDRESS::ADDR),
                                                            BinaryOperation::ASSIGN, SEMANTIC_ANALYZER.useVariable($4));
                                                    SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     | T_ID T_ATT expr { $$ = new BinaryOperation(

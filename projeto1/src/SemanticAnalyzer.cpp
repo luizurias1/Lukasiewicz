@@ -51,13 +51,22 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
     }
 
     if (left->dataType() != right->dataType()){
-      if(left->dataType() == Data::POINTER_INTEGER)
-        left->setType(Data::INTEGER);
-      if(left->dataType() == Data::POINTER_FLOAT)
-        left->setType(Data:: FLOAT);
-      if(left->dataType() == Data::POINTER_BOOLEAN)
-        left->setType(Data::BOOLEAN);
-    }
+      if(left->dataType() == Data::POINTER_INTEGER){
+        Pointer* pointer = (Pointer*) left;
+        if(pointer->typeOfAddress() == Pointer::ADDRESS::ADDR)
+          left->setType(Data::INTEGER);
+        }
+      if(left->dataType() == Data::POINTER_FLOAT){
+        Pointer* pointer = (Pointer*) left;
+        if(pointer->typeOfAddress() == Pointer::ADDRESS::ADDR)
+          left->setType(Data::FLOAT);
+        }
+      if(left->dataType() == Data::POINTER_BOOLEAN){
+        Pointer* pointer = (Pointer*) left;
+        if(pointer->typeOfAddress() == Pointer::ADDRESS::ADDR)
+          left->setType(Data::BOOLEAN);
+        }
+      }
 
     // Se é uma operação relacional, define tipo como booleano
     if(op == BinaryOperation::GREATER
@@ -106,7 +115,7 @@ TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType 
     return new Variable(id, classToDataType(dataType)); //Creates variable node anyway
 }
 
-TreeNode* SemanticAnalyzer::assignVariable(std::string id, TreeNode::ClassType assignedType) {
+TreeNode* SemanticAnalyzer::assignVariable(std::string id, TreeNode::ClassType assignedType, Pointer::ADDRESS address_type) {
     if(!symbolTable.existsVariable(id)) {
         yyerror("semantic error: undeclared variable %s\n", id.c_str());
         return new Variable(id, Data::UNKNOWN); //Creates variable node anyway
@@ -114,11 +123,11 @@ TreeNode* SemanticAnalyzer::assignVariable(std::string id, TreeNode::ClassType a
         symbolTable.setInitializedVariable(id);
 
         if (symbolTable.getSymbolType(id) == Data::POINTER_INTEGER)
-          return new Pointer(id, Data::POINTER_INTEGER, Pointer::ADDRESS::ADDR, 0);
+          return new Pointer(id, Data::POINTER_INTEGER, address_type, 0);
         if (symbolTable.getSymbolType(id) == Data::POINTER_FLOAT)
-          return new Pointer(id, Data::POINTER_FLOAT, Pointer::ADDRESS::ADDR, 0);
+          return new Pointer(id, Data::POINTER_FLOAT, address_type, 0);
         if (symbolTable.getSymbolType(id) == Data::POINTER_BOOLEAN)
-          return new Pointer(id, Data::POINTER_BOOLEAN, Pointer::ADDRESS::ADDR, 0);
+          return new Pointer(id, Data::POINTER_BOOLEAN, address_type, 0);
 
         return new Variable(id, symbolTable.getSymbolType(id));
     }
@@ -172,6 +181,14 @@ std::string SemanticAnalyzer::dataTypeToString(Data::Type type) const {
             return "float";
         case Data::INTEGER:
             return "integer";
+        case Data::POINTER:
+            return "pointer";
+        case Data::POINTER_INTEGER:
+            return "integer pointer";
+        case Data::POINTER_FLOAT:
+            return "float pointer";
+        case Data::POINTER_BOOLEAN:
+            return "bool pointer";
         default:
             return "unknown";
     }

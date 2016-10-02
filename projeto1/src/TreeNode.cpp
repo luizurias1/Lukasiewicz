@@ -563,3 +563,7 @@ std::string Pointer::numberOfRefs(int number){
   }
   return output;
 }
+
+Pointer::ADDRESS Pointer::typeOfAddress(){
+  return a;
+}

@@ -1,22 +1,6 @@
 int i = 0
-int j = 2
-float a = 9.0
-bool b = true
+int ref point
+point = i
 
 int ref mypointer
-float ref floatpointer
-bool ref boolpointer
-
 mypointer = addr i
-floatpointer = addr a
-
-i = ref mypointer + 1
-
-int ref ref doublepointer
-float ref ref ref floatpointer_two
-
-int ref jp
-int ref ip
-
-ip = addr i
-jp = addr j

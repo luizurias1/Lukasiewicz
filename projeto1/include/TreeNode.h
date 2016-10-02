@@ -277,6 +277,7 @@ class Pointer : public TreeNode {
         std::string printInOrder();
         std::string printPreOrder();
         std::string numberOfRefs(int number);
+        ADDRESS typeOfAddress();
 
     private:
         std::string id;
