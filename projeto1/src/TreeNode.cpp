@@ -523,6 +523,7 @@ Pointer::Pointer(std::string id, Data::Type type, ADDRESS a, int count) : TreeNo
     this->id = id;
     this->a = a;
     this->count = count;
+    this->type = type;
 }
 
 Pointer::~Pointer() {
@@ -533,7 +534,7 @@ TreeNode::ClassType Pointer::classType() const {
 }
 
 std::string Pointer::printInOrder() {
-    std::string output = numberOfRefs();
+    std::string output = numberOfRefs(0);
     output += " var: ";
     output += id;
     return  output;
@@ -542,19 +543,23 @@ std::string Pointer::printInOrder() {
 std::string Pointer::printPreOrder() {
     std::string output = "";
     if(a == ADDRESS::ADDR){
-      output = " [addr] ";
+      output += id;
+      output += " [addr] ";
     }else{
-      output = " [ref] " + id + " ";
+      output = numberOfRefs(1) + id + " ";
     }
 
     return  output;
 }
 
-std::string Pointer::numberOfRefs(){
+std::string Pointer::numberOfRefs(int number){
   int i;
   std::string output = "";
   for(i = 1; i <= count; i++){
-    output += " ref";
+    if(number == 0)
+      output += " ref";
+    else
+      output += "[ref] ";
   }
   return output;
 }

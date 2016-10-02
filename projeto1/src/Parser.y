@@ -91,7 +91,8 @@ lines:
 // Linha
 line:
     attribution
-    | data_type declar_pointer { $$ = new VariableDeclaration((Data::Type) $1, $2); }
+    | data_type pointer T_ID declar_pointer { $$ = new VariableDeclaration((Data::Type) $1, SEMANTIC_ANALYZER.declareVariable($3, TreeNode::POINTER, $2,
+      Pointer::ADDRESS::REF, (Data::Type) $1)); }
     | T_TYPE_INT declar_int { $$ = new VariableDeclaration(Data::INTEGER, $2); }
     | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(Data::FLOAT, $2); }
     | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2); }
@@ -132,7 +133,7 @@ attribution:
 
 // Expressão
 expr:
-    T_POINTER T_ID {$$ = new Pointer($2, Data::POINTER, Pointer::ADDRESS::REF, 1);}
+    pointer T_ID {$$ = SEMANTIC_ANALYZER.useVariable($2);}
     | T_INT { $$ = new Integer($1); }
     | T_FLOAT { $$ = new Float($1); }
     | T_TRUE { $$ = new Boolean(true); }
@@ -155,7 +156,7 @@ pointer:
 // Operações binárias
 op_binary:
     expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3);
-                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$);}
     | expr T_MINUS expr { $$ = new BinaryOperation($1, BinaryOperation::MINUS, $3);
                          SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3);
@@ -231,9 +232,10 @@ declar_int:
     ;
 
 declar_pointer:
-    pointer T_ID { $$ = SEMANTIC_ANALYZER.declareVariable($2, TreeNode::POINTER, $1); }
-    | pointer T_ID T_COMMA declar_pointer
-
+    T_COMMA T_ID
+    | T_COMMA T_ID declar_pointer
+    | {$$ = NULL;}
+    ;
 
 // Dados
 data:

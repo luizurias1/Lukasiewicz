@@ -19,7 +19,10 @@ namespace Data {
         FLOAT = 1,
         INTEGER = 2,
         UNKNOWN = 3,
-        POINTER = 4
+        POINTER = 4,
+        POINTER_INTEGER = 5,
+        POINTER_FLOAT = 6,
+        POINTER_BOOLEAN = 7
     };
 }
 
@@ -41,6 +44,9 @@ class TreeNode {
             CONDITIONAL,
             LOOP_DECLARATION,
             POINTER,
+            POINTER_INTEGER,
+            POINTER_FLOAT,
+            POINTER_BOOLEAN,
             UNKNOWN
         };
 
@@ -270,11 +276,12 @@ class Pointer : public TreeNode {
         std::string getId() const;
         std::string printInOrder();
         std::string printPreOrder();
-        std::string numberOfRefs();
+        std::string numberOfRefs(int number);
 
     private:
         std::string id;
         ADDRESS a;
+        Data::Type type;
         int count;
 
 };
