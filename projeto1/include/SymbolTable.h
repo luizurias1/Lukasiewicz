@@ -14,6 +14,8 @@ class Symbol {
     
     public:    
         enum IdentifierType {
+            FUNCTION,
+            POINTER,
             VARIABLE
         };
     
