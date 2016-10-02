@@ -25,6 +25,7 @@ class SemanticAnalyzer {
         void analyzeBinaryOperation(LoopDeclaration* loop);
         void analyzeBinaryOperation(BinaryOperation* binaryOp);
         void analyzeRerefenceOperation(TreeNode* node);
+        void analyzeAddressOperation(TreeNode* node);
         TreeNode* declareVariable(std::string varId, TreeNode::ClassType dataType, int size = 0, Pointer::ADDRESS address_type = Pointer::ADDRESS::UNKNOWN,
         Data::Type pointer_type = Data::Type::UNKNOWN);
         TreeNode* assignVariable(std::string varId, TreeNode::ClassType assignedType, Pointer::ADDRESS address_type = Pointer::ADDRESS::REF);

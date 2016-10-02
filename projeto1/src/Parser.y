@@ -49,7 +49,7 @@
  * Example: %type<node> expr
  */
 %type <syntaxTree> lines program
-%type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution declar_pointer pointer_types
+%type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution pointer_types
 %type <vector> else scope change_scope
 %type <dataType> data_type pointer
 
@@ -91,7 +91,7 @@ lines:
 // Linha
 line:
     attribution
-    | data_type pointer T_ID declar_pointer { $$ = new VariableDeclaration((Data::Type) $1,
+    | data_type pointer T_ID { $$ = new VariableDeclaration((Data::Type) $1,
       SEMANTIC_ANALYZER.declareVariable($3, TreeNode::POINTER, $2, Pointer::ADDRESS::REF, (Data::Type) $1)); }
     | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL change_scope else { $$ = new ConditionalOperation($2, $7->v, $8->v);
       SEMANTIC_ANALYZER.analyzeBinaryOperation((ConditionalOperation*) $$); }
@@ -122,11 +122,20 @@ else:
 // Atribuição
 attribution:
     {$$ = NULL;}
-    /*| pointer T_ID T_ATT pointer ID*/
-    | T_ID T_ATT T_LVALUE T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.assignVariable($1, SEMANTIC_ANALYZER.useVariable($4)->classType(),
+    | pointer T_ID T_ATT pointer T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($2, $1), BinaryOperation::ASSIGN,
+                                                              SEMANTIC_ANALYZER.useVariable($5, $4));
+                                                            SEMANTIC_ANALYZER.analyzeAddressOperation(SEMANTIC_ANALYZER.useVariable($2));
+                                                          SEMANTIC_ANALYZER.analyzeAddressOperation(SEMANTIC_ANALYZER.useVariable($5)); }
+    /*| T_ID T_ATT T_LVALUE T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.assignVariable($1, SEMANTIC_ANALYZER.useVariable($4)->classType(),
                                                               Pointer::ADDRESS::ADDR),
                                                            BinaryOperation::ASSIGN, SEMANTIC_ANALYZER.useVariable($4));
-                                                   SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+                                                           SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$);
+                                                         SEMANTIC_ANALYZER.analyzeAddressOperation(SEMANTIC_ANALYZER.useVariable($4));}*/
+    | T_ID T_ATT T_LVALUE expr {$$ = new BinaryOperation(SEMANTIC_ANALYZER.assignVariable($1, $4->classType(),
+                                                               Pointer::ADDRESS::ADDR),
+                                                            BinaryOperation::ASSIGN, $4);
+                                                            SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$);
+                                                          SEMANTIC_ANALYZER.analyzeAddressOperation($4);}
     | T_ID T_ATT expr { $$ = new BinaryOperation(
                                 SEMANTIC_ANALYZER.assignVariable($1, $3->classType()),
                                 BinaryOperation::ASSIGN, $3);
@@ -232,13 +241,6 @@ declar_int:
                                                     $1, TreeNode::INTEGER, $3->classType()),
                                                  BinaryOperation::ASSIGN, $3);
                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
-    ;
-
-// Declaração de Ponteiros
-declar_pointer:
-    /*T_COMMA T_ID
-    | T_COMMA T_ID declar_pointer*/
-     {$$ = NULL;}
     ;
 
 // Dados

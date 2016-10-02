@@ -56,7 +56,6 @@ class TreeNode {
         void setType(Data::Type type);
         virtual TreeNode::ClassType classType() const = 0;
         virtual std::string printInOrder() = 0;
-        //std::string returnIfThen(std::string identation);
         virtual std::string printPreOrder() = 0;
 
     protected:

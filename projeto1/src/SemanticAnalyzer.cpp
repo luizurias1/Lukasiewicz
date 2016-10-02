@@ -101,6 +101,12 @@ void SemanticAnalyzer::analyzeRerefenceOperation(TreeNode* node){
       yyerror("semantic error: reference operation expects a pointer\n");
 }
 
+void SemanticAnalyzer::analyzeAddressOperation(TreeNode* node){
+  Data::Type type = node->dataType();
+  if(type == Data::INTEGER | type == Data::BOOLEAN | type == Data::FLOAT)
+       yyerror("semantic error: address operation expects a variable or array item\n");
+}
+
 TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType dataType, int size, Pointer::ADDRESS address_type, Data::Type pointer_type) {
     if(symbolTable.existsVariable(id))
         yyerror("semantic error: re-declaration of variable %s\n", id.c_str());
@@ -108,15 +114,15 @@ TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType 
       if(dataType == TreeNode::POINTER){
         if (pointer_type == Data::INTEGER){
           symbolTable.addSymbol(id, Symbol(Data::POINTER_INTEGER, Symbol::VARIABLE, false)); // Adds variable to symbol table
-          return new Pointer(id, classToDataType(dataType), address_type, size);;
+          return new Pointer(id, classToDataType(dataType), address_type, size);
         }
         if (pointer_type == Data::FLOAT){
           symbolTable.addSymbol(id, Symbol(Data::POINTER_FLOAT, Symbol::VARIABLE, false)); // Adds variable to symbol table
-          return new Pointer(id, classToDataType(dataType), address_type, size);;
+          return new Pointer(id, classToDataType(dataType), address_type, size);
         }
         if (pointer_type == Data::BOOLEAN){
           symbolTable.addSymbol(id, Symbol(Data::POINTER_BOOLEAN, Symbol::VARIABLE, false)); // Adds variable to symbol table
-          return new Pointer(id, classToDataType(dataType), address_type, size);;
+          return new Pointer(id, classToDataType(dataType), address_type, size);
         }
       }
       symbolTable.addSymbol(id, Symbol(classToDataType(dataType), Symbol::VARIABLE, false)); // Adds variable to symbol table

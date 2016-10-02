@@ -1,6 +1,7 @@
 int i = 0
 int ref mypointer
-mypointer = addr i
+
+mypointer = addr 0
 i = ref mypointer + 1
 int ref ref doublepointer
 
@@ -8,3 +9,7 @@ int ref point
 point = i
 i = ref 0
 i = ref i
+
+mypointer = ref point
+
+ref point = ref mypointer
