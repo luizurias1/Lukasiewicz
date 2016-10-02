@@ -267,6 +267,7 @@ class Pointer : public TreeNode {
         enum ADDRESS{
           REF,
           ADDR,
+          VALUE,
           UNKNOWN
         };
 
@@ -286,6 +287,5 @@ class Pointer : public TreeNode {
         int count;
 
 };
-
 
 #endif
