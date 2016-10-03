@@ -25,6 +25,8 @@ namespace Data {
  */
 class Vector {
 
+    friend class SemanticAnalyzer;
+    
     public:
         Vector();
         virtual ~Vector();

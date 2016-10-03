@@ -32,7 +32,7 @@ class SemanticAnalyzer {
         TreeNode* declareAssignVariable(std::string id, Data::Type dataType, Data::Type assignedType);
         TreeNode* useVariable(std::string varId);
     
-        TreeNode* declareFunctionHeader(std::string functionId, Vector* params, TreeNode* returnValue);
+        TreeNode* declareFunctionHeader(std::string functionId, Vector* params, Data::Type returnType);
         TreeNode* declareFunction(std::string functionId, Vector* params, Vector* body, TreeNode* returnValue);
         TreeNode* callFunction(std::string functionId, Vector* params);
 

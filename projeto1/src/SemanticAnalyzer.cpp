@@ -69,8 +69,10 @@ void SemanticAnalyzer::analyzeConditionalOperation(ConditionalOperation* conditi
 }
 
 void SemanticAnalyzer::analyzeFunctions() {
-    // Analisar se todas as funções declaradas
-    // foram definidas.
+    // Analisa se todas as funções declaradas foram definidas.
+    for(std::string functionId : symbolTable.getUninitializedFunctions())
+        yyerror("semantic error: function %s is declared but never defined\n", 
+                    functionId.c_str());
 }
 
 void SemanticAnalyzer::analyzeLoopDeclaration(LoopDeclaration* loop) {
@@ -119,14 +121,15 @@ TreeNode* SemanticAnalyzer::useVariable(std::string id) {
     return new Variable(id, getSymbolType(id, Symbol::VARIABLE));
 }
 
-TreeNode* SemanticAnalyzer::declareFunctionHeader(std::string functionId, Vector* params, TreeNode* returnValue) {
-    TreeNode* functionHeader = new FunctionCall(functionId, params);
-    functionHeader->setType(returnValue->dataType());
+TreeNode* SemanticAnalyzer::declareFunctionHeader(std::string functionId, Vector* params, Data::Type returnType) {
     
     if(symbolExists(functionId, Symbol::FUNCTION, false))
         yyerror("semantic error: re-definition of function %s\n", functionId.c_str());
-    else
-       symbolTable.addSymbol(functionId, Symbol(returnValue->dataType(), Symbol::FUNCTION, false, functionHeader));
+    else {
+        TreeNode* functionHeader = new FunctionCall(functionId, params);
+        functionHeader->setType(returnType);
+        symbolTable.addSymbol(functionId, Symbol(returnType, Symbol::FUNCTION, false, functionHeader));
+    }
 
     return NULL;
 }
@@ -137,9 +140,23 @@ TreeNode* SemanticAnalyzer::declareFunction(std::string functionId, Vector* para
     if(symbolExists(functionId, Symbol::FUNCTION, false) && isSymbolInitialized(functionId, Symbol::FUNCTION, false)) {
         yyerror("semantic error: re-definition of function %s\n", functionId.c_str());
     } else if(symbolExists(functionId, Symbol::FUNCTION, false)) {
-        // Check params and delete old data
-        symbolTable.setSymbolData(functionId, Symbol::FUNCTION, newFunction);
-        setInitializedSymbol(functionId, Symbol::FUNCTION);
+        const FunctionCall* call = (const FunctionCall*) symbolTable.getSymbol(functionId, Symbol::FUNCTION).getData();
+        
+        if(call->params.size() != params->size())
+            yyerror("semantic error: re-definition of function %s\n", functionId.c_str());
+        else {
+            for(int i = 0; i < call->params.size(); i++) {
+                if(((Variable*) call->params[i])->getId().compare(((Variable*) params->internalVector[i])->getId()) != 0) {
+                    yyerror("semantic error: re-definition of function %s\n",           
+                                functionId.c_str());
+                    break;
+                }    
+            }
+            
+            // TODO Check params and delete old data
+            symbolTable.setSymbolData(functionId, Symbol::FUNCTION, newFunction);
+            setInitializedSymbol(functionId, Symbol::FUNCTION);
+        }
     } else {
        symbolTable.addSymbol(functionId, Symbol(returnValue->dataType(), Symbol::FUNCTION, true, newFunction));
     }

@@ -35,7 +35,7 @@ void Symbol::setDataType(Data::Type type) {
 std::string Symbol::SYMBOL_PREFIX(Symbol::IdentifierType idType) {
     switch(idType) {
         case Symbol::FUNCTION:
-            return "FUNC_";
+            return "FUN_";
         case Symbol::VARIABLE:
             return "VAR_";
         default:
@@ -72,6 +72,20 @@ const Symbol SymbolTable::getSymbol(std::string id, Symbol::IdentifierType type)
 
 Data::Type SymbolTable::getSymbolType(std::string id, Symbol::IdentifierType type) const {
     return entryList.at(Symbol::SYMBOL_PREFIX(type) + id).dataType;
+}
+
+std::vector<std::string> SymbolTable::getUninitializedFunctions() {
+    std::map<std::string, Symbol>::iterator iter;
+    std::vector<std::string> functions;
+    std::string prefix = Symbol::SYMBOL_PREFIX(Symbol::FUNCTION);
+    
+    for(iter = entryList.begin(); iter != entryList.end(); iter++) {
+        if(iter->first.compare(0, prefix.size(), prefix) == 0
+           && !entryList[iter->first].initialized)
+            functions.push_back(iter->first.substr(prefix.size(), iter->first.size()));
+    }
+    
+    return functions;
 }
 
 void SymbolTable::addSymbol(std::string id, Symbol newSymbol) {

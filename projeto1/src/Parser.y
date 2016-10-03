@@ -78,7 +78,7 @@
 
 // Programa
 program:
-    lines { SYNTAX_TREE = $1; }
+    lines { SYNTAX_TREE = $1; SEMANTIC_ANALYZER.analyzeFunctions(); }
     ;
 
 // Linhas
@@ -98,8 +98,8 @@ line:
             SEMANTIC_ANALYZER.analyzeConditionalOperation((ConditionalOperation*) $$); }
     | T_FOR attribution T_COMMA comparison T_COMMA attribution T_OPEN_BRACE T_NL change_scope T_CLOSING_BRACE { $$ = new LoopDeclaration($2, $4, $6, $9);
             SEMANTIC_ANALYZER.analyzeLoopDeclaration((LoopDeclaration*) $$); }
-    | data_type T_FUNCTION T_ID T_OPEN_PAR T_CLOSING_PAR new_scope function_scope end_scope { $$ = NULL; if($7->size() > 0) $$ = SEMANTIC_ANALYZER.declareFunction($3, new Vector(), $7, $7->popFront()); else $$ = SEMANTIC_ANALYZER.declareFunctionHeader($3, new Vector(), $7->popFront()); }
-    | data_type T_FUNCTION T_ID T_OPEN_PAR new_scope params T_CLOSING_PAR function_scope end_scope { $$ = NULL; if($8->size() > 0) $$ = SEMANTIC_ANALYZER.declareFunction($3, $6, $8, $8->popFront()); else $$ = SEMANTIC_ANALYZER.declareFunctionHeader($3, $6, $8->popFront()); }
+    | data_type T_FUNCTION T_ID T_OPEN_PAR T_CLOSING_PAR new_scope function_scope end_scope { $$ = NULL; if($7->size() > 0) $$ = SEMANTIC_ANALYZER.declareFunction($3, new Vector(), $7, $7->popFront()); else $$ = SEMANTIC_ANALYZER.declareFunctionHeader($3, new Vector(), (Data::Type) $1); }
+    | data_type T_FUNCTION T_ID T_OPEN_PAR new_scope params T_CLOSING_PAR function_scope end_scope { $$ = NULL; if($8->size() > 0) $$ = SEMANTIC_ANALYZER.declareFunction($3, $6, $8, $8->popFront()); else $$ = SEMANTIC_ANALYZER.declareFunctionHeader($3, $6, (Data::Type) $1); }
     ;
 
 // Escopo de uma função (parâmetros + corpo)
@@ -132,7 +132,7 @@ scope:
 
 // Fim do escopo atual
 end_scope:
-    { SEMANTIC_ANALYZER.returnScope(); }
+    { SEMANTIC_ANALYZER.analyzeFunctions(); SEMANTIC_ANALYZER.returnScope(); }
     ;
 
 // Ramo else do if

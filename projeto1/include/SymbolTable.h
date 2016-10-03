@@ -4,6 +4,7 @@
 #include "TreeNode.h"
 #include <map>
 #include <string>
+#include <vector>
 
 /**
  * Símbolo gerado na análise sintática.
@@ -52,6 +53,7 @@ class SymbolTable {
         bool isSymbolInitialized(std::string id, Symbol::IdentifierType type) const;
         const Symbol getSymbol(std::string id, Symbol::IdentifierType type) const;
         Data::Type getSymbolType(std::string id, Symbol::IdentifierType type) const;
+        std::vector<std::string> getUninitializedFunctions();
     
         void addSymbol(const std::string id, Symbol newSymbol);
         void setInitializedSymbol(const std::string id, Symbol::IdentifierType type);

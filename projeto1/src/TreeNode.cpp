@@ -692,6 +692,8 @@ std::string Function::printPreOrder() {
     }
     
     output += identation + "  ret " + returnValue->printPreOrder();
+    if(output.back() == ' ')
+        output = output.substr(0, output.length()-1);
     return output;
 }
 
@@ -725,7 +727,7 @@ std::string FunctionCall::printPreOrder() {
     if(params.size() > 0) {
         output += " ";
         for(int i = 0; i < params.size(); i++)
-            output += params[i]->printPreOrder() + " ";
+            output += params[i]->printPreOrder();
     }
     
     return output;
