@@ -95,11 +95,11 @@ line:
     | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(Data::FLOAT, $2); }
     | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2); }
     | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL change_scope T_CLOSING_BRACE else { $$ = new ConditionalOperation($2, $7, $9);
-            SEMANTIC_ANALYZER.analyzeBinaryOperation((ConditionalOperation*) $$); }
+            SEMANTIC_ANALYZER.analyzeConditionalOperation((ConditionalOperation*) $$); }
     | T_FOR attribution T_COMMA comparison T_COMMA attribution T_OPEN_BRACE T_NL change_scope T_CLOSING_BRACE { $$ = new LoopDeclaration($2, $4, $6, $9);
-            SEMANTIC_ANALYZER.analyzeBinaryOperation((LoopDeclaration*) $$); }
-    | data_type T_FUNCTION T_ID T_OPEN_PAR T_CLOSING_PAR new_scope function_scope end_scope { $$ = NULL; if($7->size() > 0) $$ = new Function($3, new Vector(), $7, $7->popFront()); }
-    | data_type T_FUNCTION T_ID T_OPEN_PAR new_scope params T_CLOSING_PAR function_scope end_scope { $$ = NULL; if($8->size() > 0) $$ = new Function($3, $6, $8, $8->popFront()); }
+            SEMANTIC_ANALYZER.analyzeLoopDeclaration((LoopDeclaration*) $$); }
+    | data_type T_FUNCTION T_ID T_OPEN_PAR T_CLOSING_PAR new_scope function_scope end_scope { $$ = NULL; if($7->size() > 0) $$ = SEMANTIC_ANALYZER.declareFunction($3, new Vector(), $7, $7->popFront()); else $$ = SEMANTIC_ANALYZER.declareFunctionHeader($3, new Vector(), $7->popFront()); }
+    | data_type T_FUNCTION T_ID T_OPEN_PAR new_scope params T_CLOSING_PAR function_scope end_scope { $$ = NULL; if($8->size() > 0) $$ = SEMANTIC_ANALYZER.declareFunction($3, $6, $8, $8->popFront()); else $$ = SEMANTIC_ANALYZER.declareFunctionHeader($3, $6, $8->popFront()); }
     ;
 
 // Escopo de uma função (parâmetros + corpo)
@@ -168,8 +168,8 @@ expr:
     ;
 
 function_call:
-    T_ID T_OPEN_PAR T_CLOSING_PAR { $$ = new FunctionCall($1, new Vector()); }
-    | T_ID T_OPEN_PAR params_call T_CLOSING_PAR { $$ = new FunctionCall($1, $3); }
+    T_ID T_OPEN_PAR T_CLOSING_PAR { $$ = SEMANTIC_ANALYZER.callFunction($1, new Vector()); }
+    | T_ID T_OPEN_PAR params_call T_CLOSING_PAR { $$ = SEMANTIC_ANALYZER.callFunction($1, $3); }
     ;
 
 params_call:

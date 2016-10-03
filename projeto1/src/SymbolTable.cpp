@@ -24,8 +24,23 @@ Data::Type Symbol::getDataType() const {
     return this->dataType;
 }
 
+Symbol::IdentifierType Symbol::getSymbolType() const {
+    return this->idType;
+}
+
 void Symbol::setDataType(Data::Type type) {
     this->dataType = type;
+}
+
+std::string Symbol::SYMBOL_PREFIX(Symbol::IdentifierType idType) {
+    switch(idType) {
+        case Symbol::FUNCTION:
+            return "FUNC_";
+        case Symbol::VARIABLE:
+            return "VAR_";
+        default:
+            return "";
+    }
 }
 
 SymbolTable::SymbolTable() {
@@ -43,26 +58,30 @@ void SymbolTable::clear() {
     entryList.clear();
 }
 
-bool SymbolTable::existsVariable(std::string varId) const {
-    return entryList.find(varId) != entryList.end();
+bool SymbolTable::existsSymbol(std::string id, Symbol::IdentifierType type) const {
+    return entryList.find(Symbol::SYMBOL_PREFIX(type) + id) != entryList.end();
 }
 
-bool SymbolTable::isVariableInitialized(std::string varId) const {
-    return entryList.at(varId).initialized;
+bool SymbolTable::isSymbolInitialized(std::string id, Symbol::IdentifierType type) const {
+    return entryList.at(Symbol::SYMBOL_PREFIX(type) + id).initialized;
 }
 
-const TreeNode* SymbolTable::getSymbolData(std::string varId) const {
-    return entryList.at(varId).data;
+const Symbol SymbolTable::getSymbol(std::string id, Symbol::IdentifierType type) const {
+    return entryList.at(Symbol::SYMBOL_PREFIX(type) + id);
 }
 
-Data::Type SymbolTable::getSymbolType(std::string varId) const {
-    return entryList.at(varId).dataType;
+Data::Type SymbolTable::getSymbolType(std::string id, Symbol::IdentifierType type) const {
+    return entryList.at(Symbol::SYMBOL_PREFIX(type) + id).dataType;
 }
 
-void SymbolTable::addSymbol(std::string varId, Symbol newSymbol) {
-    entryList[varId] = newSymbol;
+void SymbolTable::addSymbol(std::string id, Symbol newSymbol) {
+    entryList[Symbol::SYMBOL_PREFIX(newSymbol.getSymbolType()) + id] = newSymbol;
 }
 
-void SymbolTable::setInitializedVariable(std::string varId) {
-    entryList[varId].initialized = true;
+void SymbolTable::setInitializedSymbol(std::string id, Symbol::IdentifierType type) {
+    entryList[Symbol::SYMBOL_PREFIX(type) + id].initialized = true;
+}
+
+void SymbolTable::setSymbolData(const std::string id, Symbol::IdentifierType type, TreeNode* data) {
+    entryList[Symbol::SYMBOL_PREFIX(type) + id].data = data;    
 }

@@ -24,9 +24,11 @@ class Symbol {
         virtual ~Symbol();
         const TreeNode* getData() const;
         Data::Type getDataType() const;
+        IdentifierType getSymbolType() const;
         void setDataType(Data::Type type);
     
     private:
+        static std::string SYMBOL_PREFIX(IdentifierType idType);
         Data::Type dataType;
         IdentifierType idType;
         bool initialized;
@@ -46,13 +48,14 @@ class SymbolTable {
         SymbolTable& operator=(const SymbolTable& table);
         virtual ~SymbolTable();
         void clear();
-        bool existsVariable(std::string varId) const;
-        bool isVariableInitialized(std::string varId) const;
-        const TreeNode* getSymbolData(std::string varId) const;
-        Data::Type getSymbolType(std::string varId) const;
+        bool existsSymbol(std::string id, Symbol::IdentifierType type) const;
+        bool isSymbolInitialized(std::string id, Symbol::IdentifierType type) const;
+        const Symbol getSymbol(std::string id, Symbol::IdentifierType type) const;
+        Data::Type getSymbolType(std::string id, Symbol::IdentifierType type) const;
     
-        void addSymbol(const std::string varId, Symbol newSymbol);
-        void setInitializedVariable(const std::string varId);
+        void addSymbol(const std::string id, Symbol newSymbol);
+        void setInitializedSymbol(const std::string id, Symbol::IdentifierType type);
+        void setSymbolData(const std::string id, Symbol::IdentifierType type, TreeNode* data);
     
     private:
         std::map<std::string, Symbol> entryList;
