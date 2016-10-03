@@ -21,18 +21,28 @@ class SemanticAnalyzer {
 
         void newScope();
         void returnScope();
-        void analyzeBinaryOperation(ConditionalOperation* conditionalOp);
-        void analyzeBinaryOperation(LoopDeclaration* loop);
+    
         void analyzeBinaryOperation(BinaryOperation* binaryOp);
-        TreeNode* declareVariable(std::string varId, TreeNode::ClassType dataType, int size = 0);
-        TreeNode* assignVariable(std::string varId, TreeNode::ClassType assignedType, TreeNode * n = NULL);
-        TreeNode* declareAssignVariable(std::string id, TreeNode::ClassType dataType, TreeNode::ClassType assignedType);
+        void analyzeConditionalOperation(ConditionalOperation* conditionalOp);
+        void analyzeFunctions();
+        void analyzeLoopDeclaration(LoopDeclaration* loop);
+    
+        TreeNode* declareVariable(std::string varId, Data::Type dataType, int size = 0);
+        TreeNode* assignVariable(std::string varId, Data::Type assignedType, TreeNode* index = NULL);
+        TreeNode* declareAssignVariable(std::string id, Data::Type dataType, Data::Type assignedType);
         TreeNode* useVariable(std::string varId, TreeNode* index = NULL);
+    
+        TreeNode* declareFunctionHeader(std::string functionId, Vector* params, Data::Type returnType);
+        TreeNode* declareFunction(std::string functionId, Vector* params, Vector* body, TreeNode* returnValue);
+        TreeNode* callFunction(std::string functionId, Vector* params);
+        bool symbolExists(std::string id, Symbol::IdentifierType type, bool checkParentScope);
 
     private:
-        Data::Type classToDataType(TreeNode::ClassType type) const;
-        std::string classToString(TreeNode::ClassType type) const;
-        std::string dataTypeToString(Data::Type type) const;
+        Symbol getSymbol(std::string id, Symbol::IdentifierType type, bool checkParentScope);
+        Data::Type getSymbolType(std::string id, Symbol::IdentifierType type) const;
+        bool isSymbolInitialized(std::string id, Symbol::IdentifierType type, bool checkParentScope) const;
+        void setInitializedSymbol(std::string id, Symbol::IdentifierType type);
+    
         SymbolTable symbolTable;
         std::vector<SymbolTable> scopes;
 

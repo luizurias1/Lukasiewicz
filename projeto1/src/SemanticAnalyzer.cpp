@@ -8,23 +8,12 @@ SemanticAnalyzer::~SemanticAnalyzer() {
 
 void SemanticAnalyzer::newScope() {
     scopes.push_back(this->symbolTable);
+    this->symbolTable.clear();
 }
 
 void SemanticAnalyzer::returnScope() {
     this->symbolTable = scopes.back();
     scopes.pop_back();
-}
-
-void SemanticAnalyzer::analyzeBinaryOperation(ConditionalOperation* conditionalOp) {
-    if(conditionalOp->condition->dataType() != Data::BOOLEAN)
-        yyerror("semantic error: test operation expected boolean but received %s\n",
-            dataTypeToString(conditionalOp->condition->dataType()).c_str());
-}
-
-void SemanticAnalyzer::analyzeBinaryOperation(LoopDeclaration* loop) {
-    if(loop->test->dataType() != Data::BOOLEAN)
-        yyerror("semantic error: test operation expected boolean but received %s\n",
-            dataTypeToString(loop->test->dataType()).c_str());
 }
 
 void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
@@ -78,9 +67,9 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
       Array *a = (Array*) left;
       if(a->getNode()->classType() == TreeNode::VARIABLE){
         Variable *v = (Variable*) a->getNode();
-        Data::Type tipo = symbolTable.getSymbolType(v->getId());
+        Data::Type tipo = getSymbolType(v->getId(), Symbol::VARIABLE);
         if (tipo != Data::INTEGER){
-          yyerror("semantic error: index operator expects integer but received %s\n",dataTypeToString(tipo).c_str());
+          yyerror("semantic error: index operator expects integer but received %s\n",TreeNode::toString(tipo).c_str());
         }
       }
     }
@@ -89,91 +78,214 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
     if(left->dataType() != right->dataType()) {
         yyerror("semantic error: %s operation expected %s but received %s\n",
             BinaryOperation::operationName(op),
-            dataTypeToString(left->dataType()).c_str(),
-            dataTypeToString(right->dataType()).c_str());
+            TreeNode::toString(left->dataType()).c_str(),
+            TreeNode::toString(right->dataType()).c_str());
     }
 }
 
-TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType dataType, int size) {
-    if(symbolTable.existsVariable(id))
-        yyerror("semantic error: re-declaration of variable %s\n", id.c_str());
-    else
-       symbolTable.addSymbol(id, Symbol(classToDataType(dataType), Symbol::VARIABLE, false)); // Adds variable to symbol table
-    if ((dataType == TreeNode::ARRAY_INTEGER) || (dataType == TreeNode::ARRAY_FLOAT) || (dataType == TreeNode::ARRAY_BOOLEAN)){
-       return new Array(id, classToDataType(dataType), size);
-    }else
-        return new Variable(id, classToDataType(dataType)); //Creates variable node anyway
+void SemanticAnalyzer::analyzeConditionalOperation(ConditionalOperation* conditionalOp) {
+    if(conditionalOp->condition->dataType() != Data::BOOLEAN)
+        yyerror("semantic error: test operation expected boolean but received %s\n",
+            TreeNode::toString(conditionalOp->condition->dataType()).c_str());
 }
 
-TreeNode* SemanticAnalyzer::assignVariable(std::string id, TreeNode::ClassType assignedType, TreeNode* index) {
+void SemanticAnalyzer::analyzeFunctions() {
+    // Analisa se todas as funções declaradas foram definidas.
+    for(std::string functionId : symbolTable.getUninitializedFunctions())
+        yyerror("semantic error: function %s is declared but never defined\n", 
+                    functionId.c_str());
+}
 
-    if(!symbolTable.existsVariable(id)) {
+void SemanticAnalyzer::analyzeLoopDeclaration(LoopDeclaration* loop) {
+    if(loop->test->dataType() != Data::BOOLEAN)
+        yyerror("semantic error: test operation expected boolean but received %s\n",
+            TreeNode::toString(loop->test->dataType()).c_str());
+}
+
+TreeNode* SemanticAnalyzer::declareVariable(std::string id, Data::Type dataType, int size) {
+    if(symbolExists(id, Symbol::VARIABLE, false))
+        yyerror("semantic error: re-declaration of variable %s\n", id.c_str());
+    else
+       symbolTable.addSymbol(id, Symbol(dataType, Symbol::VARIABLE, false)); // Adds variable to symbol table
+    if (size > 0) {
+       return new Array(id, dataType, size);
+    }else
+        return new Variable(id, dataType); //Creates variable node anyway
+}
+
+TreeNode* SemanticAnalyzer::assignVariable(std::string id, Data::Type assignedType, TreeNode* index) {
+    if(!symbolExists(id, Symbol::VARIABLE, true)) {
         yyerror("semantic error: undeclared variable %s\n", id.c_str());
         return new Variable(id, Data::UNKNOWN); //Creates variable node anyway
-    }  else if (symbolTable.getSymbolType(id) == Data::ARRAY_INTEGER || symbolTable.getSymbolType(id) == Data::ARRAY_FLOAT || symbolTable.getSymbolType(id) == Data::ARRAY_BOOLEAN){
-          symbolTable.setInitializedVariable(id);
-          return new Array (id,symbolTable.getSymbolType(id),index);
-    } else{
-          symbolTable.setInitializedVariable(id);
-          return new Variable(id, symbolTable.getSymbolType(id));
+    } else if (index != NULL){
+          setInitializedSymbol(id, Symbol::VARIABLE);
+          return new Array(id, getSymbolType(id, Symbol::VARIABLE), index);
+    }  else {
+        setInitializedSymbol(id, Symbol::VARIABLE);
+        return new Variable(id, getSymbolType(id, Symbol::VARIABLE));
     }
 }
 
-TreeNode* SemanticAnalyzer::declareAssignVariable(std::string id, TreeNode::ClassType dataType, TreeNode::ClassType assignedType) {
-    if(symbolTable.existsVariable(id))
+TreeNode* SemanticAnalyzer::declareAssignVariable(std::string id, Data::Type dataType, Data::Type assignedType) {
+    if(symbolExists(id, Symbol::VARIABLE, false))
         yyerror("semantic error: re-declaration of variable %s\n", id.c_str());
     else
-       symbolTable.addSymbol(id, Symbol(classToDataType(dataType), Symbol::VARIABLE, false)); // Adds variable to symbol table
+       symbolTable.addSymbol(id, Symbol(dataType, Symbol::VARIABLE, false)); // Adds variable to symbol table
 
-    symbolTable.setInitializedVariable(id);
-
-    return new Variable(id, classToDataType(dataType));
+    setInitializedSymbol(id, Symbol::VARIABLE);
+    return new Variable(id, dataType);
 }
 
 TreeNode* SemanticAnalyzer::useVariable(std::string id, TreeNode* index) {
-    if(!symbolTable.existsVariable(id)) {
+    if(!symbolExists(id, Symbol::VARIABLE, true)) {
         yyerror("semantic error: undeclared variable %s\n", id.c_str());
         return new Variable(id, Data::UNKNOWN); //Creates variable node anyway
-    } else if (symbolTable.getSymbolType(id) == Data::ARRAY_INTEGER || symbolTable.getSymbolType(id) == Data::ARRAY_FLOAT || symbolTable.getSymbolType(id) == Data::ARRAY_BOOLEAN){
-        return new Array(id,symbolTable.getSymbolType(id),index);
-    }else if(!symbolTable.isVariableInitialized(id)) {
+    } else if (index != NULL){
+        return new Array(id, getSymbolType(id, Symbol::VARIABLE), index);
+    } else if(!isSymbolInitialized(id, Symbol::VARIABLE, true)) {
         yyerror("semantic error: uninitialized variable %s\n", id.c_str());
     }
-    return new Variable(id, symbolTable.getSymbolType(id));
+    return new Variable(id, getSymbolType(id, Symbol::VARIABLE));
 }
 
-Data::Type SemanticAnalyzer::classToDataType(TreeNode::ClassType type) const {
-    switch(type) {
-        case TreeNode::BOOLEAN:
-            return Data::BOOLEAN;
-        case TreeNode::FLOAT:
-            return Data::FLOAT;
-        case TreeNode::INTEGER:
-            return Data::INTEGER;
-        case TreeNode::ARRAY_INTEGER:
-            return Data::ARRAY_INTEGER;
-        case TreeNode::ARRAY_FLOAT:
-            return Data::ARRAY_FLOAT;
-        case TreeNode::ARRAY_BOOLEAN:
-            return Data::ARRAY_BOOLEAN;
-        default:
-            return Data::UNKNOWN;
+TreeNode* SemanticAnalyzer::declareFunctionHeader(std::string functionId, Vector* params, Data::Type returnType) {
+    
+    if(symbolExists(functionId, Symbol::FUNCTION, false))
+        yyerror("semantic error: re-definition of function %s\n", functionId.c_str());
+    else {
+        TreeNode* functionHeader = new Function(functionId, params, new Vector(), new Integer(0));
+        functionHeader->setType(returnType);
+        symbolTable.addSymbol(functionId, Symbol(returnType, Symbol::FUNCTION, false, functionHeader));
     }
+
+    return NULL;
 }
 
-std::string SemanticAnalyzer::classToString(TreeNode::ClassType type) const {
-    return dataTypeToString(classToDataType(type));
-}
-
-std::string SemanticAnalyzer::dataTypeToString(Data::Type type) const {
-    switch(type) {
-        case Data::BOOLEAN:
-            return "boolean";
-        case Data::FLOAT:
-            return "float";
-        case Data::INTEGER:
-            return "integer";
-        default:
-            return "unknown";
+TreeNode* SemanticAnalyzer::declareFunction(std::string functionId, Vector* params, Vector* body, TreeNode* returnValue) {
+    TreeNode* newFunction = new Function(functionId, params, body, returnValue);
+    
+    if(symbolExists(functionId, Symbol::FUNCTION, false) && isSymbolInitialized(functionId, Symbol::FUNCTION, false)) {
+        yyerror("semantic error: re-definition of function %s\n", functionId.c_str());
+    } else if(symbolExists(functionId, Symbol::FUNCTION, false)) {
+        const Function* header = (const Function*) symbolTable.getSymbol(functionId, Symbol::FUNCTION).getData();
+        
+        if(header->params.size() != params->size()) // If different # of params, error
+            yyerror("semantic error: re-definition of function %s\n", functionId.c_str());
+        else {
+            // If different param names, error
+            for(int i = 0; i < header->params.size(); i++) {
+                if(((Variable*) header->params[i])->getId().compare(((Variable*) params->internalVector[i])->getId()) != 0) {
+                    yyerror("semantic error: re-definition of function %s\n",           
+                                functionId.c_str());
+                    break;
+                }    
+            }
+            
+            symbolTable.setSymbolData(functionId, Symbol::FUNCTION, newFunction);
+            setInitializedSymbol(functionId, Symbol::FUNCTION);
+        }
+    } else {
+       symbolTable.addSymbol(functionId, Symbol(returnValue->dataType(), Symbol::FUNCTION, true, newFunction));
     }
+
+    return newFunction;
+}
+
+TreeNode* SemanticAnalyzer::callFunction(std::string functionId, Vector* params) {
+    FunctionCall* functionCall = new FunctionCall(functionId, params);
+    
+    if(!symbolExists(functionId, Symbol::FUNCTION, true)) {
+        yyerror("semantic error: undeclared function %s\n", functionId.c_str());
+        return functionCall;
+    }
+    functionCall->setType(getSymbolType(functionId, Symbol::FUNCTION));
+    
+    const Function* function = (const Function*) getSymbol(functionId, Symbol::FUNCTION, true).getData();
+    
+    if(function->params.size() != functionCall->params.size())
+        yyerror("semantic error: function %s expected %d parameters but received %d\n",
+                functionId.c_str(), function->params.size(), functionCall->params.size());
+    else
+        for(int i = 0; i < function->params.size(); i++) {
+            if(function->params[i]->dataType() != params->internalVector[i]->dataType()) {
+                yyerror("semantic error: parameter %s expected %s but received %s\n",           
+                            ((Variable*)function->params[i])->getId().c_str(),
+                            TreeNode::toString(function->params[i]->dataType()).c_str(),
+                            TreeNode::toString(params->internalVector[i]->dataType()).c_str());
+                break;
+            }    
+        }
+    
+    return functionCall;
+}
+
+Symbol SemanticAnalyzer::getSymbol(std::string id, Symbol::IdentifierType type, bool checkParentScope) {
+    if(symbolTable.existsSymbol(id, type))
+        return symbolTable.getSymbol(id, type);
+    
+    for(int i = scopes.size() - 1; i >= 0; i--) {
+        SymbolTable t = scopes[i];
+        if(t.existsSymbol(id, type))
+            return t.getSymbol(id, type);
+    }
+    
+    // Dark zone: you shouldn't reach this zone!
+    return Symbol(Data::UNKNOWN, Symbol::VARIABLE, false);    
+}
+
+Data::Type SemanticAnalyzer::getSymbolType(std::string id, Symbol::IdentifierType type) const {
+    if(symbolTable.existsSymbol(id, type))
+        return symbolTable.getSymbolType(id, type);
+    
+    for(int i = scopes.size() - 1; i >= 0; i--) {
+        SymbolTable t = scopes[i];
+        if(t.existsSymbol(id, type))
+            return t.getSymbolType(id, type);
+    }
+    
+    // Dark zone: you shouldn't reach this zone!
+    return Data::UNKNOWN;
+}
+
+bool SemanticAnalyzer::symbolExists(std::string id, Symbol::IdentifierType type, bool checkParentScope) {
+    if(symbolTable.existsSymbol(id, type))
+        return true;
+    
+    if(checkParentScope) {
+        for(SymbolTable t : scopes)
+            if(t.existsSymbol(id, type))
+                return true;
+        return false;
+    }
+    
+    return false;
+}
+
+bool SemanticAnalyzer::isSymbolInitialized(std::string id, Symbol::IdentifierType type, bool checkParentScope) const { 
+    if(symbolTable.existsSymbol(id, type))
+        return symbolTable.isSymbolInitialized(id, type);
+    
+    if(checkParentScope) {
+        for(int i = scopes.size() - 1; i >= 0; i--) {
+            SymbolTable t = scopes[i];
+            if(t.existsSymbol(id, type))
+                return t.isSymbolInitialized(id, type);
+        }
+    }
+    
+    // Dark zone: you shouldn't reach this zone!
+    return false;
+}
+
+void SemanticAnalyzer::setInitializedSymbol(std::string id, Symbol::IdentifierType type) {
+    if(symbolTable.existsSymbol(id, type))
+        symbolTable.setInitializedSymbol(id, type);
+    else
+        for(int i = scopes.size() - 1; i >= 0; i--) {
+            SymbolTable t = scopes[i];
+            if(scopes[i].existsSymbol(id, type)) {
+                scopes[i].setInitializedSymbol(id, type);
+                break;
+            }
+        }
 }
