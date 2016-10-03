@@ -92,6 +92,7 @@ class BinaryOperation : public TreeNode {
         std::string printPreOrder();
         std::string operationToString(Type operation) const;
         static const char* operationName(Type operation);
+        TreeNode* getLeft();
 
     private:
         Type operation;
@@ -270,7 +271,12 @@ class Pointer : public TreeNode {
           UNKNOWN
         };
 
-        Pointer(std::string id, Data::Type type, ADDRESS a, int count);
+        enum Declaration{
+          UNIQUE,
+          SEQUENCE
+        };
+
+        Pointer(std::string id, Data::Type type, ADDRESS a, int count, Declaration declaration = Declaration::UNIQUE);
         virtual ~Pointer();
         TreeNode::ClassType classType() const;
         std::string getId() const;
@@ -278,13 +284,37 @@ class Pointer : public TreeNode {
         std::string printPreOrder();
         std::string numberOfRefs(int number);
         ADDRESS typeOfAddress();
+        void setSize(int s);
+        Declaration getDeclaration();
+        void setDeclaration(Pointer::Declaration declar);
 
     private:
         std::string id;
         ADDRESS a;
         Data::Type type;
+        Declaration declaration;
         int count;
 
 };
+
+// class AddressOperation : public TreeNode {
+//
+//     friend class SemanticAnalyzer;
+//
+//     public:
+//
+//         AddressOperation(TreeNode* left, TreeNode* right);
+//         virtual ~AddressOperation();
+//         TreeNode::ClassType classType() const;
+//         std::string printInOrder();
+//         std::string printPreOrder();
+//         std::string operationToString(Type operation) const;
+//         static const char* operationName(Type operation);
+//
+//     private:
+//         TreeNode* left;
+//         TreeNode* right;
+//
+// };
 
 #endif

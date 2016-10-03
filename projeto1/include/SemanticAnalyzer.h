@@ -27,10 +27,10 @@ class SemanticAnalyzer {
         void analyzeRerefenceOperation(TreeNode* node);
         void analyzeAddressOperation(TreeNode* node);
         TreeNode* declareVariable(std::string varId, TreeNode::ClassType dataType, int size = 0, Pointer::ADDRESS address_type = Pointer::ADDRESS::UNKNOWN,
-        Data::Type pointer_type = Data::Type::UNKNOWN);
+        Data::Type pointer_type = Data::Type::UNKNOWN, Pointer::Declaration pointer_declaration = Pointer::Declaration::UNIQUE);
         TreeNode* assignVariable(std::string varId, TreeNode::ClassType assignedType, Pointer::ADDRESS address_type = Pointer::ADDRESS::REF);
         TreeNode* declareAssignVariable(std::string id, TreeNode::ClassType dataType, TreeNode::ClassType assignedType);
-        TreeNode* useVariable(std::string varId, int size = 0);
+        TreeNode* useVariable(std::string varId, int size = 0, bool needed = true);
 
     private:
         Data::Type classToDataType(TreeNode::ClassType type) const;

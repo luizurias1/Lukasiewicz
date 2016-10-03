@@ -49,7 +49,7 @@
  * Example: %type<node> expr
  */
 %type <syntaxTree> lines program
-%type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution pointer_types
+%type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution pointer_types declar_pointer_int values declar_pointer_float declar_pointer_bool
 %type <vector> else scope change_scope
 %type <dataType> data_type pointer
 
@@ -91,17 +91,35 @@ lines:
 // Linha
 line:
     attribution
-    | data_type pointer T_ID { $$ = new VariableDeclaration((Data::Type) $1,
-      SEMANTIC_ANALYZER.declareVariable($3, TreeNode::POINTER, $2, Pointer::ADDRESS::REF, (Data::Type) $1)); }
+    | T_TYPE_INT pointer declar_pointer_int { $$ = new VariableDeclaration(Data::INTEGER, $3);}
+    | T_TYPE_FLOAT pointer declar_pointer_float { $$ = new VariableDeclaration(Data::FLOAT, $3);}
+    | T_TYPE_BOOL pointer declar_pointer_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $3);}
     | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL change_scope else { $$ = new ConditionalOperation($2, $7->v, $8->v);
-      SEMANTIC_ANALYZER.analyzeBinaryOperation((ConditionalOperation*) $$); }
+                                      SEMANTIC_ANALYZER.analyzeBinaryOperation((ConditionalOperation*) $$); }
     | T_FOR attribution T_COMMA comparison T_COMMA attribution T_OPEN_BRACE T_NL change_scope { $$ = new LoopDeclaration($2, $4, $6, $9->v);
-      SEMANTIC_ANALYZER.analyzeBinaryOperation((LoopDeclaration*) $$); }
+                                      SEMANTIC_ANALYZER.analyzeBinaryOperation((LoopDeclaration*) $$); }
     | T_TYPE_INT declar_int { $$ = new VariableDeclaration(Data::INTEGER, $2); }
     | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(Data::FLOAT, $2); }
     | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2); }
     ;
 
+declar_pointer_int:
+    T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::POINTER, 1, Pointer::ADDRESS::REF, Data::INTEGER);}
+    | T_ID T_COMMA declar_pointer_int { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::POINTER, 1, Pointer::ADDRESS::REF, Data::INTEGER),
+                                                    BinaryOperation::COMMA, $3); Pointer* pointer = (Pointer*) $3; pointer->setDeclaration(Pointer::Declaration::SEQUENCE); }
+    ;
+
+declar_pointer_float:
+    T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::POINTER, 1, Pointer::ADDRESS::REF, Data::FLOAT);}
+    | T_ID T_COMMA declar_pointer_float { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::POINTER, 1, Pointer::ADDRESS::REF, Data::FLOAT),
+                                                    BinaryOperation::COMMA, $3); Pointer* pointer = (Pointer*) $3; pointer->setDeclaration(Pointer::Declaration::SEQUENCE); }
+    ;
+
+declar_pointer_bool:
+    T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::POINTER, 1, Pointer::ADDRESS::REF, Data::BOOLEAN);}
+    | T_ID T_COMMA declar_pointer_bool { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::POINTER, 1, Pointer::ADDRESS::REF, Data::BOOLEAN),
+                                                    BinaryOperation::COMMA, $3); Pointer* pointer = (Pointer*) $3; pointer->setDeclaration(Pointer::Declaration::SEQUENCE); }
+    ;
 // Troca de Escopo
 change_scope:
     scope { SEMANTIC_ANALYZER.returnScope(); }
@@ -124,14 +142,9 @@ attribution:
     {$$ = NULL;}
     | pointer T_ID T_ATT pointer T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.useVariable($2, $1), BinaryOperation::ASSIGN,
                                                               SEMANTIC_ANALYZER.useVariable($5, $4));
-                                                            SEMANTIC_ANALYZER.analyzeAddressOperation(SEMANTIC_ANALYZER.useVariable($2));
-                                                          SEMANTIC_ANALYZER.analyzeAddressOperation(SEMANTIC_ANALYZER.useVariable($5)); }
-    /*| T_ID T_ATT T_LVALUE T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.assignVariable($1, SEMANTIC_ANALYZER.useVariable($4)->classType(),
-                                                              Pointer::ADDRESS::ADDR),
-                                                           BinaryOperation::ASSIGN, SEMANTIC_ANALYZER.useVariable($4));
-                                                           SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$);
-                                                         SEMANTIC_ANALYZER.analyzeAddressOperation(SEMANTIC_ANALYZER.useVariable($4));}*/
-    | T_ID T_ATT T_LVALUE expr {$$ = new BinaryOperation(SEMANTIC_ANALYZER.assignVariable($1, $4->classType(),
+                                                            SEMANTIC_ANALYZER.analyzeRerefenceOperation(SEMANTIC_ANALYZER.useVariable($2));
+                                                          SEMANTIC_ANALYZER.analyzeRerefenceOperation(SEMANTIC_ANALYZER.useVariable($5)); }
+    | T_ID T_ATT T_LVALUE values {$$ = new BinaryOperation(SEMANTIC_ANALYZER.assignVariable($1, $4->classType(),
                                                                Pointer::ADDRESS::ADDR),
                                                             BinaryOperation::ASSIGN, $4);
                                                             SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$);
@@ -255,6 +268,15 @@ data:
 pointer_types:
     pointer T_ID {$$ = SEMANTIC_ANALYZER.useVariable($2, $1);}
     | pointer data { $$ = $2; }
+    ;
+
+values:
+    pointer_types {$$ = $1; SEMANTIC_ANALYZER.analyzeRerefenceOperation($1);}
+    | T_INT { $$ = new Integer($1); }
+    | T_FLOAT { $$ = new Float($1); }
+    | T_TRUE { $$ = new Boolean(true); }
+    | T_FALSE { $$ = new Boolean(false); }
+    | T_ID { $$ = SEMANTIC_ANALYZER.useVariable($1, 0, false); }
     ;
 
 // Tipos de dados

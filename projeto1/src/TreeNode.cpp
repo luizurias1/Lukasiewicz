@@ -110,6 +110,10 @@ const char* BinaryOperation::operationName(BinaryOperation::Type operation) {
     }
 }
 
+TreeNode* BinaryOperation::getLeft(){
+  return left;
+}
+
 UnaryOperation::UnaryOperation(UnaryOperation::Type operation, TreeNode* right) : TreeNode(Data::UNKNOWN) {
     this->operation = operation;
     this->right = right;
@@ -257,6 +261,14 @@ std::string VariableDeclaration::printInOrder() {
       output = typeToString(this->type);
       output += next->printInOrder();
     }
+
+    if(next->classType() == TreeNode::BINARY_OPERATION){
+      BinaryOperation* bop = (BinaryOperation*) next;
+      if(bop->getLeft()->classType() == TreeNode::POINTER){
+        output = typeToString(this->type);
+        output += next->printInOrder();
+      }
+    }
     return output;
 }
 
@@ -268,6 +280,14 @@ std::string VariableDeclaration::printPreOrder() {
     if (next->classType() == TreeNode::POINTER){
       output = typeToString(this->type);
       output += next->printInOrder();
+    }
+
+    if(next->classType() == TreeNode::BINARY_OPERATION){
+      BinaryOperation* bop = (BinaryOperation*) next;
+      if(bop->getLeft()->classType() == TreeNode::POINTER){
+        output = typeToString(this->type);
+        output += next->printInOrder();
+      }
     }
     return output;
 
@@ -519,11 +539,12 @@ std::string LoopDeclaration::getTab() {
 }
 
 // POINTER NODE
-Pointer::Pointer(std::string id, Data::Type type, ADDRESS a, int count) : TreeNode(type) {
+Pointer::Pointer(std::string id, Data::Type type, ADDRESS a, int count, Declaration declaration) : TreeNode(type) {
     this->id = id;
     this->a = a;
     this->count = count;
     this->type = type;
+    this->declaration = declaration;
 }
 
 Pointer::~Pointer() {
@@ -534,10 +555,15 @@ TreeNode::ClassType Pointer::classType() const {
 }
 
 std::string Pointer::printInOrder() {
-    std::string output = numberOfRefs(0);
-    output += " var: ";
-    output += id;
-    return  output;
+  std::string output = numberOfRefs(0);
+    if(declaration == Declaration::UNIQUE){
+      output += " var: ";
+      output += id;
+      return  output;
+    }else{
+      output = id;
+      return  output;
+    }
 }
 
 std::string Pointer::printPreOrder() {
@@ -567,3 +593,24 @@ std::string Pointer::numberOfRefs(int number){
 Pointer::ADDRESS Pointer::typeOfAddress(){
   return a;
 }
+
+void Pointer::setSize(int s){
+  count = s;
+}
+
+Pointer::Declaration Pointer::getDeclaration(){
+  return declaration;
+}
+
+void Pointer::setDeclaration(Pointer::Declaration declar){
+  declaration = declar;
+}
+
+// //Address
+// AddressOperation::AddressOperation(TreeNode* left, TreeNode* right) : TreeNode(type) {
+//   this->left = left;
+//   this->
+// }
+//
+// Pointer::~Pointer() {
+// }
