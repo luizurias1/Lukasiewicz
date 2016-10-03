@@ -91,9 +91,9 @@ lines:
 // Linha
 line:
     attribution
-    | T_TYPE_INT pointer declar_pointer_int { $$ = new VariableDeclaration(Data::INTEGER, $3);}
-    | T_TYPE_FLOAT pointer declar_pointer_float { $$ = new VariableDeclaration(Data::FLOAT, $3);}
-    | T_TYPE_BOOL pointer declar_pointer_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $3);}
+    | T_TYPE_INT declar_pointer_int { $$ = new VariableDeclaration(Data::INTEGER, $2);}
+    | T_TYPE_FLOAT declar_pointer_float { $$ = new VariableDeclaration(Data::FLOAT, $2);}
+    | T_TYPE_BOOL declar_pointer_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2);}
     | T_IF expr T_NL T_THEN T_OPEN_BRACE T_NL change_scope else { $$ = new ConditionalOperation($2, $7->v, $8->v);
                                       SEMANTIC_ANALYZER.analyzeBinaryOperation((ConditionalOperation*) $$); }
     | T_FOR attribution T_COMMA comparison T_COMMA attribution T_OPEN_BRACE T_NL change_scope { $$ = new LoopDeclaration($2, $4, $6, $9->v);
@@ -104,22 +104,26 @@ line:
     ;
 
 declar_pointer_int:
-    T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::POINTER, 1, Pointer::ADDRESS::REF, Data::INTEGER);}
-    | T_ID T_COMMA declar_pointer_int { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::POINTER, 1, Pointer::ADDRESS::REF, Data::INTEGER),
-                                                    BinaryOperation::COMMA, $3); Pointer* pointer = (Pointer*) $3; pointer->setDeclaration(Pointer::Declaration::SEQUENCE); }
+    pointer T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($2, TreeNode::POINTER_INTEGER, $1, Pointer::ADDRESS::REF);}
+    | pointer T_ID T_COMMA T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($2, TreeNode::POINTER_INTEGER, $1, Pointer::ADDRESS::REF),
+                                                    BinaryOperation::COMMA, SEMANTIC_ANALYZER.declareVariable($4, TreeNode::POINTER_INTEGER, $1, Pointer::ADDRESS::REF,
+                                                      Pointer::Declaration::SEQUENCE));}
     ;
 
 declar_pointer_float:
-    T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::POINTER, 1, Pointer::ADDRESS::REF, Data::FLOAT);}
-    | T_ID T_COMMA declar_pointer_float { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::POINTER, 1, Pointer::ADDRESS::REF, Data::FLOAT),
-                                                    BinaryOperation::COMMA, $3); Pointer* pointer = (Pointer*) $3; pointer->setDeclaration(Pointer::Declaration::SEQUENCE); }
+    pointer T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($2, TreeNode::POINTER_FLOAT, $1, Pointer::ADDRESS::REF);}
+    | pointer T_ID T_COMMA T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($2, TreeNode::POINTER_FLOAT, $1, Pointer::ADDRESS::REF),
+                                                    BinaryOperation::COMMA, SEMANTIC_ANALYZER.declareVariable($4, TreeNode::POINTER_FLOAT, $1, Pointer::ADDRESS::REF,
+                                                      Pointer::Declaration::SEQUENCE));}
     ;
 
 declar_pointer_bool:
-    T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($1, TreeNode::POINTER, 1, Pointer::ADDRESS::REF, Data::BOOLEAN);}
-    | T_ID T_COMMA declar_pointer_bool { $$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, TreeNode::POINTER, 1, Pointer::ADDRESS::REF, Data::BOOLEAN),
-                                                    BinaryOperation::COMMA, $3); Pointer* pointer = (Pointer*) $3; pointer->setDeclaration(Pointer::Declaration::SEQUENCE); }
+    pointer T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($2, TreeNode::POINTER_BOOLEAN, $1, Pointer::ADDRESS::REF);}
+    | pointer T_ID T_COMMA T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($2, TreeNode::POINTER_BOOLEAN, $1, Pointer::ADDRESS::REF),
+                                                    BinaryOperation::COMMA, SEMANTIC_ANALYZER.declareVariable($4, TreeNode::POINTER_BOOLEAN, $1, Pointer::ADDRESS::REF,
+                                                      Pointer::Declaration::SEQUENCE));}
     ;
+
 // Troca de Escopo
 change_scope:
     scope { SEMANTIC_ANALYZER.returnScope(); }

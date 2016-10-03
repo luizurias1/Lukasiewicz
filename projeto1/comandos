@@ -1,5 +1,10 @@
-int i, j = 2
-int ref ip, jp
-ip = addr i
-jp = addr j
-ref ip = ref jp
+int ref a
+int i = 0 
+int ref d, e
+float ref v
+float ref ref j
+float ref ke, kl
+bool ref gh
+int ref mypointer
+mypointer = addr i
+i = ref mypointer + 1

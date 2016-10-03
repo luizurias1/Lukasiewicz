@@ -107,24 +107,13 @@ void SemanticAnalyzer::analyzeAddressOperation(TreeNode* node){
        yyerror("semantic error: address operation expects a variable or array item\n");
 }
 
-TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType dataType, int size, Pointer::ADDRESS address_type,
-  Data::Type pointer_type, Pointer::Declaration pointer_declaration) {
+TreeNode* SemanticAnalyzer::declareVariable(std::string id, TreeNode::ClassType dataType, int size, Pointer::ADDRESS address_type, Pointer::Declaration pointer_declaration) {
     if(symbolTable.existsVariable(id))
         yyerror("semantic error: re-declaration of variable %s\n", id.c_str());
     else{
-      if(dataType == TreeNode::POINTER){
-        if (pointer_type == Data::INTEGER){
-          symbolTable.addSymbol(id, Symbol(Data::POINTER_INTEGER, Symbol::VARIABLE, false)); // Adds variable to symbol table
+      if(dataType == TreeNode::POINTER_INTEGER | dataType == TreeNode::POINTER_FLOAT | dataType == TreeNode::POINTER_BOOLEAN){
+          symbolTable.addSymbol(id, Symbol(classToDataType(dataType), Symbol::VARIABLE, false)); // Adds variable to symbol table
           return new Pointer(id, classToDataType(dataType), address_type, size, pointer_declaration);
-        }
-        if (pointer_type == Data::FLOAT){
-          symbolTable.addSymbol(id, Symbol(Data::POINTER_FLOAT, Symbol::VARIABLE, false)); // Adds variable to symbol table
-          return new Pointer(id, classToDataType(dataType), address_type, size, pointer_declaration);
-        }
-        if (pointer_type == Data::BOOLEAN){
-          symbolTable.addSymbol(id, Symbol(Data::POINTER_BOOLEAN, Symbol::VARIABLE, false)); // Adds variable to symbol table
-          return new Pointer(id, classToDataType(dataType), address_type, size, pointer_declaration);
-        }
       }
       symbolTable.addSymbol(id, Symbol(classToDataType(dataType), Symbol::VARIABLE, false)); // Adds variable to symbol table
     }
@@ -190,6 +179,12 @@ Data::Type SemanticAnalyzer::classToDataType(TreeNode::ClassType type) const {
             return Data::INTEGER;
         case TreeNode::POINTER:
             return Data::POINTER;
+        case TreeNode::POINTER_INTEGER:
+            return Data::POINTER_INTEGER;
+        case TreeNode::POINTER_FLOAT:
+            return Data::POINTER_FLOAT;
+        case TreeNode::POINTER_BOOLEAN:
+            return Data::POINTER_BOOLEAN;
         default:
             return Data::UNKNOWN;
     }
