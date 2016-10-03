@@ -368,7 +368,10 @@ std::string VariableDeclaration::printPreOrder() {
         BinaryOperation *b = (BinaryOperation*) next;
         if (b->left->classType() == TreeNode::ARRAY){
             output+= " array: " + next->printInOrder();
-        } else{
+        }else if(b->left->classType() == TreeNode::POINTER){
+          output = typeToString(this->type);
+          output += next->printInOrder();
+      }else{
             output+= " var: ";
             output += next->printInOrder();
         }
@@ -493,7 +496,7 @@ std::string ConditionalOperation::printPreOrder() {
             output = output.substr(0, output.length()-1);
         }
     }
-    
+
     if(el.size() > 0) {
         output += identation+"\nelse:";
         for (TreeNode* line: el) {
@@ -611,7 +614,7 @@ std::string LoopDeclaration::printPreOrder() {
     output += getTab();
     output += "do:";
     ConditionalOperation* c = NULL;
-    
+
     for (int i = 0; i < body.size(); i ++) {
         output += "\n";
 
@@ -673,16 +676,16 @@ std::string Function::printPreOrder() {
     std::string identation = getTab();
     std::string output = identation;
     output += TreeNode::toShortString(returnValue->dataType()) + " fun: " + id + " (params: ";
-    
+
     if(params.size() > 0) {
         output += TreeNode::toShortString(params.front()->dataType()) + " " + ((Variable*) params.front())->getId();
-        
+
         for(int i = 1; i < params.size(); i++) {
             output += ", " + TreeNode::toShortString(params[i]->dataType()) + " " + ((Variable*) params[i])->getId();
         }
     }
     output += ")\n";
-    
+
     ConditionalOperation* c = NULL;
 
     for(int i = 0; i < body.size(); i++) {
@@ -705,10 +708,10 @@ std::string Function::printPreOrder() {
                     output = output.substr(0, output.length()-1);
                 break;
         }
-        
+
         output += "\n";
     }
-    
+
     output += identation + "  ret " + returnValue->printPreOrder();
     if(output.back() == ' ')
         output = output.substr(0, output.length()-1);
@@ -741,13 +744,13 @@ std::string FunctionCall::printInOrder() {
 
 std::string FunctionCall::printPreOrder() {
     std::string output = id + "[" + std::to_string(params.size()) + " params]";
-    
+
     if(params.size() > 0) {
         output += " ";
         for(int i = 0; i < params.size(); i++)
             output += params[i]->printPreOrder();
     }
-    
+
     return output;
 }
 
