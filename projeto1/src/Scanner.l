@@ -24,6 +24,8 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 "if"                {return T_IF;} /*Conditional operator*/
 "then"              {return T_THEN;} /*Then clause*/
 "else"              {return T_ELSE;} /*Else clause*/
+"fun"               {return T_FUNCTION;}
+"ret"               {return T_RETURN;}
 "for"               {return T_FOR;} /*Loop*/
 "bool"              {yylval.dataType = Data::BOOLEAN; return T_TYPE_BOOL;} /* Type boolean */
 "float"             {yylval.dataType = Data::FLOAT; return T_TYPE_FLOAT;} /* Type float */
