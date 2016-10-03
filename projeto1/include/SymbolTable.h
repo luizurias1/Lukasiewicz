@@ -20,8 +20,9 @@ class Symbol {
         };
     
         Symbol();
-        Symbol(Data::Type dataType, IdentifierType idType, bool initialized);
+        Symbol(Data::Type dataType, IdentifierType idType, bool initialized, TreeNode* data = NULL);
         virtual ~Symbol();
+        const TreeNode* getData() const;
         Data::Type getDataType() const;
         void setDataType(Data::Type type);
     
@@ -29,6 +30,7 @@ class Symbol {
         Data::Type dataType;
         IdentifierType idType;
         bool initialized;
+        TreeNode* data;
     
 };
 
@@ -46,6 +48,7 @@ class SymbolTable {
         void clear();
         bool existsVariable(std::string varId) const;
         bool isVariableInitialized(std::string varId) const;
+        const TreeNode* getSymbolData(std::string varId) const;
         Data::Type getSymbolType(std::string varId) const;
     
         void addSymbol(const std::string varId, Symbol newSymbol);

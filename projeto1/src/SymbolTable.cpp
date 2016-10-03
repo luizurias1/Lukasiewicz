@@ -6,13 +6,18 @@ Symbol::Symbol() {
     this->initialized = false;
 }
 
-Symbol::Symbol(Data::Type dataType, IdentifierType idType, bool initialized) {
+Symbol::Symbol(Data::Type dataType, IdentifierType idType, bool initialized, TreeNode* data) {
     this->dataType = dataType;
     this->idType = idType;
     this->initialized = initialized;
+    this->data = data;
 }
 
 Symbol::~Symbol() {
+}
+
+const TreeNode* Symbol::getData() const {
+    return this->data;
 }
 
 Data::Type Symbol::getDataType() const {
@@ -44,6 +49,10 @@ bool SymbolTable::existsVariable(std::string varId) const {
 
 bool SymbolTable::isVariableInitialized(std::string varId) const {
     return entryList.at(varId).initialized;
+}
+
+const TreeNode* SymbolTable::getSymbolData(std::string varId) const {
+    return entryList.at(varId).data;
 }
 
 Data::Type SymbolTable::getSymbolType(std::string varId) const {

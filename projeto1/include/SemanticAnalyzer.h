@@ -21,9 +21,11 @@ class SemanticAnalyzer {
         
         void newScope();
         void returnScope();
-        void analyzeBinaryOperation(ConditionalOperation* conditionalOp);
-        void analyzeBinaryOperation(LoopDeclaration* loop);
+    
         void analyzeBinaryOperation(BinaryOperation* binaryOp);
+        void analyzeConditionalOperation(ConditionalOperation* conditionalOp);
+        void analyzeLoopDeclaration(LoopDeclaration* loop);
+    
         TreeNode* declareVariable(std::string varId, Data::Type dataType);
         TreeNode* assignVariable(std::string varId, Data::Type assignedType);
         TreeNode* declareAssignVariable(std::string id, Data::Type dataType, Data::Type assignedType);

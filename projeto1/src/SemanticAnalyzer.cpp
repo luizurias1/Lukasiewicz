@@ -16,18 +16,6 @@ void SemanticAnalyzer::returnScope() {
     scopes.pop_back();
 }
 
-void SemanticAnalyzer::analyzeBinaryOperation(ConditionalOperation* conditionalOp) {
-    if(conditionalOp->condition->dataType() != Data::BOOLEAN)
-        yyerror("semantic error: test operation expected boolean but received %s\n",
-            TreeNode::toString(conditionalOp->condition->dataType()).c_str());
-}
-
-void SemanticAnalyzer::analyzeBinaryOperation(LoopDeclaration* loop) {
-    if(loop->test->dataType() != Data::BOOLEAN)
-        yyerror("semantic error: test operation expected boolean but received %s\n",
-            TreeNode::toString(loop->test->dataType()).c_str());
-}
-
 void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
     TreeNode* left = binaryOp->left;
     BinaryOperation::Type op = binaryOp->operation;
@@ -72,6 +60,18 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
             TreeNode::toString(left->dataType()).c_str(),
             TreeNode::toString(right->dataType()).c_str());
     }
+}
+
+void SemanticAnalyzer::analyzeConditionalOperation(ConditionalOperation* conditionalOp) {
+    if(conditionalOp->condition->dataType() != Data::BOOLEAN)
+        yyerror("semantic error: test operation expected boolean but received %s\n",
+            TreeNode::toString(conditionalOp->condition->dataType()).c_str());
+}
+
+void SemanticAnalyzer::analyzeLoopDeclaration(LoopDeclaration* loop) {
+    if(loop->test->dataType() != Data::BOOLEAN)
+        yyerror("semantic error: test operation expected boolean but received %s\n",
+            TreeNode::toString(loop->test->dataType()).c_str());
 }
 
 TreeNode* SemanticAnalyzer::declareVariable(std::string id, Data::Type dataType) {
