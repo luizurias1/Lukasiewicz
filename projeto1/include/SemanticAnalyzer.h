@@ -26,8 +26,14 @@ class SemanticAnalyzer {
         void analyzeConditionalOperation(ConditionalOperation* conditionalOp);
         void analyzeFunctions();
         void analyzeLoopDeclaration(LoopDeclaration* loop);
+        void analyzeRerefenceOperation(TreeNode* node);
+        void analyzeAddressOperation(TreeNode* node);
     
-        TreeNode* declareVariable(std::string varId, Data::Type dataType, int size = 0);
+        TreeNode* assignPointer(std::string varId, TreeNode::ClassType assignedType, Pointer::ADDRESS address_type = Pointer::ADDRESS::REF);
+        TreeNode* usePointer(std::string varId, int size = 0, bool needed = true);
+    
+        TreeNode* declareVariable(std::string varId, Data::Type dataType, int size = 0, Pointer::ADDRESS address_type = Pointer::ADDRESS::UNKNOWN,
+        Pointer::Declaration pointer_declaration = Pointer::Declaration::UNIQUE);
         TreeNode* assignVariable(std::string varId, Data::Type assignedType, TreeNode* index = NULL);
         TreeNode* declareAssignVariable(std::string id, Data::Type dataType, Data::Type assignedType);
         TreeNode* useVariable(std::string varId, TreeNode* index = NULL);

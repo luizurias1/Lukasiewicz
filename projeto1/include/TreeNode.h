@@ -16,10 +16,14 @@ namespace Data {
         BOOLEAN = 0,
         FLOAT = 1,
         INTEGER = 2,
-        ARRAY_INTEGER = 4,
-        ARRAY_FLOAT = 5,
-        ARRAY_BOOLEAN = 6,
-        UNKNOWN = 3
+        POINTER = 3,
+        POINTER_INTEGER = 4,
+        POINTER_FLOAT = 5,
+        POINTER_BOOLEAN = 6,
+        ARRAY_INTEGER = 7,
+        ARRAY_FLOAT = 8,
+        ARRAY_BOOLEAN = 9,
+        UNKNOWN = 10
     };
 }
 
@@ -57,6 +61,10 @@ class TreeNode {
             VARIABLE_DECLARATION,
             CONDITIONAL,
             LOOP_DECLARATION,
+            POINTER,
+            POINTER_INTEGER,
+            POINTER_FLOAT,
+            POINTER_BOOLEAN,
             ARRAY,
             ARRAY_INTEGER,
             ARRAY_FLOAT,
@@ -88,6 +96,7 @@ class TreeNode {
 class BinaryOperation : public TreeNode {
 
     friend class SemanticAnalyzer;
+    friend class VariableDeclaration;
 
     public:
         enum Type {
@@ -98,13 +107,14 @@ class BinaryOperation : public TreeNode {
             ASSIGN,
             COMMA,
             EQUAL,
+            NOT_EQUAL,
             GREATER,
             GREATER_EQUAL,
             LOWER,
             LOWER_EQUAL,
             AND,
-            NOT_EQUAL,
-            OR
+            OR,
+            ADDRESS
         };
 
         BinaryOperation(TreeNode* left, Type operation, TreeNode* right);
@@ -115,6 +125,7 @@ class BinaryOperation : public TreeNode {
         std::string operationToString(Type operation) const;
         static const char* operationName(Type operation);
         TreeNode* getLeft();
+
     private:
         Type operation;
         TreeNode* left;
@@ -328,6 +339,42 @@ class FunctionCall : public TreeNode {
     private:
         std::string id;
         std::vector<TreeNode*> params;
+
+};
+
+class Pointer : public TreeNode {
+
+    public:
+        enum ADDRESS {
+          REF,
+          ADDR,
+          VALUE,
+          UNKNOWN
+        };
+
+        enum Declaration {
+          UNIQUE,
+          SEQUENCE
+        };
+
+        Pointer(std::string id, Data::Type type, ADDRESS a, int count, Declaration declaration = Declaration::UNIQUE);
+        virtual ~Pointer();
+        TreeNode::ClassType classType() const;
+        std::string getId() const;
+        std::string printInOrder();
+        std::string printPreOrder();
+        std::string numberOfRefs(int number);
+        ADDRESS typeOfAddress();
+        void setSize(int s);
+        Declaration getDeclaration();
+        void setDeclaration(Pointer::Declaration declar);
+
+    private:
+        std::string id;
+        ADDRESS a;
+        Data::Type type;
+        Declaration declaration;
+        int count;
 
 };
 

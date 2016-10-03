@@ -42,15 +42,16 @@
 %token T_EQUAL T_NOT_EQUAL T_GREATER T_LOWER T_GREATER_EQUAL T_LOWER_EQUAL
 %token T_AND T_OR T_NOT
 %token T_IF T_ELSE T_THEN T_FOR T_FUNCTION T_RETURN
+%token T_LVALUE T_POINTER
 
 /* type defines the type of our nonterminal symbols.
  * Types should match the names used in the union.
  * Example: %type<node> expr
  */
 %type <syntaxTree> lines program
-%type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution function_call
+%type <node> line expr declar_int declar_float declar_bool data comparison connective op_binary attribution function_call pointer_types declar_pointer_int values declar_pointer_float declar_pointer_bool
 %type <vector> else scope change_scope new_scope end_scope function_scope params params_call
-%type <dataType> data_type
+%type <dataType> data_type pointer
 
 /* Operator precedence for mathematical operators
  * The latest it is listed, the highest the precedence
@@ -90,6 +91,9 @@ lines:
 // Linha
 line:
     attribution
+    | T_TYPE_INT declar_pointer_int { $$ = new VariableDeclaration(Data::INTEGER, $2);}
+    | T_TYPE_FLOAT declar_pointer_float { $$ = new VariableDeclaration(Data::FLOAT, $2);}
+    | T_TYPE_BOOL declar_pointer_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2);}
     | T_TYPE_INT declar_int { $$ = new VariableDeclaration(Data::INTEGER, $2);  }
     | T_TYPE_FLOAT declar_float { $$ = new VariableDeclaration(Data::FLOAT, $2); }
     | T_TYPE_BOOL declar_bool { $$ = new VariableDeclaration(Data::BOOLEAN, $2); }
@@ -99,6 +103,27 @@ line:
             SEMANTIC_ANALYZER.analyzeLoopDeclaration((LoopDeclaration*) $$); }
     | data_type T_FUNCTION T_ID T_OPEN_PAR T_CLOSING_PAR new_scope function_scope end_scope { $$ = NULL; if($7->size() > 0) $$ = SEMANTIC_ANALYZER.declareFunction($3, new Vector(), $7, $7->popFront()); else $$ = SEMANTIC_ANALYZER.declareFunctionHeader($3, new Vector(), (Data::Type) $1); }
     | data_type T_FUNCTION T_ID T_OPEN_PAR new_scope params T_CLOSING_PAR function_scope end_scope { $$ = NULL; if($8->size() > 0) $$ = SEMANTIC_ANALYZER.declareFunction($3, $6, $8, $8->popFront()); else $$ = SEMANTIC_ANALYZER.declareFunctionHeader($3, $6, (Data::Type) $1); }
+    ;
+
+declar_pointer_int:
+    pointer T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($2, Data::POINTER_INTEGER, $1, Pointer::REF);}
+    | pointer T_ID T_COMMA T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($2, Data::POINTER_INTEGER, $1, Pointer::ADDRESS::REF),
+                                                    BinaryOperation::COMMA, SEMANTIC_ANALYZER.declareVariable($4, Data::POINTER_INTEGER, $1, Pointer::ADDRESS::REF,
+                                                      Pointer::Declaration::SEQUENCE));}
+    ;
+
+declar_pointer_float:
+    pointer T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($2, Data::POINTER_FLOAT, $1, Pointer::ADDRESS::REF);}
+    | pointer T_ID T_COMMA T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($2, Data::POINTER_FLOAT, $1, Pointer::ADDRESS::REF),
+                                                    BinaryOperation::COMMA, SEMANTIC_ANALYZER.declareVariable($4, Data::POINTER_FLOAT, $1, Pointer::ADDRESS::REF,
+                                                      Pointer::Declaration::SEQUENCE));}
+    ;
+
+declar_pointer_bool:
+    pointer T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($2, Data::POINTER_BOOLEAN, $1, Pointer::ADDRESS::REF);}
+    | pointer T_ID T_COMMA T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($2, Data::POINTER_BOOLEAN, $1, Pointer::ADDRESS::REF),
+                                                    BinaryOperation::COMMA, SEMANTIC_ANALYZER.declareVariable($4, Data::POINTER_BOOLEAN, $1, Pointer::ADDRESS::REF,
+                                                      Pointer::Declaration::SEQUENCE));}
     ;
 
 // Escopo de uma função (parâmetros + corpo)
@@ -113,7 +138,7 @@ params:
     | data_type T_ID T_COMMA params { $$ = $4; $$->pushFront(SEMANTIC_ANALYZER.declareAssignVariable($2, (Data::Type) $1, (Data::Type) $1)); }
     ;
 
-// Change scope
+// Troca de Escopo
 change_scope:
     new_scope scope end_scope { $$ = $2; }
     ;
@@ -142,7 +167,16 @@ else:
 
 // Atribuição
 attribution:
-    { $$ = NULL; }
+    {$$ = NULL;}
+    | pointer T_ID T_ATT pointer T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.usePointer($2, $1), BinaryOperation::ASSIGN,
+                                                              SEMANTIC_ANALYZER.usePointer($5, $4));
+                                                            SEMANTIC_ANALYZER.analyzeRerefenceOperation(SEMANTIC_ANALYZER.useVariable($2));
+                                                          SEMANTIC_ANALYZER.analyzeRerefenceOperation(SEMANTIC_ANALYZER.useVariable($5)); }
+    | T_ID T_ATT T_LVALUE values {$$ = new BinaryOperation(SEMANTIC_ANALYZER.assignPointer($1, $4->classType(),
+                                                               Pointer::ADDRESS::ADDR),
+                                                            BinaryOperation::ASSIGN, $4);
+                                                            SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$);
+                                                          SEMANTIC_ANALYZER.analyzeAddressOperation($4);}
     | T_ID T_ATT expr { $$ = new BinaryOperation(
                                 SEMANTIC_ANALYZER.assignVariable($1, $3->dataType()),
                                 BinaryOperation::ASSIGN, $3);
@@ -155,7 +189,7 @@ attribution:
 
 // Expressão
 expr:
-    T_INT { $$ = new Integer($1); }//std::cout<< " T_INT "<< std::endl; }
+    | T_INT { $$ = new Integer($1); }
     | T_FLOAT { $$ = new Float($1); }
     | T_TRUE { $$ = new Boolean(true); }
     | T_FALSE { $$ = new Boolean(false); }
@@ -165,7 +199,8 @@ expr:
     | T_OPEN_PAR expr T_CLOSING_PAR { $$ = $2; }
     | T_NOT expr { $$ = new UnaryOperation(UnaryOperation::NOT, $2); $$->setType(Data::BOOLEAN);}
     | T_OPEN_BRACKET data_type T_CLOSING_BRACKET expr { $$ = new TypeCasting((Data::Type) $2, $4); }
-    | op_binary //{std::cout<< "op_binary "<< std::endl;}
+    | pointer_types {$$ = $1; SEMANTIC_ANALYZER.analyzeRerefenceOperation($1);}
+    | op_binary
     | comparison
     | connective
     | function_call
@@ -181,10 +216,16 @@ params_call:
     | expr T_COMMA params_call { $$ = $3; $$->pushFront($1); }
     ;
 
+// Referências
+pointer:
+    T_POINTER {int a = 1; $$ = a;}
+    | T_POINTER pointer {$$ = ($2 + 1);}
+    ;
+
 // Operações binárias
 op_binary:
     expr T_PLUS expr { $$ = new BinaryOperation($1, BinaryOperation::PLUS, $3);
-                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
+                         SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$);}
     | expr T_MINUS expr { $$ = new BinaryOperation($1, BinaryOperation::MINUS, $3);
                          SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$); }
     | expr T_TIMES expr { $$ = new BinaryOperation($1, BinaryOperation::TIMES, $3);
@@ -268,6 +309,21 @@ declar_int:
     | T_ID T_OPEN_PAR T_INT T_CLOSING_PAR T_COMMA declar_int {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($1, Data::INTEGER, $3),
                                                     BinaryOperation::COMMA, $6);}
     | T_ID T_OPEN_PAR T_INT T_CLOSING_PAR { $$ = SEMANTIC_ANALYZER.declareVariable($1, Data::INTEGER,$3); }
+    ;
+
+// Tipos dos ponteiros
+pointer_types:
+    pointer T_ID {$$ = SEMANTIC_ANALYZER.usePointer($2, $1);}
+    | pointer data { $$ = $2; }
+    ;
+
+values:
+    pointer_types {$$ = $1; SEMANTIC_ANALYZER.analyzeRerefenceOperation($1);}
+    | T_INT { $$ = new Integer($1); }
+    | T_FLOAT { $$ = new Float($1); }
+    | T_TRUE { $$ = new Boolean(true); }
+    | T_FALSE { $$ = new Boolean(false); }
+    | T_ID { $$ = SEMANTIC_ANALYZER.usePointer($1, 0, false); }
     ;
 
 // Dados

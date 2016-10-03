@@ -19,17 +19,19 @@ id [a-z|A-Z]+[a-z|A-Z|_|0-9]*
 \|                  {return T_OR;} /* Binary operator OR */
 "&"                 {return T_AND;} /* Binary operator AND */
 "!"                 {return T_NOT;} /* Binary operator NOT */
+"ref"               {return T_POINTER;} /*Poiter declaration*/
+"addr"              {return T_LVALUE;} /*Lvalue*/
+"if"                {return T_IF;} /*Conditional operator*/
+"then"              {return T_THEN;} /*Then clause*/
+"else"              {return T_ELSE;} /*Else clause*/
 "fun"               {return T_FUNCTION;}
 "ret"               {return T_RETURN;}
-"if"                {return T_IF;}
-"then"              {return T_THEN;}
-"else"              {return T_ELSE;}
 "for"               {return T_FOR;} /*Loop*/
 "bool"              {yylval.dataType = Data::BOOLEAN; return T_TYPE_BOOL;} /* Type boolean */
 "float"             {yylval.dataType = Data::FLOAT; return T_TYPE_FLOAT;} /* Type float */
 "int"               {yylval.dataType = Data::INTEGER; return T_TYPE_INT;} /* Type integer */
-"true"              {return T_TRUE;}
-"false"             {return T_FALSE;}
+"true"              {return T_TRUE;} /*Boolean value True*/
+"false"             {return T_FALSE;} /*Boolean value False*/
 {id}                {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_ID;} /* Identifier */
 {integer}           {yylval.integer = std::atoi(yytext); return T_INT;} /* Integer number */
 {float}             {yylval.id = new char[yyleng+1]; strcpy(yylval.id, yytext); return T_FLOAT;}

@@ -115,10 +115,6 @@ std::string BinaryOperation::printPreOrder() {
   return output + right->printPreOrder();
 }
 
-TreeNode* BinaryOperation::getLeft(){
-  return left;
-}
-
 std::string BinaryOperation::operationToString(BinaryOperation::Type operation) const {
     switch(operation) {
         case PLUS:
@@ -324,12 +320,10 @@ TreeNode::ClassType Array::classType() const {
 Array::~Array() {
 }
 
-
 Variable::Variable(std::string id, Data::Type type) : TreeNode(type) {
     this->id = id;
 
 }
-
 
 Variable::~Variable() {
 }
@@ -363,41 +357,31 @@ TreeNode::ClassType VariableDeclaration::classType() const {
 }
 
 std::string VariableDeclaration::printInOrder() {
-  std::string output = typeToString(this->type);
-  if (next->classType() == TreeNode::ARRAY) {
-    output+= " array: " + next->printInOrder();
-  }else if (next->classType() == TreeNode::BINARY_OPERATION){
-      BinaryOperation *b = (BinaryOperation*) next;
-      if (b->getLeft()->classType() == TreeNode::ARRAY){
-        output+= " array: " + next->printInOrder();
-      } else{
-        output+= " var: ";
-        output += next->printInOrder();
-      }
-  } else {
-    output+= " var: ";
-    output += next->printInOrder();
-  }
-  return output;
+    return printPreOrder();
 }
 
 std::string VariableDeclaration::printPreOrder() {
-  std::string output = typeToString(this->type);
-  if (next->classType() == TreeNode::ARRAY) {
-    output+= " array: " + next->printInOrder();
-  }else if (next->classType() == TreeNode::BINARY_OPERATION){
-      BinaryOperation *b = (BinaryOperation*) next;
-      if (b->getLeft()->classType() == TreeNode::ARRAY){
+    std::string output = typeToString(this->type);
+    if (next->classType() == TreeNode::ARRAY) {
         output+= " array: " + next->printInOrder();
-      } else{
+    }else if (next->classType() == TreeNode::BINARY_OPERATION){
+        BinaryOperation *b = (BinaryOperation*) next;
+        if (b->left->classType() == TreeNode::ARRAY){
+            output+= " array: " + next->printInOrder();
+        } else{
+            output+= " var: ";
+            output += next->printInOrder();
+        }
+    } else {
         output+= " var: ";
         output += next->printInOrder();
-      }
-  } else {
-    output+= " var: ";
-    output += next->printInOrder();
-  }
-  return output;
+    }
+    if (next->classType() == TreeNode::POINTER){
+        output = typeToString(this->type);
+        output += next->printInOrder();
+    }
+
+    return output;
 }
 
 std::string VariableDeclaration::typeToString(Data::Type type) {
@@ -408,6 +392,8 @@ std::string VariableDeclaration::typeToString(Data::Type type) {
             return "bool";
         case Data::FLOAT:
             return "float";
+        case Data::POINTER:
+            return "int ref";
         default:
             return "unknown";
     }
@@ -448,6 +434,8 @@ std::string TypeCasting::typeToString(Data::Type type) {
             return "bool";
         case Data::FLOAT:
             return "float";
+        case Data::POINTER:
+            return "ref";
         default:
             return "unknown";
     }
@@ -597,50 +585,7 @@ TreeNode::ClassType LoopDeclaration::classType() const {
 }
 
 std::string LoopDeclaration::printInOrder() {
-    std::string identation = getTab();
-    std::string output = identation;
-    output += "for: ";
-    if (init != NULL) {
-        output += init->printPreOrder();
-        output = output.substr(0, output.size()-1);
-    }
-    output += ", ";
-
-    output += test->printPreOrder();
-    output = output.substr(0, output.size()-1);
-
-    output += ", ";
-    if (interation != NULL) {
-        output += interation->printPreOrder();
-    }
-    output += "\n";
-    output += getTab();
-    output += "do:";
-
-    if (body.size() > 0) {
-        int i;
-        for (i = 0; i < body.size(); i ++) {
-            output += "\n";
-            if (body[i]->classType() == BINARY_OPERATION) {
-                identation += "  ";
-                output += identation;
-                output += body[i]->printPreOrder();
-            }
-            if (body[i]->classType() == LOOP_DECLARATION) {
-                LoopDeclaration* body_local = (LoopDeclaration*) body[i];
-                body_local->setTab(tab + 1);
-                output += body_local->printPreOrder();
-            } else if (body[i]->classType() == FUNCTION) {
-                Function* body_local = (Function*) body[i];
-                body_local->tab = tab + 1;
-                output += body_local->printPreOrder();
-            }
-        }
-    } else {
-        output += "\n";
-    }
-
-    return output;
+    return printPreOrder();
 }
 
 std::string LoopDeclaration::printPreOrder() {
@@ -804,4 +749,71 @@ std::string FunctionCall::printPreOrder() {
     }
     
     return output;
+}
+
+Pointer::Pointer(std::string id, Data::Type type, ADDRESS a, int count, Declaration declaration) : TreeNode(type) {
+    this->id = id;
+    this->a = a;
+    this->count = count;
+    this->type = type;
+    this->declaration = declaration;
+}
+
+Pointer::~Pointer() {
+}
+
+TreeNode::ClassType Pointer::classType() const {
+    return TreeNode::POINTER;
+}
+
+std::string Pointer::printInOrder() {
+  std::string output = numberOfRefs(0);
+    if(declaration == Declaration::UNIQUE){
+      output += " var: ";
+      output += id;
+      return  output;
+    }else{
+      output = id;
+      return  output;
+    }
+}
+
+std::string Pointer::printPreOrder() {
+    std::string output = "";
+    if(a == ADDRESS::ADDR){
+      output += id;
+      output += " [addr] ";
+    }else{
+      output = numberOfRefs(1) + id + " ";
+    }
+
+    return  output;
+}
+
+std::string Pointer::numberOfRefs(int number){
+  int i;
+  std::string output = "";
+  for(i = 1; i <= count; i++){
+    if(number == 0)
+      output += " ref";
+    else
+      output += "[ref] ";
+  }
+  return output;
+}
+
+Pointer::ADDRESS Pointer::typeOfAddress(){
+  return a;
+}
+
+void Pointer::setSize(int s){
+  count = s;
+}
+
+Pointer::Declaration Pointer::getDeclaration(){
+  return declaration;
+}
+
+void Pointer::setDeclaration(Pointer::Declaration declar){
+  declaration = declar;
 }

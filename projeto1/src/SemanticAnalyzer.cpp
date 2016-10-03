@@ -39,6 +39,27 @@ void SemanticAnalyzer::analyzeBinaryOperation(BinaryOperation* binaryOp) {
             break;
     }
 
+    if (left->dataType() != right->dataType()){
+      if(left->dataType() == Data::POINTER_INTEGER){
+        Pointer* pointer = (Pointer*) left;
+        if(pointer->typeOfAddress() == Pointer::ADDRESS::VALUE
+      | pointer->typeOfAddress() == Pointer::ADDRESS::ADDR)
+          left->setType(Data::INTEGER);
+        }
+      if(left->dataType() == Data::POINTER_FLOAT){
+        Pointer* pointer = (Pointer*) left;
+        if(pointer->typeOfAddress() == Pointer::ADDRESS::VALUE
+      | pointer->typeOfAddress() == Pointer::ADDRESS::ADDR)
+          left->setType(Data::FLOAT);
+        }
+      if(left->dataType() == Data::POINTER_BOOLEAN){
+        Pointer* pointer = (Pointer*) left;
+        if(pointer->typeOfAddress() == Pointer::ADDRESS::VALUE
+      | pointer->typeOfAddress() == Pointer::ADDRESS::ADDR)
+          left->setType(Data::BOOLEAN);
+        }
+      }
+
     // Se é uma operação relacional, define tipo como booleano
     if(op == BinaryOperation::GREATER
        || op == BinaryOperation::LOWER
@@ -102,11 +123,49 @@ void SemanticAnalyzer::analyzeLoopDeclaration(LoopDeclaration* loop) {
             TreeNode::toString(loop->test->dataType()).c_str());
 }
 
-TreeNode* SemanticAnalyzer::declareVariable(std::string id, Data::Type dataType, int size) {
+void SemanticAnalyzer::analyzeRerefenceOperation(TreeNode* node){
+  Data::Type type = node->dataType();
+  if(type != Data::POINTER_INTEGER &&
+      type != Data::POINTER_FLOAT && type != Data::POINTER_BOOLEAN)
+      yyerror("semantic error: reference operation expects a pointer\n");
+}
+
+void SemanticAnalyzer::analyzeAddressOperation(TreeNode* node){
+  TreeNode::ClassType type = node->classType();
+  if(type != TreeNode::VARIABLE)
+       yyerror("semantic error: address operation expects a variable or array item\n");
+}
+
+TreeNode* SemanticAnalyzer::assignPointer(std::string id, TreeNode::ClassType assignedType, Pointer::ADDRESS address_type) {
+    if(!symbolExists(id, Symbol::VARIABLE, true)) {
+        yyerror("semantic error: undeclared variable %s\n", id.c_str());
+        return new Variable(id, Data::UNKNOWN); //Creates variable node anyway
+    } else {
+        setInitializedSymbol(id, Symbol::VARIABLE);
+
+        if (getSymbolType(id, Symbol::VARIABLE) == Data::POINTER_INTEGER)
+          return new Pointer(id, Data::POINTER_INTEGER, address_type, 0);
+        if (getSymbolType(id, Symbol::VARIABLE) == Data::POINTER_FLOAT)
+          return new Pointer(id, Data::POINTER_FLOAT, address_type, 0);
+        if (getSymbolType(id, Symbol::VARIABLE) == Data::POINTER_BOOLEAN)
+          return new Pointer(id, Data::POINTER_BOOLEAN, address_type, 0);
+
+        return new Variable(id, getSymbolType(id, Symbol::VARIABLE));
+    }
+}
+
+TreeNode* SemanticAnalyzer::declareVariable(std::string id, Data::Type dataType, int size, Pointer::ADDRESS address_type, Pointer::Declaration pointer_declaration) {
     if(symbolExists(id, Symbol::VARIABLE, false))
         yyerror("semantic error: re-declaration of variable %s\n", id.c_str());
-    else
-       symbolTable.addSymbol(id, Symbol(dataType, Symbol::VARIABLE, false)); // Adds variable to symbol table
+    else {
+        if(dataType == Data::POINTER_INTEGER | dataType == Data::POINTER_FLOAT | dataType == Data::POINTER_BOOLEAN) {
+              symbolTable.addSymbol(id, Symbol(dataType, Symbol::VARIABLE, false)); // Adds variable to symbol table
+              return new Pointer(id, dataType, address_type, size, pointer_declaration);
+        }
+        
+        symbolTable.addSymbol(id, Symbol(dataType, Symbol::VARIABLE, false)); // Adds variable to symbol table
+    }
+    
     if (size > 0) {
        return new Array(id, dataType, size);
     }else
@@ -134,6 +193,25 @@ TreeNode* SemanticAnalyzer::declareAssignVariable(std::string id, Data::Type dat
 
     setInitializedSymbol(id, Symbol::VARIABLE);
     return new Variable(id, dataType);
+}
+
+TreeNode* SemanticAnalyzer::usePointer(std::string id, int size, bool needed) {
+    if(!symbolExists(id, Symbol::VARIABLE, true)) {
+        yyerror("semantic error: undeclared variable %s\n", id.c_str());
+        return new Variable(id, Data::UNKNOWN); //Creates variable node anyway
+    } else if(!isSymbolInitialized(id, Symbol::VARIABLE, true)) {
+      if(needed)
+        yyerror("semantic error: uninitialized variable %s\n", id.c_str());
+    }
+    if (getSymbolType(id, Symbol::VARIABLE) == Data::POINTER_INTEGER){
+      int rest = size%2;
+      if (rest != 0.0)
+        return new Pointer(id, getSymbolType(id, Symbol::VARIABLE), Pointer::ADDRESS::VALUE, 1);
+      else
+        return new Pointer(id, getSymbolType(id, Symbol::VARIABLE), Pointer::ADDRESS::REF, 1);
+   }
+
+  return new Variable(id, getSymbolType(id, Symbol::VARIABLE));
 }
 
 TreeNode* SemanticAnalyzer::useVariable(std::string id, TreeNode* index) {
