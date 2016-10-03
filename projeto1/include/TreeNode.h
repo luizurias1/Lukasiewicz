@@ -16,6 +16,9 @@ namespace Data {
         BOOLEAN = 0,
         FLOAT = 1,
         INTEGER = 2,
+        ARRAY_INTEGER = 4,
+        ARRAY_FLOAT = 5,
+        ARRAY_BOOLEAN = 6,
         UNKNOWN = 3
     };
 }
@@ -54,6 +57,10 @@ class TreeNode {
             VARIABLE_DECLARATION,
             CONDITIONAL,
             LOOP_DECLARATION,
+            ARRAY,
+            ARRAY_INTEGER,
+            ARRAY_FLOAT,
+            ARRAY_BOOLEAN,
             FUNCTION,
             FUNCTION_CALL,
             UNKNOWN
@@ -96,6 +103,7 @@ class BinaryOperation : public TreeNode {
             LOWER,
             LOWER_EQUAL,
             AND,
+            NOT_EQUAL,
             OR
         };
 
@@ -106,7 +114,7 @@ class BinaryOperation : public TreeNode {
         std::string printPreOrder();
         std::string operationToString(Type operation) const;
         static const char* operationName(Type operation);
-
+        TreeNode* getLeft();
     private:
         Type operation;
         TreeNode* left;
@@ -171,10 +179,28 @@ class Integer : public TreeNode {
         TreeNode::ClassType classType() const;
         std::string printInOrder();
         std::string printPreOrder();
-
+        int getValue();
     private:
         int value;
 
+};
+
+class Array : public TreeNode {
+
+    public:
+      Array(std::string id, Data::Type type, int size);
+      Array(std::string id, Data::Type type, TreeNode * n);
+      virtual ~Array();
+      TreeNode::ClassType classType() const;
+      std::string printInOrder();
+      std::string getSize();
+      std::string printPreOrder();
+      TreeNode* getNode();
+
+    private:
+      std::string id;
+      int size;
+      TreeNode *n;
 };
 
 class Variable : public TreeNode {

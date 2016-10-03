@@ -51,7 +51,7 @@ class SymbolTable {
         void clear();
         bool existsSymbol(std::string id, Symbol::IdentifierType type) const;
         bool isSymbolInitialized(std::string id, Symbol::IdentifierType type) const;
-        const Symbol getSymbol(std::string id, Symbol::IdentifierType type) const;
+        Symbol getSymbol(std::string id, Symbol::IdentifierType type);
         Data::Type getSymbolType(std::string id, Symbol::IdentifierType type) const;
         std::vector<std::string> getUninitializedFunctions();
     

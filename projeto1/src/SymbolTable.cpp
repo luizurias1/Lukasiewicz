@@ -66,7 +66,7 @@ bool SymbolTable::isSymbolInitialized(std::string id, Symbol::IdentifierType typ
     return entryList.at(Symbol::SYMBOL_PREFIX(type) + id).initialized;
 }
 
-const Symbol SymbolTable::getSymbol(std::string id, Symbol::IdentifierType type) const {
+Symbol SymbolTable::getSymbol(std::string id, Symbol::IdentifierType type) {
     return entryList.at(Symbol::SYMBOL_PREFIX(type) + id);
 }
 

@@ -15,10 +15,10 @@ extern void yyerror(const char* s, ...);
  */
 class SemanticAnalyzer {
 
-    public:    
+    public:
         SemanticAnalyzer();
         virtual ~SemanticAnalyzer();
-        
+
         void newScope();
         void returnScope();
     
@@ -27,18 +27,19 @@ class SemanticAnalyzer {
         void analyzeFunctions();
         void analyzeLoopDeclaration(LoopDeclaration* loop);
     
-        TreeNode* declareVariable(std::string varId, Data::Type dataType);
-        TreeNode* assignVariable(std::string varId, Data::Type assignedType);
+        TreeNode* declareVariable(std::string varId, Data::Type dataType, int size = 0);
+        TreeNode* assignVariable(std::string varId, Data::Type assignedType, TreeNode* index = NULL);
         TreeNode* declareAssignVariable(std::string id, Data::Type dataType, Data::Type assignedType);
-        TreeNode* useVariable(std::string varId);
+        TreeNode* useVariable(std::string varId, TreeNode* index = NULL);
     
         TreeNode* declareFunctionHeader(std::string functionId, Vector* params, Data::Type returnType);
         TreeNode* declareFunction(std::string functionId, Vector* params, Vector* body, TreeNode* returnValue);
         TreeNode* callFunction(std::string functionId, Vector* params);
+        bool symbolExists(std::string id, Symbol::IdentifierType type, bool checkParentScope);
 
     private:
+        Symbol getSymbol(std::string id, Symbol::IdentifierType type, bool checkParentScope);
         Data::Type getSymbolType(std::string id, Symbol::IdentifierType type) const;
-        bool symbolExists(std::string id, Symbol::IdentifierType type, bool checkParentScope);
         bool isSymbolInitialized(std::string id, Symbol::IdentifierType type, bool checkParentScope) const;
         void setInitializedSymbol(std::string id, Symbol::IdentifierType type);
     

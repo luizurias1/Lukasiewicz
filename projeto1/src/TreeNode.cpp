@@ -8,6 +8,12 @@ Data::Type TreeNode::classToDataType(TreeNode::ClassType type) {
             return Data::FLOAT;
         case TreeNode::INTEGER:
             return Data::INTEGER;
+        case TreeNode::ARRAY_BOOLEAN:
+            return Data::BOOLEAN;
+        case TreeNode::ARRAY_FLOAT:
+            return Data::FLOAT;
+        case TreeNode::ARRAY_INTEGER:
+            return Data::INTEGER;
         default:
             return Data::UNKNOWN;
     }
@@ -94,19 +100,23 @@ TreeNode::ClassType BinaryOperation::classType() const {
 }
 
 std::string BinaryOperation::printInOrder() {
-    std::string output = left->printInOrder();
-    if(operation != COMMA)
-        output += " ";
+  std::string output = left->printInOrder();
+  if(operation != COMMA)
+      output += " ";
 
-    output += operationToString(operation) + " ";
-    return output + right->printInOrder();
+  output += operationToString(operation) + " ";
+  return output + right->printInOrder();
 }
 
 std::string BinaryOperation::printPreOrder() {
-    std::string output = "";
-    output += operationToString(operation) + " ";
-    output += left->printPreOrder();
-    return output + right->printPreOrder();
+  std::string output = "";
+  output += operationToString(operation) + " ";
+  output += left->printPreOrder();
+  return output + right->printPreOrder();
+}
+
+TreeNode* BinaryOperation::getLeft(){
+  return left;
 }
 
 std::string BinaryOperation::operationToString(BinaryOperation::Type operation) const {
@@ -137,6 +147,8 @@ std::string BinaryOperation::operationToString(BinaryOperation::Type operation) 
             return "&";
         case OR:
             return "|";
+        case NOT_EQUAL:
+            return "!=";
         default:
             return "unknown";
     }
@@ -262,6 +274,9 @@ Integer::Integer(int value) : TreeNode(Data::INTEGER) {
     this->value = value;
 }
 
+int Integer::getValue(){
+  return value;
+}
 Integer::~Integer() {
 }
 
@@ -277,9 +292,44 @@ std::string Integer::printInOrder() {
     return std::to_string(value);
 }
 
+Array::Array(std::string id, Data::Type type, int size) : TreeNode(type){
+    this->id = id;
+    this->size = size;
+    this->n = NULL;
+}
+Array::Array(std::string id, Data::Type type, TreeNode* n) : TreeNode(type){
+    this->id = id;
+    this->size = 0;
+    this->n = n;
+}
+
+std::string Array::printInOrder() {
+    return id +" (size: " + getSize() + ")";
+}
+
+TreeNode* Array::getNode(){
+  return n;
+}
+std::string Array::printPreOrder() {
+      return "[index] " + id +" "+ n->printPreOrder();
+}
+
+std::string Array::getSize(){
+  return std::to_string(size);
+}
+TreeNode::ClassType Array::classType() const {
+    return TreeNode::ARRAY;
+}
+
+Array::~Array() {
+}
+
+
 Variable::Variable(std::string id, Data::Type type) : TreeNode(type) {
     this->id = id;
+
 }
+
 
 Variable::~Variable() {
 }
@@ -293,15 +343,16 @@ std::string Variable::getId() const {
 }
 
 std::string Variable::printInOrder() {
-    return id;
-}
+      return id;
+  }
 
 std::string Variable::printPreOrder() {
-    return id + " ";
+      return id + " ";
 }
 
 VariableDeclaration::VariableDeclaration(Data::Type type, TreeNode* next) : TreeNode(type) {
     this->next = next;
+
 }
 
 VariableDeclaration::~VariableDeclaration() {
@@ -312,19 +363,41 @@ TreeNode::ClassType VariableDeclaration::classType() const {
 }
 
 std::string VariableDeclaration::printInOrder() {
-    std::string output = typeToString(this->type) + " var: ";
-    if (next != NULL) {
+  std::string output = typeToString(this->type);
+  if (next->classType() == TreeNode::ARRAY) {
+    output+= " array: " + next->printInOrder();
+  }else if (next->classType() == TreeNode::BINARY_OPERATION){
+      BinaryOperation *b = (BinaryOperation*) next;
+      if (b->getLeft()->classType() == TreeNode::ARRAY){
+        output+= " array: " + next->printInOrder();
+      } else{
+        output+= " var: ";
         output += next->printInOrder();
-    }
-    return output;
+      }
+  } else {
+    output+= " var: ";
+    output += next->printInOrder();
+  }
+  return output;
 }
 
 std::string VariableDeclaration::printPreOrder() {
-    std::string output = typeToString(this->type) + " var: ";
-    if (next != NULL) {
+  std::string output = typeToString(this->type);
+  if (next->classType() == TreeNode::ARRAY) {
+    output+= " array: " + next->printInOrder();
+  }else if (next->classType() == TreeNode::BINARY_OPERATION){
+      BinaryOperation *b = (BinaryOperation*) next;
+      if (b->getLeft()->classType() == TreeNode::ARRAY){
+        output+= " array: " + next->printInOrder();
+      } else{
+        output+= " var: ";
         output += next->printInOrder();
-    }
-    return output;
+      }
+  } else {
+    output+= " var: ";
+    output += next->printInOrder();
+  }
+  return output;
 }
 
 std::string VariableDeclaration::typeToString(Data::Type type) {
