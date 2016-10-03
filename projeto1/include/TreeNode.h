@@ -33,7 +33,7 @@ namespace Data {
 class Vector {
 
     friend class SemanticAnalyzer;
-    
+
     public:
         Vector();
         virtual ~Vector();
@@ -81,7 +81,7 @@ class TreeNode {
         virtual TreeNode::ClassType classType() const = 0;
         virtual std::string printInOrder() = 0;
         virtual std::string printPreOrder() = 0;
-    
+
         static Data::Type classToDataType(TreeNode::ClassType type);
         static std::string toString(TreeNode::ClassType type);
         static std::string toString(Data::Type type);
@@ -357,7 +357,7 @@ class Pointer : public TreeNode {
           SEQUENCE
         };
 
-        Pointer(std::string id, Data::Type type, ADDRESS a, int count, Declaration declaration = Declaration::UNIQUE);
+        Pointer(std::string id, Data::Type type, ADDRESS a, int count, Declaration declaration = Declaration::UNIQUE, Array* array = NULL);
         virtual ~Pointer();
         TreeNode::ClassType classType() const;
         std::string getId() const;
@@ -375,7 +375,7 @@ class Pointer : public TreeNode {
         Data::Type type;
         Declaration declaration;
         int count;
-
+        Array* array;
 };
 
 #endif

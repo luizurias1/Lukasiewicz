@@ -106,24 +106,27 @@ line:
     ;
 
 declar_pointer_int:
-    pointer T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($2, Data::POINTER_INTEGER, $1, Pointer::REF);}
-    | pointer T_ID T_COMMA T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($2, Data::POINTER_INTEGER, $1, Pointer::ADDRESS::REF),
-                                                    BinaryOperation::COMMA, SEMANTIC_ANALYZER.declareVariable($4, Data::POINTER_INTEGER, $1, Pointer::ADDRESS::REF,
+    pointer T_ID {$$ = SEMANTIC_ANALYZER.declarePointer($2, Data::POINTER_INTEGER, $1, Pointer::REF);}
+    | pointer T_ID T_COMMA T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declarePointer($2, Data::POINTER_INTEGER, $1, Pointer::ADDRESS::REF),
+                                                    BinaryOperation::COMMA, SEMANTIC_ANALYZER.declarePointer($4, Data::POINTER_INTEGER, $1, Pointer::ADDRESS::REF,
                                                       Pointer::Declaration::SEQUENCE));}
+    | pointer T_ID T_OPEN_PAR T_INT T_CLOSING_PAR {$$ = SEMANTIC_ANALYZER.declarePointer($2, Data::POINTER_INTEGER, $1, Pointer::REF, Pointer::UNIQUE, new Array($2, Data::INTEGER, $4));}
     ;
 
 declar_pointer_float:
-    pointer T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($2, Data::POINTER_FLOAT, $1, Pointer::ADDRESS::REF);}
-    | pointer T_ID T_COMMA T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($2, Data::POINTER_FLOAT, $1, Pointer::ADDRESS::REF),
-                                                    BinaryOperation::COMMA, SEMANTIC_ANALYZER.declareVariable($4, Data::POINTER_FLOAT, $1, Pointer::ADDRESS::REF,
+    pointer T_ID {$$ = SEMANTIC_ANALYZER.declarePointer($2, Data::POINTER_FLOAT, $1, Pointer::ADDRESS::REF);}
+    | pointer T_ID T_COMMA T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declarePointer($2, Data::POINTER_FLOAT, $1, Pointer::ADDRESS::REF),
+                                                    BinaryOperation::COMMA, SEMANTIC_ANALYZER.declarePointer($4, Data::POINTER_FLOAT, $1, Pointer::ADDRESS::REF,
                                                       Pointer::Declaration::SEQUENCE));}
+    | pointer T_ID T_OPEN_PAR T_INT T_CLOSING_PAR {$$ = SEMANTIC_ANALYZER.declarePointer($2, Data::POINTER_FLOAT, $1, Pointer::REF, Pointer::UNIQUE, new Array($2, Data::FLOAT, $4));}
     ;
 
 declar_pointer_bool:
-    pointer T_ID {$$ = SEMANTIC_ANALYZER.declareVariable($2, Data::POINTER_BOOLEAN, $1, Pointer::ADDRESS::REF);}
-    | pointer T_ID T_COMMA T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declareVariable($2, Data::POINTER_BOOLEAN, $1, Pointer::ADDRESS::REF),
-                                                    BinaryOperation::COMMA, SEMANTIC_ANALYZER.declareVariable($4, Data::POINTER_BOOLEAN, $1, Pointer::ADDRESS::REF,
+    pointer T_ID {$$ = SEMANTIC_ANALYZER.declarePointer($2, Data::POINTER_BOOLEAN, $1, Pointer::ADDRESS::REF);}
+    | pointer T_ID T_COMMA T_ID {$$ = new BinaryOperation(SEMANTIC_ANALYZER.declarePointer($2, Data::POINTER_BOOLEAN, $1, Pointer::ADDRESS::REF),
+                                                    BinaryOperation::COMMA, SEMANTIC_ANALYZER.declarePointer($4, Data::POINTER_BOOLEAN, $1, Pointer::ADDRESS::REF,
                                                       Pointer::Declaration::SEQUENCE));}
+    | pointer T_ID T_OPEN_PAR T_INT T_CLOSING_PAR {$$ = SEMANTIC_ANALYZER.declarePointer($2, Data::POINTER_BOOLEAN, $1, Pointer::REF, Pointer::UNIQUE, new Array($2, Data::BOOLEAN, $4));}
     ;
 
 // Escopo de uma função (parâmetros + corpo)
@@ -136,6 +139,8 @@ function_scope:
 params:
     data_type T_ID { $$ = new Vector(); $$->pushFront(SEMANTIC_ANALYZER.declareAssignVariable($2, (Data::Type) $1, (Data::Type) $1)); }
     | data_type T_ID T_COMMA params { $$ = $4; $$->pushFront(SEMANTIC_ANALYZER.declareAssignVariable($2, (Data::Type) $1, (Data::Type) $1)); }
+    | data_type pointer T_ID params {$$ = $4; $$->pushFront(SEMANTIC_ANALYZER.declarePointer($3, (Data::Type)$1, $2, Pointer::REF)); }
+    | data_type pointer T_ID {$$ = new Vector(); $$->pushFront(SEMANTIC_ANALYZER.declarePointer($3, (Data::Type)$1, $2, Pointer::REF)); }
     ;
 
 // Troca de Escopo
@@ -177,6 +182,11 @@ attribution:
                                                             BinaryOperation::ASSIGN, $4);
                                                             SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$);
                                                           SEMANTIC_ANALYZER.analyzeAddressOperation($4);}
+   | T_ID T_OPEN_PAR expr T_CLOSING_PAR T_ATT T_LVALUE values {$$ = new BinaryOperation(SEMANTIC_ANALYZER.assignPointer($1, $7->classType(),
+                                                             Pointer::ADDRESS::ADDR, new Array($1, Data::UNKNOWN, $3)),
+                                                          BinaryOperation::ASSIGN, $7);
+                                                          SEMANTIC_ANALYZER.analyzeBinaryOperation((BinaryOperation*) $$);
+                                                          SEMANTIC_ANALYZER.analyzeAddressOperation($7);}
     | T_ID T_ATT expr { $$ = new BinaryOperation(
                                 SEMANTIC_ANALYZER.assignVariable($1, $3->dataType()),
                                 BinaryOperation::ASSIGN, $3);
@@ -200,6 +210,7 @@ expr:
     | T_NOT expr { $$ = new UnaryOperation(UnaryOperation::NOT, $2); $$->setType(Data::BOOLEAN);}
     | T_OPEN_BRACKET data_type T_CLOSING_BRACKET expr { $$ = new TypeCasting((Data::Type) $2, $4); }
     | pointer_types {$$ = $1; SEMANTIC_ANALYZER.analyzeRerefenceOperation($1);}
+    /*| T_LVALUE T_ID {SEMANTIC_ANALYZER.useVariable($2); }*/ 
     | op_binary
     | comparison
     | connective
@@ -319,6 +330,7 @@ pointer_types:
 
 values:
     pointer_types {$$ = $1; SEMANTIC_ANALYZER.analyzeRerefenceOperation($1);}
+    | T_ID T_OPEN_PAR expr T_CLOSING_PAR { if(SEMANTIC_ANALYZER.symbolExists($1, Symbol::VARIABLE, true)) $$ = SEMANTIC_ANALYZER.useVariable($1,$3); else { Vector* v = new Vector(); v->pushFront($3); $$ = SEMANTIC_ANALYZER.callFunction($1, v); } }
     | T_INT { $$ = new Integer($1); }
     | T_FLOAT { $$ = new Float($1); }
     | T_TRUE { $$ = new Boolean(true); }

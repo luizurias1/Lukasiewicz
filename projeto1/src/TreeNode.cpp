@@ -754,12 +754,13 @@ std::string FunctionCall::printPreOrder() {
     return output;
 }
 
-Pointer::Pointer(std::string id, Data::Type type, ADDRESS a, int count, Declaration declaration) : TreeNode(type) {
+Pointer::Pointer(std::string id, Data::Type type, ADDRESS a, int count, Declaration declaration, Array* array) : TreeNode(type) {
     this->id = id;
     this->a = a;
     this->count = count;
     this->type = type;
     this->declaration = declaration;
+    this->array = array;
 }
 
 Pointer::~Pointer() {
@@ -772,6 +773,11 @@ TreeNode::ClassType Pointer::classType() const {
 std::string Pointer::printInOrder() {
   std::string output = numberOfRefs(0);
     if(declaration == Declaration::UNIQUE){
+      if(array != NULL){
+        output += " array: ";
+        output += array->printInOrder();
+        return output;
+      }
       output += " var: ";
       output += id;
       return  output;
@@ -784,6 +790,11 @@ std::string Pointer::printInOrder() {
 std::string Pointer::printPreOrder() {
     std::string output = "";
     if(a == ADDRESS::ADDR){
+      if(array != NULL){
+        output = array->printPreOrder();
+        output += "[addr] ";
+        return output;
+      }
       output += id;
       output += " [addr] ";
     }else{
