@@ -269,6 +269,7 @@ class Function : public TreeNode {
 
     friend class ConditionalOperation;
     friend class LoopDeclaration;
+    friend class SemanticAnalyzer;
 
     public:
         Function(std::string id, Vector* params, Vector* body, TreeNode* returnValue);

@@ -126,7 +126,7 @@ TreeNode* SemanticAnalyzer::declareFunctionHeader(std::string functionId, Vector
     if(symbolExists(functionId, Symbol::FUNCTION, false))
         yyerror("semantic error: re-definition of function %s\n", functionId.c_str());
     else {
-        TreeNode* functionHeader = new FunctionCall(functionId, params);
+        TreeNode* functionHeader = new Function(functionId, params, new Vector(), new Integer(0));
         functionHeader->setType(returnType);
         symbolTable.addSymbol(functionId, Symbol(returnType, Symbol::FUNCTION, false, functionHeader));
     }
@@ -140,20 +140,20 @@ TreeNode* SemanticAnalyzer::declareFunction(std::string functionId, Vector* para
     if(symbolExists(functionId, Symbol::FUNCTION, false) && isSymbolInitialized(functionId, Symbol::FUNCTION, false)) {
         yyerror("semantic error: re-definition of function %s\n", functionId.c_str());
     } else if(symbolExists(functionId, Symbol::FUNCTION, false)) {
-        const FunctionCall* call = (const FunctionCall*) symbolTable.getSymbol(functionId, Symbol::FUNCTION).getData();
+        const Function* header = (const Function*) symbolTable.getSymbol(functionId, Symbol::FUNCTION).getData();
         
-        if(call->params.size() != params->size())
+        if(header->params.size() != params->size()) // If different # of params, error
             yyerror("semantic error: re-definition of function %s\n", functionId.c_str());
         else {
-            for(int i = 0; i < call->params.size(); i++) {
-                if(((Variable*) call->params[i])->getId().compare(((Variable*) params->internalVector[i])->getId()) != 0) {
+            // If different param names, error
+            for(int i = 0; i < header->params.size(); i++) {
+                if(((Variable*) header->params[i])->getId().compare(((Variable*) params->internalVector[i])->getId()) != 0) {
                     yyerror("semantic error: re-definition of function %s\n",           
                                 functionId.c_str());
                     break;
                 }    
             }
             
-            // TODO Check params and delete old data
             symbolTable.setSymbolData(functionId, Symbol::FUNCTION, newFunction);
             setInitializedSymbol(functionId, Symbol::FUNCTION);
         }
@@ -172,6 +172,23 @@ TreeNode* SemanticAnalyzer::callFunction(std::string functionId, Vector* params)
         return functionCall;
     }
     functionCall->setType(getSymbolType(functionId, Symbol::FUNCTION));
+    
+    const Function* function = (const Function*) symbolTable.getSymbol(functionId, Symbol::FUNCTION).getData();
+    
+    if(function->params.size() != functionCall->params.size())
+        yyerror("semantic error: function %s expected %d parameters but received %d\n",
+                functionId.c_str(), function->params.size(), functionCall->params.size());
+    else
+        for(int i = 0; i < function->params.size(); i++) {
+            if(function->params[i]->dataType() != params->internalVector[i]->dataType()) {
+                yyerror("semantic error: parameter %s expected %s but received %s\n",           
+                            ((Variable*)function->params[i])->getId().c_str(),
+                            TreeNode::toString(function->params[i]->dataType()).c_str(),
+                            TreeNode::toString(params->internalVector[i]->dataType()).c_str());
+                break;
+            }    
+        }
+        
     
     return functionCall;
 }

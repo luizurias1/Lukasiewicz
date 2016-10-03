@@ -97,5 +97,10 @@ void SymbolTable::setInitializedSymbol(std::string id, Symbol::IdentifierType ty
 }
 
 void SymbolTable::setSymbolData(const std::string id, Symbol::IdentifierType type, TreeNode* data) {
+    if(entryList[Symbol::SYMBOL_PREFIX(type) + id].data) {
+        delete entryList[Symbol::SYMBOL_PREFIX(type) + id].data;
+        entryList[Symbol::SYMBOL_PREFIX(type) + id].data = 0;
+    }
+    
     entryList[Symbol::SYMBOL_PREFIX(type) + id].data = data;    
 }
